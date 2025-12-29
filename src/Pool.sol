@@ -26,6 +26,20 @@ contract Pool is ERC20 {
 
     IERC20Metadata public underlying = IERC20Metadata(address(0xdeadbeef));
 
+    function burn(uint256 units) external returns (uint256 out) {
+        uint256 u1 = balanceOf(address(this));
+        uint256 u2 = totalSupply() - u1;
+        out = units * u1 / u2;
+        _burn(msg.sender, units);
+        IERC20(underlying).safeTransfer(msg.sender, out);
+    }
+
+    function mint(uint256 units) external {
+        IERC20(underlying).safeTransferFrom(msg.sender, address(this), units);
+        _mint(msg.sender, units);
+        _mint(address(this), units);
+    }
+
     function name() public view virtual override returns (string memory name_) {
         if (this == ONE) {
             return ONE_NAME;
@@ -114,20 +128,6 @@ contract Pool is ERC20 {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(ONE).transferFrom(address(this), msg.sender, d1);
         _transfer(msg.sender, address(this), du);
-    }
-
-    function burn(uint256 units) external returns (uint256 out) {
-        uint256 u1 = balanceOf(address(this));
-        uint256 u2 = totalSupply() - u1;
-        out = units * u1 / u2;
-        _burn(msg.sender, units);
-        IERC20(underlying).safeTransfer(msg.sender, out);
-    }
-
-    function mint(uint256 units) external {
-        IERC20(underlying).safeTransferFrom(msg.sender, address(this), units);
-        _mint(msg.sender, units);
-        _mint(address(this), units);
     }
 
     constructor() ERC20("", "") {
