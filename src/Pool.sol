@@ -6,8 +6,9 @@ import {ERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 
-contract Pool is ERC20 {
+contract Pool is ERC20, ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
     uint256 constant MAX_SUPPLY = 1e9 ether;
@@ -26,13 +27,13 @@ contract Pool is ERC20 {
 
     IERC20Metadata public underlying = IERC20Metadata(address(0xdeadbeef));
 
-    function mint(uint256 units) external {
+    function mint(uint256 units) external nonReentrant {
         IERC20(underlying).safeTransferFrom(msg.sender, address(this), units);
         _mint(msg.sender, units);
         _mint(address(this), units);
     }
 
-    function burn(uint256 units) external returns (uint256 out) {
+    function burn(uint256 units) external nonReentrant returns (uint256 out) {
         uint256 u1 = balanceOf(address(this));
         uint256 u2 = totalSupply() - u1;
         out = units * u1 / u2;
