@@ -44,7 +44,12 @@ contract Pool is ERC20 {
         }
     }
 
-    function buyQuote(uint256 bu, uint256 du, uint256 b1) public pure returns (uint256 d1) {
+    function balances() public view returns (uint256 bu, uint256 b1) {
+        bu = balanceOf(address(this));
+        b1 = ONE.balanceOf(address(this));
+    }
+
+    function buyQuote(uint256 bu, uint256 b1, uint256 du) public pure returns (uint256 d1) {
         if (bu <= du) {
             revert InsufficientLiquidity();
         }
@@ -54,32 +59,32 @@ contract Pool is ERC20 {
         d1 = b1 - n1;
     }
 
-    function sellQuote(uint256 bu, uint256 du, uint256 b1) public pure returns (uint256 d1) {
-        uint256 k = bu * b1;
-        uint256 nu = bu + du;
-        uint256 n1 = k / nu;
-        d1 = n1 - b1;
-    }
-
-    function balances() public view returns (uint256 bu, uint256 b1) {
-        bu = balanceOf(address(this));
-        b1 = ONE.balanceOf(address(this));
-    }
-
     function buyQuote(uint256 du) public view returns (uint256 bu, uint256 b1, uint256 d1) {
+        (bu, b1) = balances();
+        d1 = buyQuote(bu, b1, du);
+    }
+
+    function buyWithQuote(uint256 d1) public view returns (uint256 bu, uint256 b1, uint256 du) {
         (bu, b1) = balances();
         d1 = buyQuote(bu, du, b1);
     }
 
     function buy(uint256 du) external returns (uint256 bu, uint256 b1, uint256 d1) {
         (bu, b1, d1) = buyQuote(du);
-        buyDo(du, d1);
+        buyTransfers(du, d1);
     }
 
-    function buyDo(uint256 du, uint256 d1) private {
+    function buyTransfers(uint256 du, uint256 d1) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(ONE).transfer(address(this), d1);
         _transfer(address(this), msg.sender, du);
+    }
+
+    function sellQuote(uint256 bu, uint256 b1, uint256 du) public pure returns (uint256 d1) {
+        uint256 k = bu * b1;
+        uint256 nu = bu + du;
+        uint256 n1 = k / nu;
+        d1 = n1 - b1;
     }
 
     function sellQuote(uint256 du) public view returns (uint256 bu, uint256 b1, uint256 d1) {
@@ -89,10 +94,10 @@ contract Pool is ERC20 {
 
     function sell(uint256 du) external returns (uint256 bu, uint256 b1, uint256 d1) {
         (bu, b1, d1) = sellQuote(du);
-        sellDo(du, d1);
+        sellTransfers(du, d1);
     }
 
-    function sellDo(uint256 du, uint256 d1) private {
+    function sellTransfers(uint256 du, uint256 d1) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(ONE).transferFrom(address(this), msg.sender, d1);
         _transfer(msg.sender, address(this), du);
