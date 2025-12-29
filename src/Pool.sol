@@ -44,43 +44,43 @@ contract Pool is ERC20 {
         }
     }
 
-    function buyQuote(uint256 u, uint256 du, uint256 v) public pure returns (uint256 dv) {
-        if (u <= du) {
+    function buyQuote(uint256 bu, uint256 du, uint256 b1) public pure returns (uint256 d1) {
+        if (bu <= du) {
             revert InsufficientLiquidity();
         }
-        uint256 k = u * v;
-        uint256 newU = u - du;
-        uint256 newV = k / newU;
-        dv = v - newV;
+        uint256 k = bu * b1;
+        uint256 nu = bu - du;
+        uint256 nv = k / nu;
+        d1 = b1 - nv;
     }
 
-    function buyQuote(uint256 du) public view returns (uint256 dv) {
-        uint256 u = balanceOf(address(this));
-        uint256 v = ONE.balanceOf(address(this));
-        dv = buyQuote(u, du, v);
+    function buyQuote(uint256 du) public view returns (uint256 d1) {
+        uint256 bu = balanceOf(address(this));
+        uint256 b1 = ONE.balanceOf(address(this));
+        d1 = buyQuote(bu, du, b1);
     }
 
-    function sellQuote(uint256 du) public view returns (uint256 dv) {
-        uint256 u = balanceOf(address(this));
-        uint256 v = ONE.balanceOf(address(this));
-        uint256 k = u * v;
-        uint256 newU = u + du;
-        uint256 newV = k / newU;
-        dv = newV - v;
+    function sellQuote(uint256 du) public view returns (uint256 d1) {
+        uint256 bu = balanceOf(address(this));
+        uint256 b1 = ONE.balanceOf(address(this));
+        uint256 k = bu * b1;
+        uint256 nu = bu + du;
+        uint256 nv = k / nu;
+        d1 = nv - b1;
     }
 
-    function buy(uint256 du) external returns (uint256 dv) {
-        dv = buyQuote(du);
+    function buy(uint256 du) external returns (uint256 d1) {
+        d1 = buyQuote(du);
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
-        IERC20(ONE).transfer(address(this), dv);
-        _transfer(address(this), msg.sender, dv);
+        IERC20(ONE).transfer(address(this), d1);
+        _transfer(address(this), msg.sender, d1);
     }
 
-    function sell(uint256 du) external returns (uint256 dv) {
-        dv = sellQuote(du);
+    function sell(uint256 du) external returns (uint256 d1) {
+        d1 = sellQuote(du);
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
-        IERC20(ONE).transferFrom(address(this), msg.sender, dv);
-        _transfer(msg.sender, address(this), dv);
+        IERC20(ONE).transferFrom(address(this), msg.sender, d1);
+        _transfer(msg.sender, address(this), d1);
     }
 
     function burn(uint256 units) external returns (uint256 out) {
