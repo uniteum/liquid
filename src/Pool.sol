@@ -134,30 +134,34 @@ contract Pool is ERC20 {
         _mint(ISSUER, MAX_SUPPLY);
     }
 
-    function __predict(IERC20Metadata underlying_) public view returns (address predicted, bytes32 newSalt) {
+    function predict(IERC20Metadata underlying_) public view returns (address predicted, bytes32 newSalt) {
+        if (address(underlying_) == address(0)) {
+            revert UnderlyingNull();
+        }
         newSalt = bytes32(uint256(uint160(address(underlying_))));
         predicted = Clones.predictDeterministicAddress(address(ONE), newSalt, address(ONE));
     }
 
-    function __clone(IERC20Metadata underlying_) public returns (address instance) {
+    function clone(IERC20Metadata underlying_) public returns (address instance) {
         if (this == ONE) {
             bytes32 newSalt;
-            (instance, newSalt) = __predict(underlying_);
+            (instance, newSalt) = predict(underlying_);
 
             if (instance.code.length == 0) {
                 instance = Clones.cloneDeterministic(address(ONE), newSalt);
                 Pool(instance).__initialize(underlying_);
             }
         } else {
-            instance = ONE.__clone(underlying_);
+            instance = ONE.clone(underlying_);
         }
     }
 
     function __initialize(IERC20Metadata underlying_) public {
-        if (address(underlying_) == address(0)) {
+        if (address(underlying) == address(0)) {
             underlying = underlying_;
         }
     }
 
+    error UnderlyingNull();
     error InsufficientLiquidity();
 }
