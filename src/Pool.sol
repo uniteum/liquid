@@ -36,7 +36,7 @@ contract Pool is ERC20, ReentrancyGuardTransient {
     function burn(uint256 units) external nonReentrant returns (uint256 out) {
         uint256 u1 = balanceOf(address(this));
         uint256 u2 = totalSupply() - u1;
-        out = units * u1 / u2;
+        out = 2 * units * u1 / u2;
         _burn(msg.sender, units);
         IERC20(underlying).safeTransfer(msg.sender, out);
     }
