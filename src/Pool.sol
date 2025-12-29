@@ -26,18 +26,18 @@ contract Pool is ERC20 {
 
     IERC20Metadata public underlying = IERC20Metadata(address(0xdeadbeef));
 
+    function mint(uint256 units) external {
+        IERC20(underlying).safeTransferFrom(msg.sender, address(this), units);
+        _mint(msg.sender, units);
+        _mint(address(this), units);
+    }
+
     function burn(uint256 units) external returns (uint256 out) {
         uint256 u1 = balanceOf(address(this));
         uint256 u2 = totalSupply() - u1;
         out = units * u1 / u2;
         _burn(msg.sender, units);
         IERC20(underlying).safeTransfer(msg.sender, out);
-    }
-
-    function mint(uint256 units) external {
-        IERC20(underlying).safeTransferFrom(msg.sender, address(this), units);
-        _mint(msg.sender, units);
-        _mint(address(this), units);
     }
 
     function balances() public view returns (uint256 bu, uint256 b1) {
