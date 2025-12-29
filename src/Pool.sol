@@ -14,8 +14,6 @@ contract Pool is ERC20 {
 
     address constant ISSUER = 0xEbCaD83FeAD16e7D18DD691fFD2b39eca56677d8;
 
-    error InsufficientLiquidity();
-
     string public constant ONE_NAME = "Uniteum 1";
 
     string public constant ONE_SYMBOL = "1";
@@ -160,4 +158,6 @@ contract Pool is ERC20 {
             underlying = underlying_;
         }
     }
+
+    error InsufficientLiquidity();
 }
