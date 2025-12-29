@@ -94,11 +94,21 @@ contract Pool is ERC20 {
 
     function sellQuote(uint256 du) public view returns (uint256 bu, uint256 b1, uint256 d1) {
         (bu, b1) = balances();
-        d1 = sellQuote(bu, du, b1);
+        d1 = sellQuote(bu, b1, du);
+    }
+
+    function sellForQuote(uint256 d1) public view returns (uint256 bu, uint256 b1, uint256 du) {
+        (bu, b1) = balances();
+        d1 = sellQuote(b1, bu, du);
     }
 
     function sell(uint256 du) external returns (uint256 bu, uint256 b1, uint256 d1) {
         (bu, b1, d1) = sellQuote(du);
+        sellTransfers(du, d1);
+    }
+
+    function sellFor(uint256 d1) external returns (uint256 bu, uint256 b1, uint256 du) {
+        (bu, b1, du) = sellForQuote(d1);
         sellTransfers(du, d1);
     }
 
