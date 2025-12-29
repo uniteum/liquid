@@ -40,22 +40,6 @@ contract Pool is ERC20 {
         _mint(address(this), units);
     }
 
-    function name() public view virtual override returns (string memory name_) {
-        if (this == ONE) {
-            return ONE_NAME;
-        } else {
-            return string.concat(underlying.name(), NAME_SUFFIX);
-        }
-    }
-
-    function symbol() public view virtual override returns (string memory) {
-        if (this == ONE) {
-            return ONE_SYMBOL;
-        } else {
-            return string.concat(underlying.symbol(), SYMBOL_SUFFIX);
-        }
-    }
-
     function balances() public view returns (uint256 bu, uint256 b1) {
         bu = balanceOf(address(this));
         b1 = ONE.balanceOf(address(this));
@@ -128,6 +112,22 @@ contract Pool is ERC20 {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(ONE).transferFrom(address(this), msg.sender, d1);
         _transfer(msg.sender, address(this), du);
+    }
+
+    function name() public view virtual override returns (string memory name_) {
+        if (this == ONE) {
+            return ONE_NAME;
+        } else {
+            return string.concat(underlying.name(), NAME_SUFFIX);
+        }
+    }
+
+    function symbol() public view virtual override returns (string memory) {
+        if (this == ONE) {
+            return ONE_SYMBOL;
+        } else {
+            return string.concat(underlying.symbol(), SYMBOL_SUFFIX);
+        }
     }
 
     function predict(IERC20Metadata underlying_) public view returns (address predicted, bytes32 newSalt) {
