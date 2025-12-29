@@ -57,6 +57,13 @@ contract Pool is ERC20 {
         d1 = b1 - n1;
     }
 
+    function sellQuote(uint256 bu, uint256 b1, uint256 du) public pure returns (uint256 d1) {
+        uint256 k = bu * b1;
+        uint256 nu = bu + du;
+        uint256 n1 = k / nu;
+        d1 = n1 - b1;
+    }
+
     function buyQuote(uint256 du) public view returns (uint256 bu, uint256 b1, uint256 d1) {
         (bu, b1) = balances();
         d1 = buyQuote(bu, b1, du);
@@ -64,7 +71,7 @@ contract Pool is ERC20 {
 
     function buyWithQuote(uint256 d1) public view returns (uint256 bu, uint256 b1, uint256 du) {
         (bu, b1) = balances();
-        d1 = buyQuote(b1, bu, du);
+        du = sellQuote(b1, bu, d1);
     }
 
     function buy(uint256 du) external returns (uint256 bu, uint256 b1, uint256 d1) {
@@ -83,13 +90,6 @@ contract Pool is ERC20 {
         _transfer(address(this), msg.sender, du);
     }
 
-    function sellQuote(uint256 bu, uint256 b1, uint256 du) public pure returns (uint256 d1) {
-        uint256 k = bu * b1;
-        uint256 nu = bu + du;
-        uint256 n1 = k / nu;
-        d1 = n1 - b1;
-    }
-
     function sellQuote(uint256 du) public view returns (uint256 bu, uint256 b1, uint256 d1) {
         (bu, b1) = balances();
         d1 = sellQuote(bu, b1, du);
@@ -97,7 +97,7 @@ contract Pool is ERC20 {
 
     function sellForQuote(uint256 d1) public view returns (uint256 bu, uint256 b1, uint256 du) {
         (bu, b1) = balances();
-        d1 = sellQuote(b1, bu, du);
+        d1 = buyQuote(b1, bu, du);
     }
 
     function sell(uint256 du) external returns (uint256 bu, uint256 b1, uint256 d1) {
