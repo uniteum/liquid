@@ -50,34 +50,44 @@ contract Pool is ERC20 {
         }
         uint256 k = bu * b1;
         uint256 nu = bu - du;
-        uint256 nv = k / nu;
-        d1 = b1 - nv;
+        uint256 n1 = k / nu;
+        d1 = b1 - n1;
     }
 
-    function buyQuote(uint256 du) public view returns (uint256 d1) {
-        uint256 bu = balanceOf(address(this));
-        uint256 b1 = ONE.balanceOf(address(this));
+    function sellQuote(uint256 bu, uint256 du, uint256 b1) public pure returns (uint256 d1) {
+        uint256 k = bu * b1;
+        uint256 nu = bu + du;
+        uint256 n1 = k / nu;
+        d1 = n1 - b1;
+    }
+
+    function balances() public view returns (uint256 bu, uint256 b1) {
+        bu = balanceOf(address(this));
+        b1 = ONE.balanceOf(address(this));
+    }
+
+    function buyQuote(uint256 du) public view returns (uint256 bu, uint256 b1, uint256 d1) {
+        (bu, b1) = balances();
         d1 = buyQuote(bu, du, b1);
     }
 
-    function sellQuote(uint256 du) public view returns (uint256 d1) {
-        uint256 bu = balanceOf(address(this));
-        uint256 b1 = ONE.balanceOf(address(this));
+    function sellQuote(uint256 du) public view returns (uint256 bu, uint256 b1, uint256 d1) {
+        (bu, b1) = balances();
         uint256 k = bu * b1;
         uint256 nu = bu + du;
-        uint256 nv = k / nu;
-        d1 = nv - b1;
+        uint256 n1 = k / nu;
+        d1 = n1 - b1;
     }
 
-    function buy(uint256 du) external returns (uint256 d1) {
-        d1 = buyQuote(du);
+    function buy(uint256 du) external returns (uint256 bu, uint256 b1, uint256 d1) {
+        (bu, b1, d1) = buyQuote(du);
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(ONE).transfer(address(this), d1);
         _transfer(address(this), msg.sender, d1);
     }
 
-    function sell(uint256 du) external returns (uint256 d1) {
-        d1 = sellQuote(du);
+    function sell(uint256 du) external returns (uint256 bu, uint256 b1, uint256 d1) {
+        (bu, b1, d1) = sellQuote(du);
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(ONE).transferFrom(address(this), msg.sender, d1);
         _transfer(msg.sender, address(this), d1);
