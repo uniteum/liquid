@@ -115,19 +115,11 @@ contract Pool is ERC20 {
     }
 
     function name() public view virtual override returns (string memory name_) {
-        if (this == ONE) {
-            return ONE_NAME;
-        } else {
-            return string.concat(underlying.name(), NAME_SUFFIX);
-        }
+        return this == ONE ? ONE_NAME : string.concat(underlying.name(), NAME_SUFFIX);
     }
 
     function symbol() public view virtual override returns (string memory) {
-        if (this == ONE) {
-            return ONE_SYMBOL;
-        } else {
-            return string.concat(underlying.symbol(), SYMBOL_SUFFIX);
-        }
+        return this == ONE ? ONE_SYMBOL : string.concat(underlying.symbol(), SYMBOL_SUFFIX);
     }
 
     function predict(IERC20Metadata underlying_) public view returns (address predicted, bytes32 newSalt) {
