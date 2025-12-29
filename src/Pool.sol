@@ -130,10 +130,6 @@ contract Pool is ERC20 {
         _transfer(msg.sender, address(this), du);
     }
 
-    constructor() ERC20("", "") {
-        _mint(ISSUER, MAX_SUPPLY);
-    }
-
     function predict(IERC20Metadata underlying_) public view returns (address predicted, bytes32 newSalt) {
         if (address(underlying_) == address(0)) {
             revert UnderlyingNull();
@@ -160,6 +156,10 @@ contract Pool is ERC20 {
         if (address(underlying) == address(0)) {
             underlying = underlying_;
         }
+    }
+
+    constructor() ERC20("", "") {
+        _mint(ISSUER, MAX_SUPPLY);
     }
 
     error UnderlyingNull();
