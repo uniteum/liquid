@@ -84,12 +84,6 @@ contract Pool is ERC20 {
         buyTransfers(du, d1);
     }
 
-    function buyTransfers(uint256 du, uint256 d1) private {
-        // forge-lint: disable-next-line(erc20-unchecked-transfer)
-        IERC20(ONE).transfer(address(this), d1);
-        _transfer(address(this), msg.sender, du);
-    }
-
     function sellQuote(uint256 du) public view returns (uint256 bu, uint256 b1, uint256 d1) {
         (bu, b1) = balances();
         d1 = sellQuote(bu, b1, du);
@@ -108,6 +102,12 @@ contract Pool is ERC20 {
     function sellFor(uint256 d1) external returns (uint256 bu, uint256 b1, uint256 du) {
         (bu, b1, du) = sellForQuote(d1);
         sellTransfers(du, d1);
+    }
+
+    function buyTransfers(uint256 du, uint256 d1) private {
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
+        IERC20(ONE).transfer(address(this), d1);
+        _transfer(address(this), msg.sender, du);
     }
 
     function sellTransfers(uint256 du, uint256 d1) private {
