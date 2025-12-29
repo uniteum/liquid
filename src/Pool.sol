@@ -134,7 +134,7 @@ contract Pool is ERC20 {
 
     constructor() ERC20("", "") {
         _mint(ISSUER, MAX_SUPPLY);
-        underlying = this;
+        underlying = IERC20Metadata(address(0xdeadbeef));
     }
 
     function __predict(IERC20Metadata underlying_) public view returns (address predicted, bytes32 newSalt) {
