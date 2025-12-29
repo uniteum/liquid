@@ -26,7 +26,7 @@ contract Pool is ERC20 {
 
     Pool public immutable ONE = this;
 
-    IERC20Metadata public underlying;
+    IERC20Metadata public underlying = IERC20Metadata(address(0xdeadbeef));
 
     function name() public view virtual override returns (string memory name_) {
         if (this == ONE) {
@@ -134,7 +134,6 @@ contract Pool is ERC20 {
 
     constructor() ERC20("", "") {
         _mint(ISSUER, MAX_SUPPLY);
-        underlying = IERC20Metadata(address(0xdeadbeef));
     }
 
     function __predict(IERC20Metadata underlying_) public view returns (address predicted, bytes32 newSalt) {
