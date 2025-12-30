@@ -12,48 +12,48 @@ contract PoolUser is User {
     Pool public immutable ONE;
     TestToken ignore;
 
-    constructor(string memory name_, Pool one) User(name_) {
+    constructor(string memory name, Pool one) User(name) {
         ONE = one;
     }
 
-    function mint(Pool U, uint256 du) public {
+    function mint(Pool U, uint256 units) public {
         console.log("%s.mint", name, U.symbol());
-        console.log("du:", du);
-        U.asset().approve(address(U), du);
-        U.mint(du);
+        console.log("units:", units);
+        U.asset().approve(address(U), units);
+        U.mint(units);
         logBalances();
     }
 
-    function burn(Pool U, uint256 du) public returns (uint256 out) {
+    function burn(Pool U, uint256 units) public returns (uint256 ash) {
         console.log("%s.burn", name, U.symbol());
-        console.log("du:", du);
-        out = U.burn(du);
+        console.log("units:", units);
+        ash = U.burn(units);
         logBalances();
     }
 
-    function liquidate(Pool U) public returns (uint256 du, uint256 out) {
-        du = U.balanceOf(address(this));
-        out = burn(U, du);
+    function liquidate(Pool U) public returns (uint256 units, uint256 ash) {
+        units = U.balanceOf(address(this));
+        ash = burn(U, units);
         assertHasNo(U);
     }
 
-    function rndUnits(Pool U) public returns (int256 x) {
+    function rndUnits(Pool U) public returns (int256 units) {
         int256 xmin = -int256(U.balanceOf(address(this)));
         // forge-lint: disable-next-line(unsafe-typecast)
         int256 xmax = int256(ONE.balanceOf(address(this)));
-        x = rnd(xmin, xmax);
+        units = rnd(xmin, xmax);
     }
 
-    function rndForge(Pool U) public returns (int256 du) {
-        du = rndUnits(U);
-        if (du < -int256(ONE.balanceOf(address(this)))) {
+    function rndForge(Pool U) public returns (int256 units) {
+        units = rndUnits(U);
+        if (units < -int256(ONE.balanceOf(address(this)))) {
             console.log("forge not called because insufficient balance");
-        } else if (du < 0) {
+        } else if (units < 0) {
             // forge-lint: disable-next-line(unsafe-typecast)
-            burn(U, uint256(-du));
+            burn(U, uint256(-units));
         } else {
             // forge-lint: disable-next-line(unsafe-typecast)
-            mint(U, uint256(du));
+            mint(U, uint256(units));
         }
     }
 }
