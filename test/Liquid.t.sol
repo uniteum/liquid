@@ -28,11 +28,11 @@ contract LiquidTest is BaseTest {
         U = one.make(u_);
         V = one.make(v_);
 
-        address god = one.GOD();
-        console.log("god:", god);
-        uint256 all = one.balanceOf(god);
+        address spring = one.SPRING();
+        console.log("spring:", spring);
+        uint256 all = one.balanceOf(spring);
 
-        vm.prank(god);
+        vm.prank(spring);
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         one.transfer(address(owen), all);
     }
