@@ -12,25 +12,19 @@ contract Pool is ERC20, ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
     uint256 constant MAX_SUPPLY = 1e9 ether;
-
     string public constant ONE_NAME = "Uniteum 1";
-
     string public constant ONE_SYMBOL = "1";
-
     string public constant NAME_SUFFIX = " per 1";
-
     string public constant SYMBOL_SUFFIX = "/1";
-
     Pool public immutable ONE = this;
-
     address public immutable ISSUER = 0xEbCaD83FeAD16e7D18DD691fFD2b39eca56677d8;
-
     IERC20Metadata public underlying = IERC20Metadata(address(0xdeadbeef));
 
     function mint(uint256 units) external nonReentrant {
         IERC20(underlying).safeTransferFrom(msg.sender, address(this), units);
         _mint(address(this), units);
         _mint(msg.sender, units);
+        emit Minted(msg.sender, this, units);
     }
 
     function burn(uint256 units) external nonReentrant returns (uint256 released) {
@@ -43,6 +37,7 @@ contract Pool is ERC20, ReentrancyGuardTransient {
         _burn(address(this), myPool);
         _burn(msg.sender, myDry);
         IERC20(underlying).safeTransfer(msg.sender, released);
+        emit Burned(msg.sender, this, units, released);
     }
 
     function balances() public view returns (uint256 pool, uint256 ones) {
@@ -111,12 +106,14 @@ contract Pool is ERC20, ReentrancyGuardTransient {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(ONE).transfer(address(this), myOnes);
         _transfer(address(this), msg.sender, units);
+        emit Bought(msg.sender, this, units, myOnes);
     }
 
     function sellTransfers(uint256 units, uint256 myOnes) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(ONE).transferFrom(address(this), msg.sender, myOnes);
         _transfer(msg.sender, address(this), units);
+        emit Sold(msg.sender, this, units, myOnes);
     }
 
     function name() public view virtual override returns (string memory) {
@@ -143,6 +140,7 @@ contract Pool is ERC20, ReentrancyGuardTransient {
             if (instance.code.length == 0) {
                 instance = Clones.cloneDeterministic(address(ONE), newSalt);
                 Pool(instance).__initialize(underlying_);
+                emit Cloned(instance, underlying_);
             }
         } else {
             instance = ONE.clone(underlying_);
@@ -158,6 +156,12 @@ contract Pool is ERC20, ReentrancyGuardTransient {
     constructor() ERC20("", "") {
         _mint(ISSUER, MAX_SUPPLY);
     }
+
+    event Minted(address indexed minter, Pool indexed token, uint256 units);
+    event Burned(address indexed burner, Pool indexed token, uint256 units, uint256 released);
+    event Bought(address indexed buyer, Pool indexed token, uint256 units, uint256 ones);
+    event Sold(address indexed seller, Pool indexed token, uint256 units, uint256 ones);
+    event Cloned(address indexed clone, IERC20Metadata indexed underlying);
 
     error UnderlyingNull();
     error InsufficientLiquidity();
