@@ -12,7 +12,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     using SafeERC20 for IERC20Metadata;
 
     uint256 public constant ONE_SUPPLY = 1e9 ether;
-    string public constant ONE_NAME = "Uniteum 1";
+    string public constant ONE_NAME = "Liquid 1";
     string public constant ONE_SYMBOL = "1";
     string public constant NAME_SUFFIX = " per 1";
     string public constant SYMBOL_SUFFIX = "/1";
