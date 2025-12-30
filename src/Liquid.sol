@@ -142,7 +142,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
             if (future.code.length == 0) {
                 future = Clones.cloneDeterministic(address(WATER), salt);
                 liquid.__initialize(stuff);
-                emit Made(liquid, stuff);
+                emit Made(stuff, liquid);
             }
         } else {
             liquid = WATER.make(stuff);
@@ -163,7 +163,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     event Frozen(address indexed burner, Liquid indexed liquid, uint256 liquids, uint256 solids);
     event Bought(address indexed buyer, Liquid indexed liquid, uint256 liquids, uint256 water);
     event Sold(address indexed seller, Liquid indexed liquid, uint256 liquids, uint256 water);
-    event Made(Liquid indexed liquid, IERC20Metadata indexed solid);
+    event Made(IERC20Metadata indexed solid, Liquid indexed liquid);
 
     error Nothing();
     error Thirst();
