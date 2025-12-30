@@ -28,13 +28,13 @@ contract LiquidTest is BaseTest {
         U = one.make(u_);
         V = one.make(v_);
 
-        address issuer = one.ISSUER();
-        console.log("issuer:", issuer);
-        uint256 totalOne = one.balanceOf(issuer);
+        address god = one.GOD();
+        console.log("god:", god);
+        uint256 all = one.balanceOf(god);
 
-        vm.prank(issuer);
+        vm.prank(god);
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
-        one.transfer(address(owen), totalOne);
+        one.transfer(address(owen), all);
     }
 
     function newUser(string memory name) internal returns (LiquidUser u) {
