@@ -18,7 +18,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     Liquid public immutable WATER = this;
     address public immutable GOD = 0xEbCaD83FeAD16e7D18DD691fFD2b39eca56677d8;
 
-    IERC20Metadata public solid = IERC20Metadata(address(0xdead));
+    IERC20Metadata public solid = IERC20Metadata(address(0x1CE));
 
     function melt(uint256 solids) external nonReentrant {
         solid.safeTransferFrom(msg.sender, address(this), solids);
