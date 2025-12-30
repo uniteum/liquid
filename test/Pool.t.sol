@@ -41,7 +41,7 @@ contract PoolTest is BaseTest {
         u = new PoolUser(name, one);
     }
 
-    function ftest_Pool() public {
+    function test_Pool() public returns (uint256 du, uint256 out) {
         owen.give(address(alex), 1e3, one);
         owen.give(address(alex), 1e3, u_);
         owen.give(address(alex), 1e3, v_);
@@ -51,11 +51,20 @@ contract PoolTest is BaseTest {
         owen.mint(U, 500);
         alex.mint(U, 500);
         beck.mint(U, 500);
-        alex.liquidate(U);
+        du = 100;
+        out = alex.burn(U, du);
+        console.log("alex.burn:", U.symbol());
+        console.log("alex.burn.du:", du);
+        console.log("alex.burn.out:", out);
+        (du, out) = alex.liquidate(U);
         console.log("alex.liquidate:", U.symbol());
+        console.log("alex.liquidate.du:", du);
+        console.log("alex.liquidate.out:", out);
         assertEq(1e3, alex.balance(one), "alex should have the same 1");
-        beck.liquidate(U);
+        (du, out) = beck.liquidate(U);
         console.log("beck.liquidate:", U.symbol());
+        console.log("beck.liquidate.du:", du);
+        console.log("beck.liquidate.out:", out);
         assertEq(beck.balance(one), 1e7, "beck should have the same 1");
     }
 }

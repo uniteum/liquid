@@ -39,7 +39,7 @@ contract Pool is ERC20, ReentrancyGuardTransient {
         uint256 b2 = ts - b1;
         uint256 u1 = 2 * units * b1 / ts;
         uint256 u2 = 2 * units * b2 / ts;
-        out = units * ts / u2 / 2;
+        out = units * ts / b2 / 2;
         _burn(address(this), u1);
         _burn(msg.sender, u2);
         IERC20(underlying).safeTransfer(msg.sender, out);
