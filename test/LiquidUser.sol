@@ -16,24 +16,24 @@ contract LiquidUser is User {
         ONE = one;
     }
 
-    function mint(Liquid U, uint256 units) public {
-        console.log("%s.mint", name, U.symbol());
+    function melt(Liquid U, uint256 units) public {
+        console.log("%s.melt", name, U.symbol());
         console.log("units:", units);
         U.solid().approve(address(U), units);
-        U.mint(units);
+        U.melt(units);
         logBalances();
     }
 
-    function burn(Liquid U, uint256 units) public returns (uint256 ash) {
-        console.log("%s.burn", name, U.symbol());
+    function freeze(Liquid U, uint256 units) public returns (uint256 solids) {
+        console.log("%s.freeze", name, U.symbol());
         console.log("units:", units);
-        ash = U.burn(units);
+        solids = U.freeze(units);
         logBalances();
     }
 
-    function liquidate(Liquid U) public returns (uint256 units, uint256 ash) {
+    function liquidate(Liquid U) public returns (uint256 units, uint256 solids) {
         units = U.balanceOf(address(this));
-        ash = burn(U, units);
+        solids = freeze(U, units);
         assertHasNo(U);
     }
 
@@ -50,10 +50,10 @@ contract LiquidUser is User {
             console.log("forge not called because insufficient balance");
         } else if (units < 0) {
             // forge-lint: disable-next-line(unsafe-typecast)
-            burn(U, uint256(-units));
+            freeze(U, uint256(-units));
         } else {
             // forge-lint: disable-next-line(unsafe-typecast)
-            mint(U, uint256(units));
+            melt(U, uint256(units));
         }
     }
 }

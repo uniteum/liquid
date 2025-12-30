@@ -20,24 +20,24 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     IERC20Metadata public solid = IERC20Metadata(address(0xdead));
 
-    function mint(uint256 units) external nonReentrant {
+    function melt(uint256 units) external nonReentrant {
         solid.safeTransferFrom(msg.sender, address(this), units);
         _mint(address(this), units);
         _mint(msg.sender, units);
         emit Minted(msg.sender, this, units);
     }
 
-    function burn(uint256 units) external nonReentrant returns (uint256 ash) {
+    function freeze(uint256 units) external nonReentrant returns (uint256 solids) {
         uint256 total = totalSupply();
         uint256 wet = balanceOf(address(this));
         uint256 dry = total - wet;
         uint256 myWet = 2 * units * wet / total;
         uint256 myDry = 2 * units * dry / total;
-        ash = units * solid.balanceOf(address(this)) / dry;
+        solids = units * solid.balanceOf(address(this)) / dry;
         _burn(address(this), myWet);
         _burn(msg.sender, myDry);
-        solid.safeTransfer(msg.sender, ash);
-        emit Burned(msg.sender, this, units, ash);
+        solid.safeTransfer(msg.sender, solids);
+        emit Burned(msg.sender, this, units, solids);
     }
 
     function balances() public view returns (uint256 wet, uint256 ones) {
@@ -160,7 +160,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     event Minted(address indexed minter, Liquid indexed liquid, uint256 units);
-    event Burned(address indexed burner, Liquid indexed liquid, uint256 units, uint256 ash);
+    event Burned(address indexed burner, Liquid indexed liquid, uint256 units, uint256 solids);
     event Bought(address indexed buyer, Liquid indexed liquid, uint256 units, uint256 cost);
     event Sold(address indexed seller, Liquid indexed liquid, uint256 units, uint256 cost);
     event Made(Liquid indexed liquid, IERC20Metadata indexed solid);
