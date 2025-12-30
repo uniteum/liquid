@@ -55,16 +55,16 @@ contract Pool is ERC20, ReentrancyGuardTransient {
             revert InsufficientLiquidity();
         }
         uint256 k = pool * ones;
-        uint256 nu = pool - units;
-        uint256 n1 = k / nu;
-        myOnes = ones - n1;
+        uint256 newPool = pool - units;
+        uint256 newOnes = k / newPool;
+        myOnes = ones - newOnes;
     }
 
     function sellQuote(uint256 pool, uint256 ones, uint256 units) public pure returns (uint256 myOnes) {
         uint256 k = pool * ones;
-        uint256 nu = pool + units;
-        uint256 n1 = k / nu;
-        myOnes = n1 - ones;
+        uint256 newPool = pool + units;
+        uint256 newOnes = k / newPool;
+        myOnes = newOnes - ones;
     }
 
     function buyQuote(uint256 units) public view returns (uint256 pool, uint256 ones, uint256 myOnes) {
