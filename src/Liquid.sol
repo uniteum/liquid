@@ -136,9 +136,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         if (this != WATER) {
             liquid = WATER.make(stuff);
         } else {
-            bytes32 salt;
-            address future;
-            (future, salt) = predict(stuff);
+            (address future, bytes32 salt) = predict(stuff);
             liquid = Liquid(future);
             if (future.code.length == 0) {
                 future = Clones.cloneDeterministic(address(WATER), salt);
