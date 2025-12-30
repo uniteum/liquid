@@ -9,7 +9,7 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 
 contract Liquid is ERC20, ReentrancyGuardTransient {
-    using SafeERC20 for IERC20;
+    using SafeERC20 for IERC20Metadata;
 
     uint256 constant ONE_SUPPLY = 1e9 ether;
     string public constant ONE_NAME = "Uniteum 1";
@@ -23,7 +23,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     IERC20Metadata public substance = IERC20Metadata(address(0xdeadbeef));
 
     function mint(uint256 units) external nonReentrant {
-        IERC20(substance).safeTransferFrom(msg.sender, address(this), units);
+        substance.safeTransferFrom(msg.sender, address(this), units);
         _mint(address(this), units);
         _mint(msg.sender, units);
         emit Minted(msg.sender, this, units);
@@ -38,7 +38,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         ash = units * substance.balanceOf(address(this)) / dry;
         _burn(address(this), myWet);
         _burn(msg.sender, myDry);
-        IERC20(substance).safeTransfer(msg.sender, ash);
+        substance.safeTransfer(msg.sender, ash);
         emit Burned(msg.sender, this, units, ash);
     }
 
