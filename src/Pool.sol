@@ -119,7 +119,7 @@ contract Pool is ERC20, ReentrancyGuardTransient {
         _transfer(msg.sender, address(this), du);
     }
 
-    function name() public view virtual override returns (string memory name_) {
+    function name() public view virtual override returns (string memory) {
         return this == ONE ? ONE_NAME : string.concat(underlying.name(), NAME_SUFFIX);
     }
 
