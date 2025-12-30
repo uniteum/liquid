@@ -51,16 +51,16 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         if (wet <= units) {
             revert Thirst();
         }
-        uint256 k = wet * ones;
+        uint256 area = wet * ones;
         uint256 newPool = wet - units;
-        uint256 newOnes = k / newPool;
+        uint256 newOnes = area / newPool;
         myOnes = ones - newOnes;
     }
 
     function sellQuote(uint256 wet, uint256 ones, uint256 units) public pure returns (uint256 myOnes) {
-        uint256 k = wet * ones;
+        uint256 area = wet * ones;
         uint256 newPool = wet + units;
-        uint256 newOnes = k / newPool;
+        uint256 newOnes = area / newPool;
         myOnes = newOnes - ones;
     }
 
