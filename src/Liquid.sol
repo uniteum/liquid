@@ -134,7 +134,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         future = Clones.predictDeterministicAddress(address(ONE), salt, address(ONE));
     }
 
-    function clone(IERC20Metadata stuff) public returns (Liquid liquid) {
+    function make(IERC20Metadata stuff) public returns (Liquid liquid) {
         if (this == ONE) {
             bytes32 salt;
             address future;
@@ -147,7 +147,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
                 emit Cloned(future, stuff);
             }
         } else {
-            liquid = ONE.clone(stuff);
+            liquid = ONE.make(stuff);
         }
     }
 
@@ -165,7 +165,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     event Burned(address indexed burner, Liquid indexed token, uint256 units, uint256 ash);
     event Bought(address indexed buyer, Liquid indexed token, uint256 units, uint256 ones);
     event Sold(address indexed seller, Liquid indexed token, uint256 units, uint256 ones);
-    event Cloned(address indexed clone, IERC20Metadata indexed substance);
+    event Cloned(address indexed make, IERC20Metadata indexed substance);
 
     error Nothing();
     error Thirst();

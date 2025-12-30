@@ -25,8 +25,8 @@ contract LiquidTest is BaseTest {
         beck = newUser("beck");
         u_ = owen.newToken("U", 1e9);
         v_ = owen.newToken("V", 1e9);
-        U = one.clone(u_);
-        V = one.clone(v_);
+        U = one.make(u_);
+        V = one.make(v_);
 
         address issuer = one.ISSUER();
         console.log("issuer:", issuer);
