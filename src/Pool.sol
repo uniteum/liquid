@@ -33,77 +33,77 @@ contract Pool is ERC20, ReentrancyGuardTransient {
         _mint(msg.sender, units);
     }
 
-    function burn(uint256 units) external nonReentrant returns (uint256 out) {
-        uint256 ts = totalSupply();
-        uint256 b1 = balanceOf(address(this));
-        uint256 b2 = ts - b1;
-        uint256 u1 = 2 * units * b1 / ts;
-        uint256 u2 = 2 * units * b2 / ts;
-        out = units * underlying.balanceOf(address(this)) / b2;
-        _burn(address(this), u1);
-        _burn(msg.sender, u2);
-        IERC20(underlying).safeTransfer(msg.sender, out);
+    function burn(uint256 units) external nonReentrant returns (uint256 burnt) {
+        uint256 totalUnits = totalSupply();
+        uint256 poolBalance = balanceOf(address(this));
+        uint256 dryBalance = totalUnits - poolBalance;
+        uint256 poolUnits = 2 * units * poolBalance / totalUnits;
+        uint256 dryUnits = 2 * units * dryBalance / totalUnits;
+        burnt = units * underlying.balanceOf(address(this)) / dryBalance;
+        _burn(address(this), poolUnits);
+        _burn(msg.sender, dryUnits);
+        IERC20(underlying).safeTransfer(msg.sender, burnt);
     }
 
-    function balances() public view returns (uint256 bu, uint256 b1) {
+    function balances() public view returns (uint256 bu, uint256 poolBalance) {
         bu = balanceOf(address(this));
-        b1 = ONE.balanceOf(address(this));
+        poolBalance = ONE.balanceOf(address(this));
     }
 
-    function buyQuote(uint256 bu, uint256 b1, uint256 du) public pure returns (uint256 d1) {
+    function buyQuote(uint256 bu, uint256 poolBalance, uint256 du) public pure returns (uint256 d1) {
         if (bu <= du) {
             revert InsufficientLiquidity();
         }
-        uint256 k = bu * b1;
+        uint256 k = bu * poolBalance;
         uint256 nu = bu - du;
         uint256 n1 = k / nu;
-        d1 = b1 - n1;
+        d1 = poolBalance - n1;
     }
 
-    function sellQuote(uint256 bu, uint256 b1, uint256 du) public pure returns (uint256 d1) {
-        uint256 k = bu * b1;
+    function sellQuote(uint256 bu, uint256 poolBalance, uint256 du) public pure returns (uint256 d1) {
+        uint256 k = bu * poolBalance;
         uint256 nu = bu + du;
         uint256 n1 = k / nu;
-        d1 = n1 - b1;
+        d1 = n1 - poolBalance;
     }
 
-    function buyQuote(uint256 du) public view returns (uint256 bu, uint256 b1, uint256 d1) {
-        (bu, b1) = balances();
-        d1 = buyQuote(bu, b1, du);
+    function buyQuote(uint256 du) public view returns (uint256 bu, uint256 poolBalance, uint256 d1) {
+        (bu, poolBalance) = balances();
+        d1 = buyQuote(bu, poolBalance, du);
     }
 
-    function buyWithQuote(uint256 d1) public view returns (uint256 bu, uint256 b1, uint256 du) {
-        (bu, b1) = balances();
-        du = sellQuote(b1, bu, d1);
+    function buyWithQuote(uint256 d1) public view returns (uint256 bu, uint256 poolBalance, uint256 du) {
+        (bu, poolBalance) = balances();
+        du = sellQuote(poolBalance, bu, d1);
     }
 
-    function buy(uint256 du) external returns (uint256 bu, uint256 b1, uint256 d1) {
-        (bu, b1, d1) = buyQuote(du);
+    function buy(uint256 du) external returns (uint256 bu, uint256 poolBalance, uint256 d1) {
+        (bu, poolBalance, d1) = buyQuote(du);
         buyTransfers(du, d1);
     }
 
-    function buyWith(uint256 d1) external returns (uint256 bu, uint256 b1, uint256 du) {
-        (bu, b1, du) = buyWithQuote(d1);
+    function buyWith(uint256 d1) external returns (uint256 bu, uint256 poolBalance, uint256 du) {
+        (bu, poolBalance, du) = buyWithQuote(d1);
         buyTransfers(du, d1);
     }
 
-    function sellQuote(uint256 du) public view returns (uint256 bu, uint256 b1, uint256 d1) {
-        (bu, b1) = balances();
-        d1 = sellQuote(bu, b1, du);
+    function sellQuote(uint256 du) public view returns (uint256 bu, uint256 poolBalance, uint256 d1) {
+        (bu, poolBalance) = balances();
+        d1 = sellQuote(bu, poolBalance, du);
     }
 
-    function sellForQuote(uint256 d1) public view returns (uint256 bu, uint256 b1, uint256 du) {
-        (bu, b1) = balances();
-        d1 = buyQuote(b1, bu, du);
+    function sellForQuote(uint256 d1) public view returns (uint256 bu, uint256 poolBalance, uint256 du) {
+        (bu, poolBalance) = balances();
+        d1 = buyQuote(poolBalance, bu, du);
     }
 
-    function sell(uint256 du) external returns (uint256 bu, uint256 b1, uint256 d1) {
-        (bu, b1, d1) = sellQuote(du);
+    function sell(uint256 du) external returns (uint256 bu, uint256 poolBalance, uint256 d1) {
+        (bu, poolBalance, d1) = sellQuote(du);
         sellTransfers(du, d1);
     }
 
-    function sellFor(uint256 d1) external returns (uint256 bu, uint256 b1, uint256 du) {
-        (bu, b1, du) = sellForQuote(d1);
+    function sellFor(uint256 d1) external returns (uint256 bu, uint256 poolBalance, uint256 du) {
+        (bu, poolBalance, du) = sellForQuote(d1);
         sellTransfers(du, d1);
     }
 
