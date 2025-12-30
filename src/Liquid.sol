@@ -133,19 +133,18 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function make(IERC20Metadata stuff) public returns (Liquid liquid) {
-        if (this == WATER) {
+        if (this != WATER) {
+            liquid = WATER.make(stuff);
+        } else {
             bytes32 salt;
             address future;
             (future, salt) = predict(stuff);
             liquid = Liquid(future);
-
             if (future.code.length == 0) {
                 future = Clones.cloneDeterministic(address(WATER), salt);
                 liquid.__initialize(stuff);
                 emit Made(stuff, liquid);
             }
-        } else {
-            liquid = WATER.make(stuff);
         }
     }
 
