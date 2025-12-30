@@ -51,13 +51,13 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         }
         uint256 drained = pool - liquids;
         uint256 filled = pool * lake / drained;
-        water = lake - filled;
+        water = filled - lake;
     }
 
     function sellQuote(uint256 liquids, uint256 pool, uint256 lake) public pure returns (uint256 water) {
         uint256 filled = pool + liquids;
         uint256 drained = pool * lake / filled;
-        water = drained - lake;
+        water = lake - drained;
     }
 
     function buyQuote(uint256 liquids) public view returns (uint256 water) {
