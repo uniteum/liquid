@@ -16,8 +16,10 @@ contract Pool is ERC20, ReentrancyGuardTransient {
     string public constant ONE_SYMBOL = "1";
     string public constant NAME_SUFFIX = " per 1";
     string public constant SYMBOL_SUFFIX = "/1";
+
     Pool public immutable ONE = this;
     address public immutable ISSUER = 0xEbCaD83FeAD16e7D18DD691fFD2b39eca56677d8;
+
     IERC20Metadata public underlying = IERC20Metadata(address(0xdeadbeef));
 
     function mint(uint256 units) external nonReentrant {
