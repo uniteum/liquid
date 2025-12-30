@@ -19,7 +19,7 @@ contract LiquidUser is User {
     function mint(Liquid U, uint256 units) public {
         console.log("%s.mint", name, U.symbol());
         console.log("units:", units);
-        U.substance().approve(address(U), units);
+        U.solid().approve(address(U), units);
         U.mint(units);
         logBalances();
     }

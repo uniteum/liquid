@@ -18,10 +18,10 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     Liquid public immutable ONE = this;
     address public immutable GOD = 0xEbCaD83FeAD16e7D18DD691fFD2b39eca56677d8;
 
-    IERC20Metadata public substance = IERC20Metadata(address(0xdead));
+    IERC20Metadata public solid = IERC20Metadata(address(0xdead));
 
     function mint(uint256 units) external nonReentrant {
-        substance.safeTransferFrom(msg.sender, address(this), units);
+        solid.safeTransferFrom(msg.sender, address(this), units);
         _mint(address(this), units);
         _mint(msg.sender, units);
         emit Minted(msg.sender, this, units);
@@ -33,10 +33,10 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         uint256 dry = total - wet;
         uint256 myWet = 2 * units * wet / total;
         uint256 myDry = 2 * units * dry / total;
-        ash = units * substance.balanceOf(address(this)) / dry;
+        ash = units * solid.balanceOf(address(this)) / dry;
         _burn(address(this), myWet);
         _burn(msg.sender, myDry);
-        substance.safeTransfer(msg.sender, ash);
+        solid.safeTransfer(msg.sender, ash);
         emit Burned(msg.sender, this, units, ash);
     }
 
@@ -117,11 +117,11 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function name() public view virtual override returns (string memory) {
-        return this == ONE ? ONE_NAME : substance.name();
+        return this == ONE ? ONE_NAME : solid.name();
     }
 
     function symbol() public view virtual override returns (string memory) {
-        return this == ONE ? ONE_SYMBOL : substance.symbol();
+        return this == ONE ? ONE_SYMBOL : solid.symbol();
     }
 
     function predict(IERC20Metadata stuff) public view returns (address future, bytes32 salt) {
@@ -150,8 +150,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function __initialize(IERC20Metadata stuff) public {
-        if (address(substance) == address(0)) {
-            substance = stuff;
+        if (address(solid) == address(0)) {
+            solid = stuff;
         }
     }
 
@@ -163,7 +163,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     event Burned(address indexed burner, Liquid indexed liquid, uint256 units, uint256 ash);
     event Bought(address indexed buyer, Liquid indexed liquid, uint256 units, uint256 cost);
     event Sold(address indexed seller, Liquid indexed liquid, uint256 units, uint256 cost);
-    event Made(Liquid indexed liquid, IERC20Metadata indexed substance);
+    event Made(Liquid indexed liquid, IERC20Metadata indexed solid);
 
     error Nothing();
     error Thirst();
