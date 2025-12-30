@@ -34,89 +34,89 @@ contract Pool is ERC20, ReentrancyGuardTransient {
     }
 
     function burn(uint256 units) external nonReentrant returns (uint256 burnt) {
-        uint256 totalUnits = totalSupply();
-        uint256 poolBalance = balanceOf(address(this));
-        uint256 dryBalance = totalUnits - poolBalance;
-        uint256 poolUnits = 2 * units * poolBalance / totalUnits;
-        uint256 dryUnits = 2 * units * dryBalance / totalUnits;
-        burnt = units * underlying.balanceOf(address(this)) / dryBalance;
-        _burn(address(this), poolUnits);
-        _burn(msg.sender, dryUnits);
+        uint256 total = totalSupply();
+        uint256 pool = balanceOf(address(this));
+        uint256 dry = total - pool;
+        uint256 myPool = 2 * units * pool / total;
+        uint256 myDry = 2 * units * dry / total;
+        burnt = units * underlying.balanceOf(address(this)) / dry;
+        _burn(address(this), myPool);
+        _burn(msg.sender, myDry);
         IERC20(underlying).safeTransfer(msg.sender, burnt);
     }
 
-    function balances() public view returns (uint256 bu, uint256 poolBalance) {
-        bu = balanceOf(address(this));
-        poolBalance = ONE.balanceOf(address(this));
+    function balances() public view returns (uint256 pool, uint256 ones) {
+        pool = balanceOf(address(this));
+        ones = ONE.balanceOf(address(this));
     }
 
-    function buyQuote(uint256 bu, uint256 poolBalance, uint256 du) public pure returns (uint256 d1) {
-        if (bu <= du) {
+    function buyQuote(uint256 pool, uint256 ones, uint256 units) public pure returns (uint256 myOnes) {
+        if (pool <= units) {
             revert InsufficientLiquidity();
         }
-        uint256 k = bu * poolBalance;
-        uint256 nu = bu - du;
+        uint256 k = pool * ones;
+        uint256 nu = pool - units;
         uint256 n1 = k / nu;
-        d1 = poolBalance - n1;
+        myOnes = ones - n1;
     }
 
-    function sellQuote(uint256 bu, uint256 poolBalance, uint256 du) public pure returns (uint256 d1) {
-        uint256 k = bu * poolBalance;
-        uint256 nu = bu + du;
+    function sellQuote(uint256 pool, uint256 ones, uint256 units) public pure returns (uint256 myOnes) {
+        uint256 k = pool * ones;
+        uint256 nu = pool + units;
         uint256 n1 = k / nu;
-        d1 = n1 - poolBalance;
+        myOnes = n1 - ones;
     }
 
-    function buyQuote(uint256 du) public view returns (uint256 bu, uint256 poolBalance, uint256 d1) {
-        (bu, poolBalance) = balances();
-        d1 = buyQuote(bu, poolBalance, du);
+    function buyQuote(uint256 units) public view returns (uint256 pool, uint256 ones, uint256 myOnes) {
+        (pool, ones) = balances();
+        myOnes = buyQuote(pool, ones, units);
     }
 
-    function buyWithQuote(uint256 d1) public view returns (uint256 bu, uint256 poolBalance, uint256 du) {
-        (bu, poolBalance) = balances();
-        du = sellQuote(poolBalance, bu, d1);
+    function buyWithQuote(uint256 myOnes) public view returns (uint256 pool, uint256 ones, uint256 units) {
+        (pool, ones) = balances();
+        units = sellQuote(ones, pool, myOnes);
     }
 
-    function buy(uint256 du) external returns (uint256 bu, uint256 poolBalance, uint256 d1) {
-        (bu, poolBalance, d1) = buyQuote(du);
-        buyTransfers(du, d1);
+    function buy(uint256 units) external returns (uint256 pool, uint256 ones, uint256 myOnes) {
+        (pool, ones, myOnes) = buyQuote(units);
+        buyTransfers(units, myOnes);
     }
 
-    function buyWith(uint256 d1) external returns (uint256 bu, uint256 poolBalance, uint256 du) {
-        (bu, poolBalance, du) = buyWithQuote(d1);
-        buyTransfers(du, d1);
+    function buyWith(uint256 myOnes) external returns (uint256 pool, uint256 ones, uint256 units) {
+        (pool, ones, units) = buyWithQuote(myOnes);
+        buyTransfers(units, myOnes);
     }
 
-    function sellQuote(uint256 du) public view returns (uint256 bu, uint256 poolBalance, uint256 d1) {
-        (bu, poolBalance) = balances();
-        d1 = sellQuote(bu, poolBalance, du);
+    function sellQuote(uint256 units) public view returns (uint256 pool, uint256 ones, uint256 myOnes) {
+        (pool, ones) = balances();
+        myOnes = sellQuote(pool, ones, units);
     }
 
-    function sellForQuote(uint256 d1) public view returns (uint256 bu, uint256 poolBalance, uint256 du) {
-        (bu, poolBalance) = balances();
-        d1 = buyQuote(poolBalance, bu, du);
+    function sellForQuote(uint256 myOnes) public view returns (uint256 pool, uint256 ones, uint256 units) {
+        (pool, ones) = balances();
+        myOnes = buyQuote(ones, pool, units);
     }
 
-    function sell(uint256 du) external returns (uint256 bu, uint256 poolBalance, uint256 d1) {
-        (bu, poolBalance, d1) = sellQuote(du);
-        sellTransfers(du, d1);
+    function sell(uint256 units) external returns (uint256 pool, uint256 ones, uint256 myOnes) {
+        (pool, ones, myOnes) = sellQuote(units);
+        sellTransfers(units, myOnes);
     }
 
-    function sellFor(uint256 d1) external returns (uint256 bu, uint256 poolBalance, uint256 du) {
-        (bu, poolBalance, du) = sellForQuote(d1);
-        sellTransfers(du, d1);
+    function sellFor(uint256 myOnes) external returns (uint256 pool, uint256 ones, uint256 units) {
+        (pool, ones, units) = sellForQuote(myOnes);
+        sellTransfers(units, myOnes);
     }
 
-    function buyTransfers(uint256 du, uint256 d1) private {
+    function buyTransfers(uint256 units, uint256 myOnes) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
-        IERC20(ONE).transfer(address(this), d1);
-        _transfer(address(this), msg.sender, du);
+        IERC20(ONE).transfer(address(this), myOnes);
+        _transfer(address(this), msg.sender, units);
     }
 
-    function sellTransfers(uint256 du, uint256 d1) private {
+    function sellTransfers(uint256 units, uint256 myOnes) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
-        IERC20(ONE).transferFrom(address(this), msg.sender, d1);
-        _transfer(msg.sender, address(this), du);
+        IERC20(ONE).transferFrom(address(this), msg.sender, myOnes);
+        _transfer(msg.sender, address(this), units);
     }
 
     function name() public view virtual override returns (string memory) {
