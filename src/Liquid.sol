@@ -8,7 +8,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 
-contract Pool is ERC20, ReentrancyGuardTransient {
+contract Liquid is ERC20, ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
     uint256 constant MAX_SUPPLY = 1e9 ether;
@@ -17,7 +17,7 @@ contract Pool is ERC20, ReentrancyGuardTransient {
     string public constant NAME_SUFFIX = " per 1";
     string public constant SYMBOL_SUFFIX = "/1";
 
-    Pool public immutable ONE = this;
+    Liquid public immutable ONE = this;
     address public immutable ISSUER = 0xEbCaD83FeAD16e7D18DD691fFD2b39eca56677d8;
 
     IERC20Metadata public asset = IERC20Metadata(address(0xdeadbeef));
@@ -141,7 +141,7 @@ contract Pool is ERC20, ReentrancyGuardTransient {
 
             if (instance.code.length == 0) {
                 instance = Clones.cloneDeterministic(address(ONE), newSalt);
-                Pool(instance).__initialize(underlying_);
+                Liquid(instance).__initialize(underlying_);
                 emit Cloned(instance, underlying_);
             }
         } else {
@@ -159,10 +159,10 @@ contract Pool is ERC20, ReentrancyGuardTransient {
         _mint(ISSUER, MAX_SUPPLY);
     }
 
-    event Minted(address indexed minter, Pool indexed token, uint256 units);
-    event Burned(address indexed burner, Pool indexed token, uint256 units, uint256 ash);
-    event Bought(address indexed buyer, Pool indexed token, uint256 units, uint256 ones);
-    event Sold(address indexed seller, Pool indexed token, uint256 units, uint256 ones);
+    event Minted(address indexed minter, Liquid indexed token, uint256 units);
+    event Burned(address indexed burner, Liquid indexed token, uint256 units, uint256 ash);
+    event Bought(address indexed buyer, Liquid indexed token, uint256 units, uint256 ones);
+    event Sold(address indexed seller, Liquid indexed token, uint256 units, uint256 ones);
     event Cloned(address indexed clone, IERC20Metadata indexed asset);
 
     error UnderlyingNull();

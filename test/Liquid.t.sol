@@ -2,20 +2,20 @@
 
 pragma solidity ^0.8.30;
 
-import {Pool} from "../src/Pool.sol";
+import {Liquid} from "../src/Liquid.sol";
 import {BaseTest, console} from "./Base.t.sol";
 import {TestToken} from "./TestToken.sol";
-import {PoolUser} from "./PoolUser.sol";
+import {LiquidUser} from "./LiquidUser.sol";
 
-contract PoolTest is BaseTest {
-    Pool one = new Pool();
-    Pool public U;
-    Pool public V;
+contract LiquidTest is BaseTest {
+    Liquid one = new Liquid();
+    Liquid public U;
+    Liquid public V;
     TestToken public u_;
     TestToken public v_;
-    PoolUser public owen;
-    PoolUser public alex;
-    PoolUser public beck;
+    LiquidUser public owen;
+    LiquidUser public alex;
+    LiquidUser public beck;
 
     function setUp() public virtual override {
         super.setUp();
@@ -25,8 +25,8 @@ contract PoolTest is BaseTest {
         beck = newUser("beck");
         u_ = owen.newToken("U", 1e9);
         v_ = owen.newToken("V", 1e9);
-        U = Pool(one.clone(u_));
-        V = Pool(one.clone(v_));
+        U = Liquid(one.clone(u_));
+        V = Liquid(one.clone(v_));
 
         address issuer = one.ISSUER();
         console.log("issuer:", issuer);
@@ -37,8 +37,8 @@ contract PoolTest is BaseTest {
         one.transfer(address(owen), totalOne);
     }
 
-    function newUser(string memory name) internal returns (PoolUser u) {
-        u = new PoolUser(name, one);
+    function newUser(string memory name) internal returns (LiquidUser u) {
+        u = new LiquidUser(name, one);
     }
 
     function test_Pool() public returns (uint256 du, uint256 out) {
