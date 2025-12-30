@@ -11,7 +11,7 @@ import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/Reentrancy
 contract Liquid is ERC20, ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
-    uint256 constant MAX_SUPPLY = 1e9 ether;
+    uint256 constant ONE_SUPPLY = 1e9 ether;
     string public constant ONE_NAME = "Uniteum 1";
     string public constant ONE_SYMBOL = "1";
     string public constant NAME_SUFFIX = " per 1";
@@ -156,7 +156,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     constructor() ERC20("", "") {
-        _mint(ISSUER, MAX_SUPPLY);
+        _mint(ISSUER, ONE_SUPPLY);
     }
 
     event Minted(address indexed minter, Liquid indexed token, uint256 units);
