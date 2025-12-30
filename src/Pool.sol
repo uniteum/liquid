@@ -20,10 +20,10 @@ contract Pool is ERC20, ReentrancyGuardTransient {
     Pool public immutable ONE = this;
     address public immutable ISSUER = 0xEbCaD83FeAD16e7D18DD691fFD2b39eca56677d8;
 
-    IERC20Metadata public underlying = IERC20Metadata(address(0xdeadbeef));
+    IERC20Metadata public asset = IERC20Metadata(address(0xdeadbeef));
 
     function mint(uint256 units) external nonReentrant {
-        IERC20(underlying).safeTransferFrom(msg.sender, address(this), units);
+        IERC20(asset).safeTransferFrom(msg.sender, address(this), units);
         _mint(address(this), units);
         _mint(msg.sender, units);
         emit Minted(msg.sender, this, units);
@@ -35,10 +35,10 @@ contract Pool is ERC20, ReentrancyGuardTransient {
         uint256 dry = total - wet;
         uint256 myWet = 2 * units * wet / total;
         uint256 myDry = 2 * units * dry / total;
-        ash = units * underlying.balanceOf(address(this)) / dry;
+        ash = units * asset.balanceOf(address(this)) / dry;
         _burn(address(this), myWet);
         _burn(msg.sender, myDry);
-        IERC20(underlying).safeTransfer(msg.sender, ash);
+        IERC20(asset).safeTransfer(msg.sender, ash);
         emit Burned(msg.sender, this, units, ash);
     }
 
@@ -119,11 +119,11 @@ contract Pool is ERC20, ReentrancyGuardTransient {
     }
 
     function name() public view virtual override returns (string memory) {
-        return this == ONE ? ONE_NAME : string.concat(underlying.name(), NAME_SUFFIX);
+        return this == ONE ? ONE_NAME : string.concat(asset.name(), NAME_SUFFIX);
     }
 
     function symbol() public view virtual override returns (string memory) {
-        return this == ONE ? ONE_SYMBOL : string.concat(underlying.symbol(), SYMBOL_SUFFIX);
+        return this == ONE ? ONE_SYMBOL : string.concat(asset.symbol(), SYMBOL_SUFFIX);
     }
 
     function predict(IERC20Metadata underlying_) public view returns (address predicted, bytes32 newSalt) {
@@ -150,8 +150,8 @@ contract Pool is ERC20, ReentrancyGuardTransient {
     }
 
     function __initialize(IERC20Metadata underlying_) public {
-        if (address(underlying) == address(0)) {
-            underlying = underlying_;
+        if (address(asset) == address(0)) {
+            asset = underlying_;
         }
     }
 
@@ -163,7 +163,7 @@ contract Pool is ERC20, ReentrancyGuardTransient {
     event Burned(address indexed burner, Pool indexed token, uint256 units, uint256 ash);
     event Bought(address indexed buyer, Pool indexed token, uint256 units, uint256 ones);
     event Sold(address indexed seller, Pool indexed token, uint256 units, uint256 ones);
-    event Cloned(address indexed clone, IERC20Metadata indexed underlying);
+    event Cloned(address indexed clone, IERC20Metadata indexed asset);
 
     error UnderlyingNull();
     error InsufficientLiquidity();

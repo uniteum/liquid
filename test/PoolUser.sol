@@ -19,7 +19,7 @@ contract PoolUser is User {
     function mint(Pool U, uint256 du) public {
         console.log("%s.mint", name, U.symbol());
         console.log("du:", du);
-        U.underlying().approve(address(U), du);
+        U.asset().approve(address(U), du);
         U.mint(du);
         logBalances();
     }
