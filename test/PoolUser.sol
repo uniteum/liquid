@@ -38,10 +38,10 @@ contract PoolUser is User {
     }
 
     function rndUnits(Pool U) public returns (int256 units) {
-        int256 xmin = -int256(U.balanceOf(address(this)));
+        int256 min = -int256(U.balanceOf(address(this)));
         // forge-lint: disable-next-line(unsafe-typecast)
-        int256 xmax = int256(ONE.balanceOf(address(this)));
-        units = rnd(xmin, xmax);
+        int256 max = int256(ONE.balanceOf(address(this)));
+        units = rnd(min, max);
     }
 
     function rndForge(Pool U) public returns (int256 units) {
