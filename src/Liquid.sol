@@ -50,16 +50,16 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
             revert Thirsty(pool, liquids);
         }
         uint256 area = pool * lake;
-        uint256 newWet = pool - liquids;
-        uint256 newOnes = area / newWet;
-        water = lake - newOnes;
+        uint256 drained = pool - liquids;
+        uint256 filled = area / drained;
+        water = lake - filled;
     }
 
     function sellQuote(uint256 liquids, uint256 pool, uint256 lake) public pure returns (uint256 water) {
         uint256 area = pool * lake;
-        uint256 newWet = pool + liquids;
-        uint256 newOnes = area / newWet;
-        water = newOnes - lake;
+        uint256 filled = pool + liquids;
+        uint256 drained = area / filled;
+        water = drained - lake;
     }
 
     function buyQuote(uint256 liquids) public view returns (uint256 water) {
