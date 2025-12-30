@@ -27,17 +27,17 @@ contract Pool is ERC20, ReentrancyGuardTransient {
         emit Minted(msg.sender, this, units);
     }
 
-    function burn(uint256 units) external nonReentrant returns (uint256 released) {
+    function burn(uint256 units) external nonReentrant returns (uint256 ash) {
         uint256 total = totalSupply();
         uint256 wet = balanceOf(address(this));
         uint256 dry = total - wet;
         uint256 myWet = 2 * units * wet / total;
         uint256 myDry = 2 * units * dry / total;
-        released = units * underlying.balanceOf(address(this)) / dry;
+        ash = units * underlying.balanceOf(address(this)) / dry;
         _burn(address(this), myWet);
         _burn(msg.sender, myDry);
-        IERC20(underlying).safeTransfer(msg.sender, released);
-        emit Burned(msg.sender, this, units, released);
+        IERC20(underlying).safeTransfer(msg.sender, ash);
+        emit Burned(msg.sender, this, units, ash);
     }
 
     function balances() public view returns (uint256 wet, uint256 ones) {
@@ -158,7 +158,7 @@ contract Pool is ERC20, ReentrancyGuardTransient {
     }
 
     event Minted(address indexed minter, Pool indexed token, uint256 units);
-    event Burned(address indexed burner, Pool indexed token, uint256 units, uint256 released);
+    event Burned(address indexed burner, Pool indexed token, uint256 units, uint256 ash);
     event Bought(address indexed buyer, Pool indexed token, uint256 units, uint256 ones);
     event Sold(address indexed seller, Pool indexed token, uint256 units, uint256 ones);
     event Cloned(address indexed clone, IERC20Metadata indexed underlying);
