@@ -126,25 +126,25 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         return this == ONE ? ONE_SYMBOL : string.concat(substance.symbol(), SYMBOL_SUFFIX);
     }
 
-    function predict(IERC20Metadata stuff) public view returns (address predicted, bytes32 salt) {
+    function predict(IERC20Metadata stuff) public view returns (address future, bytes32 salt) {
         if (address(stuff) == address(0)) {
             revert Nothing();
         }
         salt = bytes32(uint256(uint160(address(stuff))));
-        predicted = Clones.predictDeterministicAddress(address(ONE), salt, address(ONE));
+        future = Clones.predictDeterministicAddress(address(ONE), salt, address(ONE));
     }
 
     function clone(IERC20Metadata stuff) public returns (Liquid liquid) {
         if (this == ONE) {
             bytes32 salt;
-            address instance;
-            (instance, salt) = predict(stuff);
-            liquid = Liquid(instance);
+            address future;
+            (future, salt) = predict(stuff);
+            liquid = Liquid(future);
 
-            if (instance.code.length == 0) {
-                instance = Clones.cloneDeterministic(address(ONE), salt);
-                Liquid(instance).__initialize(stuff);
-                emit Cloned(instance, stuff);
+            if (future.code.length == 0) {
+                future = Clones.cloneDeterministic(address(ONE), salt);
+                Liquid(future).__initialize(stuff);
+                emit Cloned(future, stuff);
             }
         } else {
             liquid = ONE.clone(stuff);
