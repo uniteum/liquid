@@ -76,12 +76,12 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function buy(uint256 units) external returns (uint256 wet, uint256 ones, uint256 my1) {
         (wet, ones, my1) = buyQuote(units);
-        buyTransfers(units, my1);
+        bought(units, my1);
     }
 
     function buyWith(uint256 my1) external returns (uint256 wet, uint256 ones, uint256 units) {
         (wet, ones, units) = buyWithQuote(my1);
-        buyTransfers(units, my1);
+        bought(units, my1);
     }
 
     function sellQuote(uint256 units) public view returns (uint256 wet, uint256 ones, uint256 my1) {
@@ -96,22 +96,22 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function sell(uint256 units) external returns (uint256 wet, uint256 ones, uint256 my1) {
         (wet, ones, my1) = sellQuote(units);
-        sellTransfers(units, my1);
+        sold(units, my1);
     }
 
     function sellFor(uint256 my1) external returns (uint256 wet, uint256 ones, uint256 units) {
         (wet, ones, units) = sellForQuote(my1);
-        sellTransfers(units, my1);
+        sold(units, my1);
     }
 
-    function buyTransfers(uint256 units, uint256 my1) private {
+    function bought(uint256 units, uint256 my1) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(ONE).transfer(address(this), my1);
         _transfer(address(this), msg.sender, units);
         emit Bought(msg.sender, this, units, my1);
     }
 
-    function sellTransfers(uint256 units, uint256 my1) private {
+    function sold(uint256 units, uint256 my1) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(ONE).transferFrom(address(this), msg.sender, my1);
         _transfer(msg.sender, address(this), units);
