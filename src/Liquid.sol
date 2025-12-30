@@ -24,7 +24,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         solid.safeTransferFrom(msg.sender, address(this), solids);
         _mint(address(this), solids);
         _mint(msg.sender, solids);
-        emit Melted(msg.sender, this, solids);
+        emit Melted(this, solids);
     }
 
     function freeze(uint256 liquids) external nonReentrant returns (uint256 solids) {
@@ -37,7 +37,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _burn(address(this), ours);
         _burn(msg.sender, mine);
         solid.safeTransfer(msg.sender, solids);
-        emit Frozen(msg.sender, this, liquids, solids);
+        emit Frozen(this, liquids, solids);
     }
 
     function balances() public view returns (uint256 pool, uint256 lake) {
@@ -47,7 +47,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function buyQuote(uint256 pool, uint256 lake, uint256 liquids) public pure returns (uint256 water) {
         if (pool <= liquids) {
-            revert Thirst();
+            revert Thirsty(pool, liquids);
         }
         uint256 area = pool * lake;
         uint256 newWet = pool - liquids;
@@ -106,14 +106,14 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(WATER).transfer(address(this), water);
         _transfer(address(this), msg.sender, liquids);
-        emit Bought(msg.sender, this, liquids, water);
+        emit Bought(this, liquids, water);
     }
 
     function sold(uint256 liquids, uint256 water) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(WATER).transferFrom(address(this), msg.sender, water);
         _transfer(msg.sender, address(this), liquids);
-        emit Sold(msg.sender, this, liquids, water);
+        emit Sold(this, liquids, water);
     }
 
     function name() public view virtual override returns (string memory) {
@@ -159,12 +159,12 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _mint(GOD, WATER_SUPPLY);
     }
 
-    event Melted(address indexed minter, Liquid indexed liquid, uint256 liquids);
-    event Frozen(address indexed burner, Liquid indexed liquid, uint256 liquids, uint256 solids);
-    event Bought(address indexed buyer, Liquid indexed liquid, uint256 liquids, uint256 water);
-    event Sold(address indexed seller, Liquid indexed liquid, uint256 liquids, uint256 water);
+    event Melted(Liquid indexed liquid, uint256 liquids);
+    event Frozen(Liquid indexed liquid, uint256 liquids, uint256 solids);
+    event Bought(Liquid indexed liquid, uint256 liquids, uint256 water);
+    event Sold(Liquid indexed liquid, uint256 liquids, uint256 water);
     event Made(IERC20Metadata indexed solid, Liquid indexed liquid);
 
     error Nothing();
-    error Thirst();
+    error Thirsty(uint256 pool, uint256 liquids);
 }
