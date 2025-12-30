@@ -12,15 +12,13 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     using SafeERC20 for IERC20Metadata;
 
     uint256 public constant ONE_TOTAL = 1e9 ether;
-    string public constant ONE_NAME = "Liquid 1";
-    string public constant ONE_SYMBOL = "1";
-    string public constant NAME_SUFFIX = " per 1";
-    string public constant SYMBOL_SUFFIX = "/1";
+    string public constant ONE_NAME = "Watar";
+    string public constant ONE_SYMBOL = "WATAR";
 
     Liquid public immutable ONE = this;
     address public immutable GOD = 0xEbCaD83FeAD16e7D18DD691fFD2b39eca56677d8;
 
-    IERC20Metadata public substance = IERC20Metadata(address(0xdeadbeef));
+    IERC20Metadata public substance = IERC20Metadata(address(0xdead));
 
     function mint(uint256 units) external nonReentrant {
         substance.safeTransferFrom(msg.sender, address(this), units);
@@ -119,11 +117,11 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function name() public view virtual override returns (string memory) {
-        return this == ONE ? ONE_NAME : string.concat(substance.name(), NAME_SUFFIX);
+        return this == ONE ? ONE_NAME : substance.name();
     }
 
     function symbol() public view virtual override returns (string memory) {
-        return this == ONE ? ONE_SYMBOL : string.concat(substance.symbol(), SYMBOL_SUFFIX);
+        return this == ONE ? ONE_SYMBOL : substance.symbol();
     }
 
     function predict(IERC20Metadata stuff) public view returns (address future, bytes32 salt) {
