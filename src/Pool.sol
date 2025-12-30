@@ -13,8 +13,6 @@ contract Pool is ERC20, ReentrancyGuardTransient {
 
     uint256 constant MAX_SUPPLY = 1e9 ether;
 
-    address constant ISSUER = 0xEbCaD83FeAD16e7D18DD691fFD2b39eca56677d8;
-
     string public constant ONE_NAME = "Uniteum 1";
 
     string public constant ONE_SYMBOL = "1";
@@ -24,6 +22,8 @@ contract Pool is ERC20, ReentrancyGuardTransient {
     string public constant SYMBOL_SUFFIX = "/1";
 
     Pool public immutable ONE = this;
+
+    address public immutable ISSUER = 0xEbCaD83FeAD16e7D18DD691fFD2b39eca56677d8;
 
     IERC20Metadata public underlying = IERC20Metadata(address(0xdeadbeef));
 
