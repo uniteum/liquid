@@ -11,11 +11,11 @@ import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/Reentrancy
 contract Liquid is ERC20, ReentrancyGuardTransient {
     using SafeERC20 for IERC20Metadata;
 
-    uint256 public constant ONE_TOTAL = 1e9 ether;
-    string public constant ONE_NAME = "Watar";
-    string public constant ONE_SYMBOL = "WATAR";
+    uint256 public constant WATER_SUPPLY = 1e9 ether;
+    string public constant WATER_NAME = "Watar";
+    string public constant WATER_SYMBOL = "WATAR";
 
-    Liquid public immutable ONE = this;
+    Liquid public immutable WATER = this;
     address public immutable GOD = 0xEbCaD83FeAD16e7D18DD691fFD2b39eca56677d8;
 
     IERC20Metadata public solid = IERC20Metadata(address(0xdead));
@@ -31,10 +31,10 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         uint256 total = totalSupply();
         uint256 pool = balanceOf(address(this));
         uint256 held = total - pool;
-        uint256 our = 2 * liquids * pool / total;
+        uint256 ours = 2 * liquids * pool / total;
         uint256 mine = 2 * liquids * held / total;
         solids = liquids * solid.balanceOf(address(this)) / held;
-        _burn(address(this), our);
+        _burn(address(this), ours);
         _burn(msg.sender, mine);
         solid.safeTransfer(msg.sender, solids);
         emit Frozen(msg.sender, this, liquids, solids);
@@ -42,7 +42,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function balances() public view returns (uint256 pool, uint256 lake) {
         pool = balanceOf(address(this));
-        lake = ONE.balanceOf(address(this));
+        lake = WATER.balanceOf(address(this));
     }
 
     function buyQuote(uint256 pool, uint256 lake, uint256 liquids) public pure returns (uint256 water) {
@@ -104,24 +104,24 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function bought(uint256 liquids, uint256 water) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
-        IERC20(ONE).transfer(address(this), water);
+        IERC20(WATER).transfer(address(this), water);
         _transfer(address(this), msg.sender, liquids);
         emit Bought(msg.sender, this, liquids, water);
     }
 
     function sold(uint256 liquids, uint256 water) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
-        IERC20(ONE).transferFrom(address(this), msg.sender, water);
+        IERC20(WATER).transferFrom(address(this), msg.sender, water);
         _transfer(msg.sender, address(this), liquids);
         emit Sold(msg.sender, this, liquids, water);
     }
 
     function name() public view virtual override returns (string memory) {
-        return this == ONE ? ONE_NAME : solid.name();
+        return this == WATER ? WATER_NAME : solid.name();
     }
 
     function symbol() public view virtual override returns (string memory) {
-        return this == ONE ? ONE_SYMBOL : solid.symbol();
+        return this == WATER ? WATER_SYMBOL : solid.symbol();
     }
 
     function predict(IERC20Metadata stuff) public view returns (address future, bytes32 salt) {
@@ -129,23 +129,23 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
             revert Nothing();
         }
         salt = bytes32(uint256(uint160(address(stuff))));
-        future = Clones.predictDeterministicAddress(address(ONE), salt, address(ONE));
+        future = Clones.predictDeterministicAddress(address(WATER), salt, address(WATER));
     }
 
     function make(IERC20Metadata stuff) public returns (Liquid liquid) {
-        if (this == ONE) {
+        if (this == WATER) {
             bytes32 salt;
             address future;
             (future, salt) = predict(stuff);
             liquid = Liquid(future);
 
             if (future.code.length == 0) {
-                future = Clones.cloneDeterministic(address(ONE), salt);
+                future = Clones.cloneDeterministic(address(WATER), salt);
                 liquid.__initialize(stuff);
                 emit Made(liquid, stuff);
             }
         } else {
-            liquid = ONE.make(stuff);
+            liquid = WATER.make(stuff);
         }
     }
 
@@ -156,7 +156,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     constructor() ERC20("", "") {
-        _mint(GOD, ONE_TOTAL);
+        _mint(GOD, WATER_SUPPLY);
     }
 
     event Melted(address indexed minter, Liquid indexed liquid, uint256 liquids);
