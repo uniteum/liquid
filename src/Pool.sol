@@ -29,76 +29,76 @@ contract Pool is ERC20, ReentrancyGuardTransient {
 
     function burn(uint256 units) external nonReentrant returns (uint256 released) {
         uint256 total = totalSupply();
-        uint256 pool = balanceOf(address(this));
-        uint256 dry = total - pool;
-        uint256 myPool = 2 * units * pool / total;
+        uint256 wet = balanceOf(address(this));
+        uint256 dry = total - wet;
+        uint256 myWet = 2 * units * wet / total;
         uint256 myDry = 2 * units * dry / total;
         released = units * underlying.balanceOf(address(this)) / dry;
-        _burn(address(this), myPool);
+        _burn(address(this), myWet);
         _burn(msg.sender, myDry);
         IERC20(underlying).safeTransfer(msg.sender, released);
         emit Burned(msg.sender, this, units, released);
     }
 
-    function balances() public view returns (uint256 pool, uint256 ones) {
-        pool = balanceOf(address(this));
+    function balances() public view returns (uint256 wet, uint256 ones) {
+        wet = balanceOf(address(this));
         ones = ONE.balanceOf(address(this));
     }
 
-    function buyQuote(uint256 pool, uint256 ones, uint256 units) public pure returns (uint256 myOnes) {
-        if (pool <= units) {
+    function buyQuote(uint256 wet, uint256 ones, uint256 units) public pure returns (uint256 myOnes) {
+        if (wet <= units) {
             revert InsufficientLiquidity();
         }
-        uint256 k = pool * ones;
-        uint256 newPool = pool - units;
+        uint256 k = wet * ones;
+        uint256 newPool = wet - units;
         uint256 newOnes = k / newPool;
         myOnes = ones - newOnes;
     }
 
-    function sellQuote(uint256 pool, uint256 ones, uint256 units) public pure returns (uint256 myOnes) {
-        uint256 k = pool * ones;
-        uint256 newPool = pool + units;
+    function sellQuote(uint256 wet, uint256 ones, uint256 units) public pure returns (uint256 myOnes) {
+        uint256 k = wet * ones;
+        uint256 newPool = wet + units;
         uint256 newOnes = k / newPool;
         myOnes = newOnes - ones;
     }
 
-    function buyQuote(uint256 units) public view returns (uint256 pool, uint256 ones, uint256 myOnes) {
-        (pool, ones) = balances();
-        myOnes = buyQuote(pool, ones, units);
+    function buyQuote(uint256 units) public view returns (uint256 wet, uint256 ones, uint256 myOnes) {
+        (wet, ones) = balances();
+        myOnes = buyQuote(wet, ones, units);
     }
 
-    function buyWithQuote(uint256 myOnes) public view returns (uint256 pool, uint256 ones, uint256 units) {
-        (pool, ones) = balances();
-        units = sellQuote(ones, pool, myOnes);
+    function buyWithQuote(uint256 myOnes) public view returns (uint256 wet, uint256 ones, uint256 units) {
+        (wet, ones) = balances();
+        units = sellQuote(ones, wet, myOnes);
     }
 
-    function buy(uint256 units) external returns (uint256 pool, uint256 ones, uint256 myOnes) {
-        (pool, ones, myOnes) = buyQuote(units);
+    function buy(uint256 units) external returns (uint256 wet, uint256 ones, uint256 myOnes) {
+        (wet, ones, myOnes) = buyQuote(units);
         buyTransfers(units, myOnes);
     }
 
-    function buyWith(uint256 myOnes) external returns (uint256 pool, uint256 ones, uint256 units) {
-        (pool, ones, units) = buyWithQuote(myOnes);
+    function buyWith(uint256 myOnes) external returns (uint256 wet, uint256 ones, uint256 units) {
+        (wet, ones, units) = buyWithQuote(myOnes);
         buyTransfers(units, myOnes);
     }
 
-    function sellQuote(uint256 units) public view returns (uint256 pool, uint256 ones, uint256 myOnes) {
-        (pool, ones) = balances();
-        myOnes = sellQuote(pool, ones, units);
+    function sellQuote(uint256 units) public view returns (uint256 wet, uint256 ones, uint256 myOnes) {
+        (wet, ones) = balances();
+        myOnes = sellQuote(wet, ones, units);
     }
 
-    function sellForQuote(uint256 myOnes) public view returns (uint256 pool, uint256 ones, uint256 units) {
-        (pool, ones) = balances();
-        myOnes = buyQuote(ones, pool, units);
+    function sellForQuote(uint256 myOnes) public view returns (uint256 wet, uint256 ones, uint256 units) {
+        (wet, ones) = balances();
+        myOnes = buyQuote(ones, wet, units);
     }
 
-    function sell(uint256 units) external returns (uint256 pool, uint256 ones, uint256 myOnes) {
-        (pool, ones, myOnes) = sellQuote(units);
+    function sell(uint256 units) external returns (uint256 wet, uint256 ones, uint256 myOnes) {
+        (wet, ones, myOnes) = sellQuote(units);
         sellTransfers(units, myOnes);
     }
 
-    function sellFor(uint256 myOnes) external returns (uint256 pool, uint256 ones, uint256 units) {
-        (pool, ones, units) = sellForQuote(myOnes);
+    function sellFor(uint256 myOnes) external returns (uint256 wet, uint256 ones, uint256 units) {
+        (wet, ones, units) = sellForQuote(myOnes);
         sellTransfers(units, myOnes);
     }
 
