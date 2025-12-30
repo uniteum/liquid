@@ -20,24 +20,24 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     IERC20Metadata public solid = IERC20Metadata(address(0xdead));
 
-    function melt(uint256 units) external nonReentrant {
-        solid.safeTransferFrom(msg.sender, address(this), units);
-        _mint(address(this), units);
-        _mint(msg.sender, units);
-        emit Minted(msg.sender, this, units);
+    function melt(uint256 solids) external nonReentrant {
+        solid.safeTransferFrom(msg.sender, address(this), solids);
+        _mint(address(this), solids);
+        _mint(msg.sender, solids);
+        emit Minted(msg.sender, this, solids);
     }
 
-    function freeze(uint256 units) external nonReentrant returns (uint256 solids) {
+    function freeze(uint256 liquids) external nonReentrant returns (uint256 solids) {
         uint256 total = totalSupply();
         uint256 wet = balanceOf(address(this));
         uint256 dry = total - wet;
-        uint256 myWet = 2 * units * wet / total;
-        uint256 myDry = 2 * units * dry / total;
-        solids = units * solid.balanceOf(address(this)) / dry;
+        uint256 myWet = 2 * liquids * wet / total;
+        uint256 myDry = 2 * liquids * dry / total;
+        solids = liquids * solid.balanceOf(address(this)) / dry;
         _burn(address(this), myWet);
         _burn(msg.sender, myDry);
         solid.safeTransfer(msg.sender, solids);
-        emit Burned(msg.sender, this, units, solids);
+        emit Burned(msg.sender, this, liquids, solids);
     }
 
     function balances() public view returns (uint256 wet, uint256 ones) {
@@ -45,75 +45,75 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         ones = ONE.balanceOf(address(this));
     }
 
-    function buyQuote(uint256 wet, uint256 ones, uint256 units) public pure returns (uint256 cost) {
-        if (wet <= units) {
+    function buyQuote(uint256 wet, uint256 ones, uint256 liquids) public pure returns (uint256 cost) {
+        if (wet <= liquids) {
             revert Thirst();
         }
         uint256 area = wet * ones;
-        uint256 newWet = wet - units;
+        uint256 newWet = wet - liquids;
         uint256 newOnes = area / newWet;
         cost = ones - newOnes;
     }
 
-    function sellQuote(uint256 wet, uint256 ones, uint256 units) public pure returns (uint256 cost) {
+    function sellQuote(uint256 wet, uint256 ones, uint256 liquids) public pure returns (uint256 cost) {
         uint256 area = wet * ones;
-        uint256 newWet = wet + units;
+        uint256 newWet = wet + liquids;
         uint256 newOnes = area / newWet;
         cost = newOnes - ones;
     }
 
-    function buyQuote(uint256 units) public view returns (uint256 wet, uint256 ones, uint256 cost) {
+    function buyQuote(uint256 liquids) public view returns (uint256 wet, uint256 ones, uint256 cost) {
         (wet, ones) = balances();
-        cost = buyQuote(wet, ones, units);
+        cost = buyQuote(wet, ones, liquids);
     }
 
-    function buyWithQuote(uint256 cost) public view returns (uint256 wet, uint256 ones, uint256 units) {
+    function buyWithQuote(uint256 cost) public view returns (uint256 wet, uint256 ones, uint256 liquids) {
         (wet, ones) = balances();
-        units = sellQuote(ones, wet, cost);
+        liquids = sellQuote(ones, wet, cost);
     }
 
-    function buy(uint256 units) external returns (uint256 wet, uint256 ones, uint256 cost) {
-        (wet, ones, cost) = buyQuote(units);
-        bought(units, cost);
+    function buy(uint256 liquids) external returns (uint256 wet, uint256 ones, uint256 cost) {
+        (wet, ones, cost) = buyQuote(liquids);
+        bought(liquids, cost);
     }
 
-    function buyWith(uint256 cost) external returns (uint256 wet, uint256 ones, uint256 units) {
-        (wet, ones, units) = buyWithQuote(cost);
-        bought(units, cost);
+    function buyWith(uint256 cost) external returns (uint256 wet, uint256 ones, uint256 liquids) {
+        (wet, ones, liquids) = buyWithQuote(cost);
+        bought(liquids, cost);
     }
 
-    function sellQuote(uint256 units) public view returns (uint256 wet, uint256 ones, uint256 cost) {
+    function sellQuote(uint256 liquids) public view returns (uint256 wet, uint256 ones, uint256 cost) {
         (wet, ones) = balances();
-        cost = sellQuote(wet, ones, units);
+        cost = sellQuote(wet, ones, liquids);
     }
 
-    function sellForQuote(uint256 cost) public view returns (uint256 wet, uint256 ones, uint256 units) {
+    function sellForQuote(uint256 cost) public view returns (uint256 wet, uint256 ones, uint256 liquids) {
         (wet, ones) = balances();
-        cost = buyQuote(ones, wet, units);
+        cost = buyQuote(ones, wet, liquids);
     }
 
-    function sell(uint256 units) external returns (uint256 wet, uint256 ones, uint256 cost) {
-        (wet, ones, cost) = sellQuote(units);
-        sold(units, cost);
+    function sell(uint256 liquids) external returns (uint256 wet, uint256 ones, uint256 cost) {
+        (wet, ones, cost) = sellQuote(liquids);
+        sold(liquids, cost);
     }
 
-    function sellFor(uint256 cost) external returns (uint256 wet, uint256 ones, uint256 units) {
-        (wet, ones, units) = sellForQuote(cost);
-        sold(units, cost);
+    function sellFor(uint256 cost) external returns (uint256 wet, uint256 ones, uint256 liquids) {
+        (wet, ones, liquids) = sellForQuote(cost);
+        sold(liquids, cost);
     }
 
-    function bought(uint256 units, uint256 cost) private {
+    function bought(uint256 liquids, uint256 cost) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(ONE).transfer(address(this), cost);
-        _transfer(address(this), msg.sender, units);
-        emit Bought(msg.sender, this, units, cost);
+        _transfer(address(this), msg.sender, liquids);
+        emit Bought(msg.sender, this, liquids, cost);
     }
 
-    function sold(uint256 units, uint256 cost) private {
+    function sold(uint256 liquids, uint256 cost) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(ONE).transferFrom(address(this), msg.sender, cost);
-        _transfer(msg.sender, address(this), units);
-        emit Sold(msg.sender, this, units, cost);
+        _transfer(msg.sender, address(this), liquids);
+        emit Sold(msg.sender, this, liquids, cost);
     }
 
     function name() public view virtual override returns (string memory) {
@@ -159,10 +159,10 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _mint(GOD, ONE_TOTAL);
     }
 
-    event Minted(address indexed minter, Liquid indexed liquid, uint256 units);
-    event Burned(address indexed burner, Liquid indexed liquid, uint256 units, uint256 solids);
-    event Bought(address indexed buyer, Liquid indexed liquid, uint256 units, uint256 cost);
-    event Sold(address indexed seller, Liquid indexed liquid, uint256 units, uint256 cost);
+    event Minted(address indexed minter, Liquid indexed liquid, uint256 liquids);
+    event Burned(address indexed burner, Liquid indexed liquid, uint256 liquids, uint256 solids);
+    event Bought(address indexed buyer, Liquid indexed liquid, uint256 liquids, uint256 cost);
+    event Sold(address indexed seller, Liquid indexed liquid, uint256 liquids, uint256 cost);
     event Made(Liquid indexed liquid, IERC20Metadata indexed solid);
 
     error Nothing();
