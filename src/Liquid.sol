@@ -49,7 +49,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function buyQuote(uint256 wet, uint256 ones, uint256 units) public pure returns (uint256 myOnes) {
         if (wet <= units) {
-            revert InsufficientLiquidity();
+            revert Thirst();
         }
         uint256 k = wet * ones;
         uint256 newPool = wet - units;
@@ -126,32 +126,32 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         return this == ONE ? ONE_SYMBOL : string.concat(substance.symbol(), SYMBOL_SUFFIX);
     }
 
-    function predict(IERC20Metadata underlying_) public view returns (address predicted, bytes32 newSalt) {
-        if (address(underlying_) == address(0)) {
-            revert UnderlyingNull();
+    function predict(IERC20Metadata stuff) public view returns (address predicted, bytes32 salt) {
+        if (address(stuff) == address(0)) {
+            revert Nothing();
         }
-        newSalt = bytes32(uint256(uint160(address(underlying_))));
-        predicted = Clones.predictDeterministicAddress(address(ONE), newSalt, address(ONE));
+        salt = bytes32(uint256(uint160(address(stuff))));
+        predicted = Clones.predictDeterministicAddress(address(ONE), salt, address(ONE));
     }
 
-    function clone(IERC20Metadata underlying_) public returns (address instance) {
+    function clone(IERC20Metadata stuff) public returns (address instance) {
         if (this == ONE) {
-            bytes32 newSalt;
-            (instance, newSalt) = predict(underlying_);
+            bytes32 salt;
+            (instance, salt) = predict(stuff);
 
             if (instance.code.length == 0) {
-                instance = Clones.cloneDeterministic(address(ONE), newSalt);
-                Liquid(instance).__initialize(underlying_);
-                emit Cloned(instance, underlying_);
+                instance = Clones.cloneDeterministic(address(ONE), salt);
+                Liquid(instance).__initialize(stuff);
+                emit Cloned(instance, stuff);
             }
         } else {
-            instance = ONE.clone(underlying_);
+            instance = ONE.clone(stuff);
         }
     }
 
-    function __initialize(IERC20Metadata underlying_) public {
+    function __initialize(IERC20Metadata stuff) public {
         if (address(substance) == address(0)) {
-            substance = underlying_;
+            substance = stuff;
         }
     }
 
@@ -165,6 +165,6 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     event Sold(address indexed seller, Liquid indexed token, uint256 units, uint256 ones);
     event Cloned(address indexed clone, IERC20Metadata indexed substance);
 
-    error UnderlyingNull();
-    error InsufficientLiquidity();
+    error Nothing();
+    error Thirst();
 }
