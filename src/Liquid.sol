@@ -12,6 +12,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     using SafeERC20 for IERC20Metadata;
 
     uint256 public constant WATER_SUPPLY = 1e9 ether;
+    uint8 public constant WATER_DECIMALS = 18;
     string public constant WATER_NAME = "Watar";
     string public constant WATER_SYMBOL = "WATAR";
 
@@ -135,6 +136,10 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function symbol() public view virtual override returns (string memory) {
         return this == WATER ? WATER_SYMBOL : solid.symbol();
+    }
+
+    function decimals() public view virtual override returns (uint8) {
+        return this == WATER ? WATER_DECIMALS : solid.decimals();
     }
 
     function predict(IERC20Metadata stuff) public view returns (address future, bytes32 salt) {
