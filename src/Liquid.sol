@@ -45,7 +45,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         lake = WATER.balanceOf(address(this));
     }
 
-    function buyQuote(uint256 pool, uint256 lake, uint256 liquids) public pure returns (uint256 water) {
+    function buyQuote(uint256 liquids, uint256 pool, uint256 lake) public pure returns (uint256 water) {
         if (pool <= liquids) {
             revert Thirsty(pool, liquids);
         }
@@ -55,7 +55,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         water = lake - newOnes;
     }
 
-    function sellQuote(uint256 pool, uint256 lake, uint256 liquids) public pure returns (uint256 water) {
+    function sellQuote(uint256 liquids, uint256 pool, uint256 lake) public pure returns (uint256 water) {
         uint256 area = pool * lake;
         uint256 newWet = pool + liquids;
         uint256 newOnes = area / newWet;
@@ -64,22 +64,22 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function buyQuote(uint256 liquids) public view returns (uint256 water) {
         (uint256 pool, uint256 lake) = balances();
-        water = buyQuote(pool, lake, liquids);
+        water = buyQuote(liquids, pool, lake);
     }
 
     function sellQuote(uint256 liquids) public view returns (uint256 water) {
         (uint256 pool, uint256 lake) = balances();
-        water = sellQuote(pool, lake, liquids);
+        water = sellQuote(liquids, pool, lake);
     }
 
     function buyWithQuote(uint256 water) public view returns (uint256 liquids) {
         (uint256 pool, uint256 lake) = balances();
-        liquids = sellQuote(lake, pool, water);
+        liquids = sellQuote(water, lake, pool);
     }
 
     function sellForQuote(uint256 water) public view returns (uint256 liquids) {
         (uint256 pool, uint256 lake) = balances();
-        water = buyQuote(lake, pool, liquids);
+        water = buyQuote(liquids, lake, pool);
     }
 
     function buy(uint256 liquids) external returns (uint256 water) {
