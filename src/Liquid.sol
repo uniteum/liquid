@@ -62,43 +62,43 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         water = newOnes - lake;
     }
 
-    function buyQuote(uint256 liquids) public view returns (uint256 pool, uint256 lake, uint256 water) {
-        (pool, lake) = balances();
+    function buyQuote(uint256 liquids) public view returns (uint256 water) {
+        (uint256 pool, uint256 lake) = balances();
         water = buyQuote(pool, lake, liquids);
     }
 
-    function buyWithQuote(uint256 water) public view returns (uint256 pool, uint256 lake, uint256 liquids) {
-        (pool, lake) = balances();
+    function buyWithQuote(uint256 water) public view returns (uint256 liquids) {
+        (uint256 pool, uint256 lake) = balances();
         liquids = sellQuote(lake, pool, water);
     }
 
-    function buy(uint256 liquids) external returns (uint256 pool, uint256 lake, uint256 water) {
-        (pool, lake, water) = buyQuote(liquids);
+    function buy(uint256 liquids) external returns (uint256 water) {
+        water = buyQuote(liquids);
         bought(liquids, water);
     }
 
-    function buyWith(uint256 water) external returns (uint256 pool, uint256 lake, uint256 liquids) {
-        (pool, lake, liquids) = buyWithQuote(water);
+    function buyWith(uint256 water) external returns (uint256 liquids) {
+        liquids = buyWithQuote(water);
         bought(liquids, water);
     }
 
-    function sellQuote(uint256 liquids) public view returns (uint256 pool, uint256 lake, uint256 water) {
-        (pool, lake) = balances();
+    function sellQuote(uint256 liquids) public view returns (uint256 water) {
+        (uint256 pool, uint256 lake) = balances();
         water = sellQuote(pool, lake, liquids);
     }
 
-    function sellForQuote(uint256 water) public view returns (uint256 pool, uint256 lake, uint256 liquids) {
-        (pool, lake) = balances();
+    function sellForQuote(uint256 water) public view returns (uint256 liquids) {
+        (uint256 pool, uint256 lake) = balances();
         water = buyQuote(lake, pool, liquids);
     }
 
-    function sell(uint256 liquids) external returns (uint256 pool, uint256 lake, uint256 water) {
-        (pool, lake, water) = sellQuote(liquids);
+    function sell(uint256 liquids) external returns (uint256 water) {
+        water = sellQuote(liquids);
         sold(liquids, water);
     }
 
-    function sellFor(uint256 water) external returns (uint256 pool, uint256 lake, uint256 liquids) {
-        (pool, lake, liquids) = sellForQuote(water);
+    function sellFor(uint256 water) external returns (uint256 liquids) {
+        liquids = sellForQuote(water);
         sold(liquids, water);
     }
 
