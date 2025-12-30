@@ -47,75 +47,75 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         ones = ONE.balanceOf(address(this));
     }
 
-    function buyQuote(uint256 wet, uint256 ones, uint256 units) public pure returns (uint256 my1) {
+    function buyQuote(uint256 wet, uint256 ones, uint256 units) public pure returns (uint256 cost) {
         if (wet <= units) {
             revert Thirst();
         }
         uint256 area = wet * ones;
         uint256 newWet = wet - units;
         uint256 newOnes = area / newWet;
-        my1 = ones - newOnes;
+        cost = ones - newOnes;
     }
 
-    function sellQuote(uint256 wet, uint256 ones, uint256 units) public pure returns (uint256 my1) {
+    function sellQuote(uint256 wet, uint256 ones, uint256 units) public pure returns (uint256 cost) {
         uint256 area = wet * ones;
         uint256 newWet = wet + units;
         uint256 newOnes = area / newWet;
-        my1 = newOnes - ones;
+        cost = newOnes - ones;
     }
 
-    function buyQuote(uint256 units) public view returns (uint256 wet, uint256 ones, uint256 my1) {
+    function buyQuote(uint256 units) public view returns (uint256 wet, uint256 ones, uint256 cost) {
         (wet, ones) = balances();
-        my1 = buyQuote(wet, ones, units);
+        cost = buyQuote(wet, ones, units);
     }
 
-    function buyWithQuote(uint256 my1) public view returns (uint256 wet, uint256 ones, uint256 units) {
+    function buyWithQuote(uint256 cost) public view returns (uint256 wet, uint256 ones, uint256 units) {
         (wet, ones) = balances();
-        units = sellQuote(ones, wet, my1);
+        units = sellQuote(ones, wet, cost);
     }
 
-    function buy(uint256 units) external returns (uint256 wet, uint256 ones, uint256 my1) {
-        (wet, ones, my1) = buyQuote(units);
-        bought(units, my1);
+    function buy(uint256 units) external returns (uint256 wet, uint256 ones, uint256 cost) {
+        (wet, ones, cost) = buyQuote(units);
+        bought(units, cost);
     }
 
-    function buyWith(uint256 my1) external returns (uint256 wet, uint256 ones, uint256 units) {
-        (wet, ones, units) = buyWithQuote(my1);
-        bought(units, my1);
+    function buyWith(uint256 cost) external returns (uint256 wet, uint256 ones, uint256 units) {
+        (wet, ones, units) = buyWithQuote(cost);
+        bought(units, cost);
     }
 
-    function sellQuote(uint256 units) public view returns (uint256 wet, uint256 ones, uint256 my1) {
+    function sellQuote(uint256 units) public view returns (uint256 wet, uint256 ones, uint256 cost) {
         (wet, ones) = balances();
-        my1 = sellQuote(wet, ones, units);
+        cost = sellQuote(wet, ones, units);
     }
 
-    function sellForQuote(uint256 my1) public view returns (uint256 wet, uint256 ones, uint256 units) {
+    function sellForQuote(uint256 cost) public view returns (uint256 wet, uint256 ones, uint256 units) {
         (wet, ones) = balances();
-        my1 = buyQuote(ones, wet, units);
+        cost = buyQuote(ones, wet, units);
     }
 
-    function sell(uint256 units) external returns (uint256 wet, uint256 ones, uint256 my1) {
-        (wet, ones, my1) = sellQuote(units);
-        sold(units, my1);
+    function sell(uint256 units) external returns (uint256 wet, uint256 ones, uint256 cost) {
+        (wet, ones, cost) = sellQuote(units);
+        sold(units, cost);
     }
 
-    function sellFor(uint256 my1) external returns (uint256 wet, uint256 ones, uint256 units) {
-        (wet, ones, units) = sellForQuote(my1);
-        sold(units, my1);
+    function sellFor(uint256 cost) external returns (uint256 wet, uint256 ones, uint256 units) {
+        (wet, ones, units) = sellForQuote(cost);
+        sold(units, cost);
     }
 
-    function bought(uint256 units, uint256 my1) private {
+    function bought(uint256 units, uint256 cost) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
-        IERC20(ONE).transfer(address(this), my1);
+        IERC20(ONE).transfer(address(this), cost);
         _transfer(address(this), msg.sender, units);
-        emit Bought(msg.sender, this, units, my1);
+        emit Bought(msg.sender, this, units, cost);
     }
 
-    function sold(uint256 units, uint256 my1) private {
+    function sold(uint256 units, uint256 cost) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
-        IERC20(ONE).transferFrom(address(this), msg.sender, my1);
+        IERC20(ONE).transferFrom(address(this), msg.sender, cost);
         _transfer(msg.sender, address(this), units);
-        emit Sold(msg.sender, this, units, my1);
+        emit Sold(msg.sender, this, units, cost);
     }
 
     function name() public view virtual override returns (string memory) {
