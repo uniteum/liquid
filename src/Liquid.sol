@@ -134,10 +134,12 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         predicted = Clones.predictDeterministicAddress(address(ONE), salt, address(ONE));
     }
 
-    function clone(IERC20Metadata stuff) public returns (address instance) {
+    function clone(IERC20Metadata stuff) public returns (Liquid liquid) {
         if (this == ONE) {
             bytes32 salt;
+            address instance;
             (instance, salt) = predict(stuff);
+            liquid = Liquid(instance);
 
             if (instance.code.length == 0) {
                 instance = Clones.cloneDeterministic(address(ONE), salt);
@@ -145,7 +147,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
                 emit Cloned(instance, stuff);
             }
         } else {
-            instance = ONE.clone(stuff);
+            liquid = ONE.clone(stuff);
         }
     }
 
