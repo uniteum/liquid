@@ -33,16 +33,16 @@ contract Pool is ERC20, ReentrancyGuardTransient {
         _mint(msg.sender, units);
     }
 
-    function burn(uint256 units) external nonReentrant returns (uint256 burnt) {
+    function burn(uint256 units) external nonReentrant returns (uint256 released) {
         uint256 total = totalSupply();
         uint256 pool = balanceOf(address(this));
         uint256 dry = total - pool;
         uint256 myPool = 2 * units * pool / total;
         uint256 myDry = 2 * units * dry / total;
-        burnt = units * underlying.balanceOf(address(this)) / dry;
+        released = units * underlying.balanceOf(address(this)) / dry;
         _burn(address(this), myPool);
         _burn(msg.sender, myDry);
-        IERC20(underlying).safeTransfer(msg.sender, burnt);
+        IERC20(underlying).safeTransfer(msg.sender, released);
     }
 
     function balances() public view returns (uint256 pool, uint256 ones) {
