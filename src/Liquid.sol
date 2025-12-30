@@ -45,75 +45,75 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         lake = ONE.balanceOf(address(this));
     }
 
-    function buyQuote(uint256 wet, uint256 lake, uint256 liquids) public pure returns (uint256 cost) {
+    function buyQuote(uint256 wet, uint256 lake, uint256 liquids) public pure returns (uint256 water) {
         if (wet <= liquids) {
             revert Thirst();
         }
         uint256 area = wet * lake;
         uint256 newWet = wet - liquids;
         uint256 newOnes = area / newWet;
-        cost = lake - newOnes;
+        water = lake - newOnes;
     }
 
-    function sellQuote(uint256 wet, uint256 lake, uint256 liquids) public pure returns (uint256 cost) {
+    function sellQuote(uint256 wet, uint256 lake, uint256 liquids) public pure returns (uint256 water) {
         uint256 area = wet * lake;
         uint256 newWet = wet + liquids;
         uint256 newOnes = area / newWet;
-        cost = newOnes - lake;
+        water = newOnes - lake;
     }
 
-    function buyQuote(uint256 liquids) public view returns (uint256 wet, uint256 lake, uint256 cost) {
+    function buyQuote(uint256 liquids) public view returns (uint256 wet, uint256 lake, uint256 water) {
         (wet, lake) = balances();
-        cost = buyQuote(wet, lake, liquids);
+        water = buyQuote(wet, lake, liquids);
     }
 
-    function buyWithQuote(uint256 cost) public view returns (uint256 wet, uint256 lake, uint256 liquids) {
+    function buyWithQuote(uint256 water) public view returns (uint256 wet, uint256 lake, uint256 liquids) {
         (wet, lake) = balances();
-        liquids = sellQuote(lake, wet, cost);
+        liquids = sellQuote(lake, wet, water);
     }
 
-    function buy(uint256 liquids) external returns (uint256 wet, uint256 lake, uint256 cost) {
-        (wet, lake, cost) = buyQuote(liquids);
-        bought(liquids, cost);
+    function buy(uint256 liquids) external returns (uint256 wet, uint256 lake, uint256 water) {
+        (wet, lake, water) = buyQuote(liquids);
+        bought(liquids, water);
     }
 
-    function buyWith(uint256 cost) external returns (uint256 wet, uint256 lake, uint256 liquids) {
-        (wet, lake, liquids) = buyWithQuote(cost);
-        bought(liquids, cost);
+    function buyWith(uint256 water) external returns (uint256 wet, uint256 lake, uint256 liquids) {
+        (wet, lake, liquids) = buyWithQuote(water);
+        bought(liquids, water);
     }
 
-    function sellQuote(uint256 liquids) public view returns (uint256 wet, uint256 lake, uint256 cost) {
+    function sellQuote(uint256 liquids) public view returns (uint256 wet, uint256 lake, uint256 water) {
         (wet, lake) = balances();
-        cost = sellQuote(wet, lake, liquids);
+        water = sellQuote(wet, lake, liquids);
     }
 
-    function sellForQuote(uint256 cost) public view returns (uint256 wet, uint256 lake, uint256 liquids) {
+    function sellForQuote(uint256 water) public view returns (uint256 wet, uint256 lake, uint256 liquids) {
         (wet, lake) = balances();
-        cost = buyQuote(lake, wet, liquids);
+        water = buyQuote(lake, wet, liquids);
     }
 
-    function sell(uint256 liquids) external returns (uint256 wet, uint256 lake, uint256 cost) {
-        (wet, lake, cost) = sellQuote(liquids);
-        sold(liquids, cost);
+    function sell(uint256 liquids) external returns (uint256 wet, uint256 lake, uint256 water) {
+        (wet, lake, water) = sellQuote(liquids);
+        sold(liquids, water);
     }
 
-    function sellFor(uint256 cost) external returns (uint256 wet, uint256 lake, uint256 liquids) {
-        (wet, lake, liquids) = sellForQuote(cost);
-        sold(liquids, cost);
+    function sellFor(uint256 water) external returns (uint256 wet, uint256 lake, uint256 liquids) {
+        (wet, lake, liquids) = sellForQuote(water);
+        sold(liquids, water);
     }
 
-    function bought(uint256 liquids, uint256 cost) private {
+    function bought(uint256 liquids, uint256 water) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
-        IERC20(ONE).transfer(address(this), cost);
+        IERC20(ONE).transfer(address(this), water);
         _transfer(address(this), msg.sender, liquids);
-        emit Bought(msg.sender, this, liquids, cost);
+        emit Bought(msg.sender, this, liquids, water);
     }
 
-    function sold(uint256 liquids, uint256 cost) private {
+    function sold(uint256 liquids, uint256 water) private {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
-        IERC20(ONE).transferFrom(address(this), msg.sender, cost);
+        IERC20(ONE).transferFrom(address(this), msg.sender, water);
         _transfer(msg.sender, address(this), liquids);
-        emit Sold(msg.sender, this, liquids, cost);
+        emit Sold(msg.sender, this, liquids, water);
     }
 
     function name() public view virtual override returns (string memory) {
@@ -161,8 +161,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     event Minted(address indexed minter, Liquid indexed liquid, uint256 liquids);
     event Burned(address indexed burner, Liquid indexed liquid, uint256 liquids, uint256 solids);
-    event Bought(address indexed buyer, Liquid indexed liquid, uint256 liquids, uint256 cost);
-    event Sold(address indexed seller, Liquid indexed liquid, uint256 liquids, uint256 cost);
+    event Bought(address indexed buyer, Liquid indexed liquid, uint256 liquids, uint256 water);
+    event Sold(address indexed seller, Liquid indexed liquid, uint256 liquids, uint256 water);
     event Made(Liquid indexed liquid, IERC20Metadata indexed solid);
 
     error Nothing();
