@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-Watar
+// SPDX-License-Identifier: LicenseRef-Tatar
 
 pragma solidity ^0.8.30;
 
@@ -13,8 +13,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     uint256 public constant WATER_SUPPLY = 1e9 ether;
     uint8 public constant WATER_DECIMALS = 18;
-    string public constant WATER_NAME = "Watar";
-    string public constant WATER_SYMBOL = "WATAR";
+    string public constant WATER_NAME = "Tatar";
+    string public constant WATER_SYMBOL = "TATAR";
 
     Liquid public immutable WATER = this;
     address public immutable SPRING = 0xEbCaD83FeAD16e7D18DD691fFD2b39eca56677d8;
