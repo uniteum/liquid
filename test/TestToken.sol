@@ -4,6 +4,7 @@ pragma solidity ^0.8.30;
 
 import {ERC20, IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {console} from "forge-std/Test.sol";
+import {Namer} from "./Namer.sol";
 
 /**
  * @title HookToken
@@ -11,6 +12,8 @@ import {console} from "forge-std/Test.sol";
  * @dev Designed for testing reentrancy vulnerabilities.
  */
 contract TestToken is ERC20 {
+    Namer namer = new Namer();
+
     function(IERC20Metadata, address, address, uint256) external afterUpdate;
 
     constructor(string memory name, uint256 value) ERC20(name, name) {
@@ -33,7 +36,7 @@ contract TestToken is ERC20 {
 
         string memory format = string.concat(symbol(), "._update(%s, %s, %s)");
 
-        console.log(format, from, to, value);
+        console.log(format, namer.name(from), namer.name(to), value);
 
         if (!inHook && (afterUpdate.address != address(0))) {
             inHook = true;
