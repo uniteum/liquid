@@ -2,6 +2,66 @@
 
 > Context guide for AI-assisted development of the Liquid protocol.
 
+## Meta: Maintaining This Document
+
+### Purpose
+This file provides context for AI assistants (primarily Claude) to understand the Liquid protocol codebase. It is optimized for token efficiency and accuracy.
+
+### When to Update
+
+**Update IMMEDIATELY when:**
+- User provides feedback contradicting this documentation
+- Core protocol mechanics change (formulas, operations, invariants)
+- New functions or contracts are added
+- File structure changes significantly
+- Test patterns or development workflows change
+
+**Update PROACTIVELY when:**
+- You discover inaccuracies while working on tasks
+- Line counts or file sizes drift significantly from stated values
+- Code examples become outdated or incorrect
+- Better explanations or examples become apparent
+
+### How to Update
+
+**Optimization Guidelines:**
+- Keep total length under 500 lines (currently ~467 lines)
+- Prioritize formulas, patterns, and non-obvious mechanics
+- Remove redundant explanations
+- Use concise code examples over prose
+- Reference other docs instead of duplicating content
+- Update line counts when files change significantly (>10% drift)
+
+**What to Include:**
+- Core operations with exact formulas
+- Non-obvious architectural patterns (CREATE2, factory, etc.)
+- Common pitfalls or gotchas
+- Test patterns that save time
+- Quick reference for frequent operations
+
+**What to Exclude:**
+- Standard Solidity/Foundry knowledge
+- Extensive background on ERC-20, AMMs, etc.
+- Detailed explanations available in official docs
+- Verbose examples when concise ones suffice
+
+### Validation Process
+
+**Before finalizing updates:**
+1. Verify formulas against actual code in [src/Liquid.sol](src/Liquid.sol)
+2. Check that line counts are approximately correct
+3. Test code examples compile/run if they've changed
+4. Ensure Quick Reference section remains accurate
+5. Confirm total length stays token-efficient
+
+### Related Documentation Files
+
+- [README.md](README.md) - User-facing introduction
+- [foundry.toml](foundry.toml) - Build configuration (authoritative source)
+- [src/Liquid.sol](src/Liquid.sol) - Source of truth for all mechanics
+
+**If user feedback conflicts with CLAUDE.md:** Update this file to reflect reality, then confirm the change with the user.
+
 ## Overview
 
 **Liquid** is a constant-product AMM protocol on Ethereum where any ERC-20 token can be wrapped into a "liquid" token with built-in liquidity.
