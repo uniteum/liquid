@@ -349,7 +349,9 @@ You're both a holder and liquidity provider simultaneously.
 
 ### Are there fees?
 
-Check the specific liquid contract implementation. The base protocol has no built-in fees, but deployments can add them.
+No. The protocol charges no fees beyond standard Ethereum gas costs. There never will be fees.
+
+The protocol developers reserved a portion of Water tokens as their monetization strategy, not ongoing transaction fees.
 
 ### Can I trade liquid tokens on other DEXs?
 
