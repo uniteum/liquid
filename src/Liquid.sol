@@ -111,6 +111,18 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         sold(liquids, water);
     }
 
+    function buy(uint256 liquids, Liquid other) external returns (uint256 water, uint256 others) {
+        (water, others) = buyQuote(liquids, other);
+        other.sold(others, water);
+        bought(liquids, water);
+    }
+
+    function sell(uint256 liquids, Liquid other) external returns (uint256 water, uint256 others) {
+        (water, others) = sellQuote(liquids, other);
+        sold(liquids, water);
+        other.bought(others, water);
+    }
+
     function buyWith(uint256 water) external returns (uint256 liquids) {
         liquids = buyWithQuote(water);
         bought(liquids, water);
@@ -121,14 +133,14 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         sold(liquids, water);
     }
 
-    function bought(uint256 liquids, uint256 water) private {
+    function bought(uint256 liquids, uint256 water) public {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(WATER).transfer(address(this), water);
         _transfer(address(this), msg.sender, liquids);
         emit Bought(this, liquids, water);
     }
 
-    function sold(uint256 liquids, uint256 water) private {
+    function sold(uint256 liquids, uint256 water) public {
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         IERC20(WATER).transferFrom(address(this), msg.sender, water);
         _transfer(msg.sender, address(this), liquids);
