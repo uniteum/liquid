@@ -11,11 +11,11 @@ contract LiquidUser is User {
     using SafeERC20 for IERC20;
     using Strings for uint256;
 
-    Liquid public immutable ONE;
+    Liquid public immutable WATER;
     TestToken ignore;
 
-    constructor(string memory name, Liquid one) User(name) {
-        ONE = one;
+    constructor(string memory name, Liquid water) User(name) {
+        WATER = water;
     }
 
     modifier logging(string memory method, Liquid U, uint256 amount) {
@@ -52,13 +52,13 @@ contract LiquidUser is User {
     function rndUnits(Liquid U) public returns (int256 liquids) {
         int256 min = -int256(U.balanceOf(address(this)));
         // forge-lint: disable-next-line(unsafe-typecast)
-        int256 max = int256(ONE.balanceOf(address(this)));
+        int256 max = int256(WATER.balanceOf(address(this)));
         liquids = rnd(min, max);
     }
 
     function rndForge(Liquid U) public returns (int256 liquids) {
         liquids = rndUnits(U);
-        if (liquids < -int256(ONE.balanceOf(address(this)))) {
+        if (liquids < -int256(WATER.balanceOf(address(this)))) {
             console.log("forge not called because insufficient balance");
         } else if (liquids < 0) {
             // forge-lint: disable-next-line(unsafe-typecast)
