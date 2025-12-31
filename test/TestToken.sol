@@ -34,9 +34,7 @@ contract TestToken is ERC20 {
     function _update(address from, address to, uint256 value) internal virtual override {
         super._update(from, to, value);
 
-        string memory format = string.concat(symbol(), " update %s %s %s");
-
-        console.log(format, namer.name(from), namer.name(to), value);
+        console.log("%s update %s %s", symbol(), string.concat(namer.name(from), " ", namer.name(to)), value);
 
         if (!inHook && (afterUpdate.address != address(0))) {
             inHook = true;
