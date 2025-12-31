@@ -71,13 +71,13 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         water = sellQuote(liquids, pool, lake);
     }
 
-    function buyQuote(uint256 liquids, Liquid other) public view returns (uint256 others) {
-        uint256 water = buyQuote(liquids);
+    function buyQuote(uint256 liquids, Liquid other) public view returns (uint256 water, uint256 others) {
+        water = buyQuote(liquids);
         others = other.buyWithQuote(water);
     }
 
-    function sellQuote(uint256 liquids, Liquid other) public view returns (uint256 others) {
-        uint256 water = sellQuote(liquids);
+    function sellQuote(uint256 liquids, Liquid other) public view returns (uint256 water, uint256 others) {
+        water = sellQuote(liquids);
         others = other.sellForQuote(water);
     }
 
