@@ -50,7 +50,7 @@ contract LiquidTest is BaseTest {
         give(beck, 1e3, V.solid());
     }
 
-    function test_Pool() public returns (uint256 liquids, uint256 solids) {
+    function test_MeltFreeze() public returns (uint256 liquids, uint256 solids) {
         giveaway();
         owen.melt(U, 500);
         alex.melt(U, 500);
