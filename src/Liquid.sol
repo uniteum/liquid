@@ -180,7 +180,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         return solid.decimals();
     }
 
-    function predict(IERC20Metadata stuff) public view returns (address future, bytes32 salt) {
+    function heated(IERC20Metadata stuff) public view returns (address future, bytes32 salt) {
         if (address(stuff) == address(0)) {
             revert Nothing();
         }
@@ -188,11 +188,11 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         future = Clones.predictDeterministicAddress(address(WATER), salt, address(WATER));
     }
 
-    function make(IERC20Metadata stuff) public returns (Liquid liquid) {
+    function heat(IERC20Metadata stuff) public returns (Liquid liquid) {
         if (this != WATER) {
-            liquid = WATER.make(stuff);
+            liquid = WATER.heat(stuff);
         } else {
-            (address future, bytes32 salt) = predict(stuff);
+            (address future, bytes32 salt) = heated(stuff);
             liquid = Liquid(future);
             if (future.code.length == 0) {
                 future = Clones.cloneDeterministic(address(WATER), salt);

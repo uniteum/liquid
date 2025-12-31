@@ -22,8 +22,8 @@ contract LiquidTest is BaseTest {
         beck = newUser("beck");
         W = new Liquid(owen.newToken("W", 1e9));
         owen.heat(W, 1e9);
-        U = W.make(owen.newToken("U", 1e9));
-        V = W.make(owen.newToken("V", 1e9));
+        U = W.heat(owen.newToken("U", 1e9));
+        V = W.heat(owen.newToken("V", 1e9));
     }
 
     function newUser(string memory name) internal returns (LiquidUser user) {
