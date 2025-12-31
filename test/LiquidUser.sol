@@ -16,20 +16,30 @@ contract LiquidUser is User {
         ONE = one;
     }
 
-    function melt(Liquid U, uint256 solids) public {
-        console.log("%s.melt", name, U.symbol());
-        console.log("solids:", solids);
-        U.solid().approve(address(U), solids);
-        U.melt(solids);
+    modifier logging(string memory method, Liquid U, uint256 amount) {
+        _logging(method, U, amount);
+        _;
         logBalances();
     }
 
-    function freeze(Liquid U, uint256 liquids) public returns (uint256 solids) {
-        console.log("%s.freeze", name, U.symbol());
-        console.log("liquids:", liquids);
+    function _logging(string memory method, Liquid U, uint256 amount) private view {
+        console.log("%s.%s", U.name(), method);
+        console.log("amount:", amount);
+    }
+
+    function melt(Liquid U, uint256 solids) public logging("melt", U, solids) {
+        U.solid().approve(address(U), solids);
+        U.melt(solids);
+    }
+
+    function freeze(Liquid U, uint256 liquids) public logging("freeze", U, liquids) returns (uint256 solids) {
         solids = U.freeze(liquids);
         console.log("solids:", solids);
-        logBalances();
+    }
+
+    function sell(Liquid U, uint256 liquids) public logging("sell", U, liquids) returns (uint256 water) {
+        water = U.sell(liquids);
+        console.log("water:", water);
     }
 
     function liquidate(Liquid U) public returns (uint256 liquids, uint256 solids) {
