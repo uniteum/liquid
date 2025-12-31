@@ -2,9 +2,8 @@
 
 pragma solidity ^0.8.30;
 
-import {IERC20} from "../src/Unit.sol";
 import {Random} from "./Random.sol";
-import {TestToken, IERC20Metadata} from "./TestToken.sol";
+import {TestToken, IERC20, IERC20Metadata} from "./TestToken.sol";
 import {Test, console} from "forge-std/Test.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 

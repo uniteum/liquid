@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.30;
 
-import {ERC20, IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20, IERC20, IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {console} from "forge-std/Test.sol";
 import {Namer} from "./Namer.sol";
 
@@ -12,6 +12,8 @@ import {Namer} from "./Namer.sol";
  * @dev Designed for testing reentrancy vulnerabilities.
  */
 contract TestToken is ERC20 {
+    IERC20 unused;
+
     Namer namer = new Namer();
 
     function(IERC20Metadata, address, address, uint256) external afterUpdate;
