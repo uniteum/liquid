@@ -17,7 +17,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     string public constant WATER_SYMBOL = "TATAR";
 
     Liquid public immutable WATER = this;
-    address public immutable SPRING = 0xEbCaD83FeAD16e7D18DD691fFD2b39eca56677d8;
+    address public immutable WATER_UTILITY = 0xEbCaD83FeAD16e7D18DD691fFD2b39eca56677d8;
 
     IERC20Metadata public solid = IERC20Metadata(address(0x1CE));
 
@@ -208,7 +208,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     constructor() ERC20("", "") {
-        _mint(SPRING, WATER_SUPPLY);
+        _mint(WATER_UTILITY, WATER_SUPPLY);
     }
 
     modifier onlyLiquid() {

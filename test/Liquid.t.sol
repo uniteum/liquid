@@ -28,7 +28,7 @@ contract LiquidTest is BaseTest {
         U = one.make(u_);
         V = one.make(v_);
 
-        address spring = one.SPRING();
+        address spring = one.WATER_UTILITY();
         console.log("spring:", spring);
         uint256 all = one.balanceOf(spring);
 
