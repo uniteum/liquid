@@ -16,44 +16,45 @@ contract LiquidUser is User {
         ONE = one;
     }
 
-    function melt(Liquid U, uint256 units) public {
+    function melt(Liquid U, uint256 solids) public {
         console.log("%s.melt", name, U.symbol());
-        console.log("units:", units);
-        U.solid().approve(address(U), units);
-        U.melt(units);
+        console.log("solids:", solids);
+        U.solid().approve(address(U), solids);
+        U.melt(solids);
         logBalances();
     }
 
-    function freeze(Liquid U, uint256 units) public returns (uint256 solids) {
+    function freeze(Liquid U, uint256 liquids) public returns (uint256 solids) {
         console.log("%s.freeze", name, U.symbol());
-        console.log("units:", units);
-        solids = U.freeze(units);
+        console.log("liquids:", liquids);
+        solids = U.freeze(liquids);
+        console.log("solids:", solids);
         logBalances();
     }
 
-    function liquidate(Liquid U) public returns (uint256 units, uint256 solids) {
-        units = U.balanceOf(address(this));
-        solids = freeze(U, units);
+    function liquidate(Liquid U) public returns (uint256 liquids, uint256 solids) {
+        liquids = U.balanceOf(address(this));
+        solids = freeze(U, liquids);
         assertHasNo(U);
     }
 
-    function rndUnits(Liquid U) public returns (int256 units) {
+    function rndUnits(Liquid U) public returns (int256 liquids) {
         int256 min = -int256(U.balanceOf(address(this)));
         // forge-lint: disable-next-line(unsafe-typecast)
         int256 max = int256(ONE.balanceOf(address(this)));
-        units = rnd(min, max);
+        liquids = rnd(min, max);
     }
 
-    function rndForge(Liquid U) public returns (int256 units) {
-        units = rndUnits(U);
-        if (units < -int256(ONE.balanceOf(address(this)))) {
+    function rndForge(Liquid U) public returns (int256 liquids) {
+        liquids = rndUnits(U);
+        if (liquids < -int256(ONE.balanceOf(address(this)))) {
             console.log("forge not called because insufficient balance");
-        } else if (units < 0) {
+        } else if (liquids < 0) {
             // forge-lint: disable-next-line(unsafe-typecast)
-            freeze(U, uint256(-units));
+            freeze(U, uint256(-liquids));
         } else {
             // forge-lint: disable-next-line(unsafe-typecast)
-            melt(U, uint256(units));
+            melt(U, uint256(liquids));
         }
     }
 }
