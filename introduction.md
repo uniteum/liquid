@@ -260,6 +260,12 @@ The AMM formula automatically adjusts based on current pool state.
 - Call `solid()` to see what token backs this liquid
 - Check that backing token is legitimate
 
+✅ **Verify the liquid is authentic (extra paranoid):**
+- Go to the verified water contract on Etherscan
+- Call `predict(address stuff)` with the backing token address
+- Confirm the returned address matches the liquid contract you're interacting with
+- This ensures the liquid is legitimately created by the official water contract
+
 ✅ **Check pool liquidity:**
 - Call `balances()` to see pool size
 - Larger pools generally have better prices
