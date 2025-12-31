@@ -5,9 +5,11 @@ pragma solidity ^0.8.30;
 import {User, TestToken, console} from "./User.sol";
 import {Liquid, IERC20} from "../src/Liquid.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract LiquidUser is User {
     using SafeERC20 for IERC20;
+    using Strings for uint256;
 
     Liquid public immutable ONE;
     TestToken ignore;
@@ -23,8 +25,7 @@ contract LiquidUser is User {
     }
 
     function _logging(string memory method, Liquid U, uint256 amount) private view {
-        console.log("%s.%s", U.name(), method);
-        console.log("amount:", amount);
+        console.log(string.concat(name, " ", method, " ", amount.toString(), " ", U.name()));
     }
 
     function melt(Liquid U, uint256 solids) public logging("melt", U, solids) {
