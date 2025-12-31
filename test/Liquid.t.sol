@@ -3,11 +3,11 @@
 pragma solidity ^0.8.30;
 
 import {Liquid} from "../src/Liquid.sol";
-import {BaseTest, console} from "./Base.t.sol";
+import {BaseTest} from "./Base.t.sol";
 import {LiquidUser, IERC20} from "./LiquidUser.sol";
 
 contract LiquidTest is BaseTest {
-    Liquid public WATER;
+    Liquid public W;
     Liquid public U;
     Liquid public V;
     LiquidUser public owen;
@@ -20,14 +20,14 @@ contract LiquidTest is BaseTest {
         owen = newUser("owen");
         alex = newUser("alex");
         beck = newUser("beck");
-        WATER = new Liquid(owen.newToken("WATER", 1e9));
-        owen.liquify(WATER, 1e9);
-        U = WATER.make(owen.newToken("U", 1e9));
-        V = WATER.make(owen.newToken("V", 1e9));
+        W = new Liquid(owen.newToken("W", 1e9));
+        owen.liquify(W, 1e9);
+        U = W.make(owen.newToken("U", 1e9));
+        V = W.make(owen.newToken("V", 1e9));
     }
 
     function newUser(string memory name) internal returns (LiquidUser user) {
-        user = new LiquidUser(name, WATER);
+        user = new LiquidUser(name, W);
     }
 
     function give(LiquidUser user, uint256 amount, IERC20 token) internal {
@@ -35,10 +35,10 @@ contract LiquidTest is BaseTest {
     }
 
     function giveaway() internal {
-        give(alex, 1e3, WATER);
+        give(alex, 1e3, W);
         give(alex, 1e3, U.solid());
         give(alex, 1e3, V.solid());
-        give(beck, 1e7, WATER);
+        give(beck, 1e7, W);
         give(beck, 1e3, U.solid());
         give(beck, 1e3, V.solid());
     }
@@ -59,7 +59,7 @@ contract LiquidTest is BaseTest {
 
     function test_MeltSellFreezeBuy() public returns (uint256 water, uint256 solids) {
         giveaway();
-        owen.give(address(U), 1000, WATER);
+        owen.give(address(U), 1000, W);
         owen.liquify(U, 1000);
         alex.liquify(U, 100);
         water = alex.sell(U, 50);
