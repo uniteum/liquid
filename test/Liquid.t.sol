@@ -66,6 +66,7 @@ contract LiquidTest is BaseTest {
 
     function test_MeltSellFreezeBuy() public returns (uint256 water) {
         giveaway();
+        owen.give(address(U), 1000, WATER);
         owen.melt(U, 1000);
         alex.melt(U, 100);
         water = alex.sell(U, 100);

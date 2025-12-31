@@ -150,9 +150,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function _bought(uint256 liquids, uint256 water) private {
-        // forge-lint: disable-next-line(erc20-unchecked-transfer)
-        IERC20(WATER).transfer(address(this), water);
-        _transfer(address(this), msg.sender, liquids);
+        WATER.update(msg.sender, address(this), water);
+        _update(address(this), msg.sender, liquids);
         emit Bought(this, liquids, water);
     }
 
@@ -161,10 +160,13 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function _sold(uint256 liquids, uint256 water) private {
-        // forge-lint: disable-next-line(erc20-unchecked-transfer)
-        IERC20(WATER).transferFrom(address(this), msg.sender, water);
-        _transfer(msg.sender, address(this), liquids);
+        WATER.update(address(this), msg.sender, water);
+        _update(msg.sender, address(this), liquids);
         emit Sold(this, liquids, water);
+    }
+
+    function update(address from, address to, uint256 amount) external onlyLiquid {
+        _update(from, to, amount);
     }
 
     function name() public view virtual override returns (string memory) {
