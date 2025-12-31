@@ -1,14 +1,10 @@
-# Uniteum
+# Liquid
 
-Uniteum is an algebraic liquidity protocol on Ethereum where units are ERC-20 tokens with built-in liquidity via reciprocal relationships.
+Liquid is a liquidity protocol on Ethereum where liquids are ERC-20 tokens with built-in liquidity.
 
 ## Overview
 
-- **Built-in Liquidity**: Every unit U has a reciprocal 1/U with constant product invariant `u * v = w^2`
-- **Symbolic Algebra**: Units compose algebraically: `kg*m/s^2`, `m^2\3`
-- **Rational Exponents**: Full support for rational exponents (e.g., `x^2\3`, `kg^-1\2`)
-- **Anchored Units**: Custodial wrappers for external ERC-20 tokens (e.g., `$0xdAC17F958D2ee523a2206206994597C13D831ec7` for USDT)
-- **Kiosk System**: Native currency ↔ ERC-20 trading with fixed or discount pricing
+- **Built-in Liquidity**
 
 For comprehensive documentation, see [CLAUDE.md](CLAUDE.md).
 
@@ -16,8 +12,8 @@ For comprehensive documentation, see [CLAUDE.md](CLAUDE.md).
 
 ```bash
 # Clone and install
-git clone git@github.com:uniteum/uniteum.git
-cd uniteum
+git clone git@github.com:uniteum/liquid.git
+cd liquid
 
 # Build
 forge build
@@ -88,7 +84,7 @@ forge snapshot
 
 ```bash
 chain=11155111
-forge script script/Unit.s.sol -f $chain --private-key $tx_key --broadcast --verify --delay 10 --retries 10
+forge script script/Liquid.s.sol -f $chain --private-key $tx_key --broadcast --verify --delay 10 --retries 10
 ```
 
 ## Documentation
@@ -104,7 +100,3 @@ This codebase uses:
 - Deterministic CREATE2 deployments
 
 See [CLAUDE.md](CLAUDE.md) for detailed security considerations.
-
-## License
-
-See [LICENSE.Uniteum](LICENSE.Uniteum) file for details.
