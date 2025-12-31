@@ -24,11 +24,11 @@ contract LiquidTest is BaseTest {
         U = WATER.make(owen.newToken("U", 1e9));
         V = WATER.make(owen.newToken("V", 1e9));
 
-        address spring = WATER.WATER_UTILITY();
-        console.log("spring:", spring);
-        uint256 all = WATER.balanceOf(spring);
+        address utility = WATER.WATER_UTILITY();
+        console.log("utility:", utility);
+        uint256 all = WATER.balanceOf(utility);
 
-        vm.prank(spring);
+        vm.prank(utility);
         // forge-lint: disable-next-line(erc20-unchecked-transfer)
         WATER.transfer(address(owen), all);
     }
@@ -49,18 +49,9 @@ contract LiquidTest is BaseTest {
         beck.melt(U, 500);
         du = 100;
         out = alex.freeze(U, du);
-        console.log("alex.freeze:", U.symbol());
-        console.log("alex.freeze.du:", du);
-        console.log("alex.freeze.out:", out);
         (du, out) = alex.liquidate(U);
-        console.log("alex.liquidate:", U.symbol());
-        console.log("alex.liquidate.du:", du);
-        console.log("alex.liquidate.out:", out);
         assertEq(1e3, alex.balance(WATER), "alex should have the same 1");
         (du, out) = beck.liquidate(U);
-        console.log("beck.liquidate:", U.symbol());
-        console.log("beck.liquidate.du:", du);
-        console.log("beck.liquidate.out:", out);
         assertEq(beck.balance(WATER), 1e7, "beck should have the same 1");
     }
 }
