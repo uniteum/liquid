@@ -83,7 +83,7 @@ This file provides context for AI assistants (primarily Claude) to understand th
 ### 1. Liquify (Solid → Liquid)
 
 ```solidity
-function liquify(uint256 solids) external nonReentrant
+function heat(uint256 solids) external nonReentrant
 ```
 
 **What it does:**
@@ -95,7 +95,7 @@ function liquify(uint256 solids) external nonReentrant
 ```solidity
 // User has 1000 USDC
 usdc.approve(address(liquidUSDC), 1000);
-liquidUSDC.liquify(1000);
+liquidUSDC.heat(1000);
 // User now has: 1000 liquid-USDC
 // Pool now has: 1000 liquid-USDC
 ```
@@ -103,13 +103,13 @@ liquidUSDC.liquify(1000);
 ### 2. Solidify (Liquid → Solid)
 
 ```solidity
-function solidify(uint256 liquids) external nonReentrant returns (uint256 solids)
+function cool(uint256 liquids) external nonReentrant returns (uint256 solids)
 ```
 
 **What it does:**
 - Burns liquids proportionally from both user and pool
 - Returns backing tokens based on: `liquids * (backing_balance / user_held_liquids)`
-- Burns total of `2 * liquids` (maintaining symmetry with liquify)
+- Burns total of `2 * liquids` (maintaining symmetry with heat)
 
 **Formula:**
 ```solidity
@@ -223,8 +223,8 @@ pool * lake = k  (constant before and after trades)
 ### 2. Liquify/Solidify Symmetry
 
 ```
-Total minted in liquify = 2 * solids
-Total burned in solidify = 2 * liquids
+Total minted in heat = 2 * solids
+Total burned in cool = 2 * liquids
 ```
 
 ### 3. Backing Token Conservation
@@ -275,13 +275,13 @@ using SafeERC20 for IERC20Metadata;
 
 ### Token Approval Requirements
 
-**IMPORTANT:** Token approval is ONLY required for liquify operations.
+**IMPORTANT:** Token approval is ONLY required for heat operations.
 
 **Requires approval:**
-- `liquify(solids)` - User must approve liquid contract to spend backing tokens
+- `heat(solids)` - User must approve liquid contract to spend backing tokens
 
 **NO approval needed (only requires msg.sender ownership):**
-- `solidify(liquids)` - Burns from msg.sender's balance
+- `cool(liquids)` - Burns from msg.sender's balance
 - `buy(liquids)` - Transfers water from msg.sender
 - `sell(liquids)` - Transfers liquids from msg.sender
 - `buy(liquids, other)` - Cross-swap using msg.sender's liquids
@@ -335,7 +335,7 @@ contract LiquidTest is BaseTest {
         super.setUp();
         owen = newUser("owen");
         W = new Liquid(owen.newToken("W", 1e9));
-        owen.liquify(W, 1e9);
+        owen.heat(W, 1e9);
         U = W.make(owen.newToken("U", 1e9));
         V = W.make(owen.newToken("V", 1e9));
     }
@@ -346,8 +346,8 @@ contract LiquidTest is BaseTest {
 
 ```solidity
 contract LiquidUser is User {
-    function liquify(Liquid U, uint256 solids) public { }
-    function solidify(Liquid U, uint256 liquids) public returns (uint256 solids) { }
+    function heat(Liquid U, uint256 solids) public { }
+    function cool(Liquid U, uint256 liquids) public returns (uint256 solids) { }
     function sell(Liquid U, uint256 liquids) public returns (uint256 water) { }
     function liquidate(Liquid U) public returns (uint256 liquids, uint256 solids) { }
 }
@@ -360,12 +360,12 @@ contract LiquidUser is User {
 ```solidity
 function test_MeltFreeze() public returns (uint256 liquids, uint256 solids) {
     giveaway();                        // Distribute tokens to users
-    owen.liquify(U, 500);
-    alex.liquify(U, 500);
-    beck.liquify(U, 500);
+    owen.heat(U, 500);
+    alex.heat(U, 500);
+    beck.heat(U, 500);
 
     liquids = 100;
-    solids = alex.solidify(U, liquids);
+    solids = alex.cool(U, liquids);
     assertEq(liquids, solids, "alex liquids != solids");
 
     // Full liquidation
@@ -444,7 +444,7 @@ Liquid liquidDAI = water.make(dai);
 ```solidity
 // User deposits backing token
 dai.approve(address(liquidDAI), 1000 ether);
-liquidDAI.liquify(1000 ether);
+liquidDAI.heat(1000 ether);
 // User receives 1000 liquid-DAI, pool grows by 1000
 ```
 
@@ -452,7 +452,7 @@ liquidDAI.liquify(1000 ether);
 
 ```solidity
 // User withdraws backing token
-uint256 solids = liquidDAI.solidify(500 ether);
+uint256 solids = liquidDAI.cool(500 ether);
 // User receives DAI, burns liquid-DAI from self and pool
 ```
 

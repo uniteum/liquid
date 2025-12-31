@@ -21,7 +21,7 @@ contract LiquidTest is BaseTest {
         alex = newUser("alex");
         beck = newUser("beck");
         W = new Liquid(owen.newToken("W", 1e9));
-        owen.liquify(W, 1e9);
+        owen.heat(W, 1e9);
         U = W.make(owen.newToken("U", 1e9));
         V = W.make(owen.newToken("V", 1e9));
     }
@@ -45,11 +45,11 @@ contract LiquidTest is BaseTest {
 
     function test_MeltFreeze() public returns (uint256 liquids, uint256 solids) {
         giveaway();
-        owen.liquify(U, 500);
-        alex.liquify(U, 500);
-        beck.liquify(U, 500);
+        owen.heat(U, 500);
+        alex.heat(U, 500);
+        beck.heat(U, 500);
         liquids = 100;
-        solids = alex.solidify(U, liquids);
+        solids = alex.cool(U, liquids);
         assertEq(liquids, solids, "1. alex liquids != solids");
         (liquids, solids) = alex.liquidate(U);
         assertEq(liquids, solids, "2. alex liquids != solids");
@@ -60,9 +60,9 @@ contract LiquidTest is BaseTest {
     function test_MeltSellFreezeBuy() public returns (uint256 water, uint256 solids) {
         giveaway();
         owen.give(address(U), 1000, W);
-        owen.liquify(U, 1000);
-        alex.liquify(U, 100);
+        owen.heat(U, 1000);
+        alex.heat(U, 100);
         water = alex.sell(U, 50);
-        solids = alex.solidify(U, U.balanceOf(address(alex)));
+        solids = alex.cool(U, U.balanceOf(address(alex)));
     }
 }

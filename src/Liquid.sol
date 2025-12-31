@@ -20,14 +20,14 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         solidOf[address(this)] = ice;
     }
 
-    function liquify(uint256 solids) external nonReentrant {
+    function heat(uint256 solids) external nonReentrant {
         solid.safeTransferFrom(msg.sender, address(this), solids);
         _mint(address(this), solids);
         _mint(msg.sender, solids);
         emit Liquify(this, solids);
     }
 
-    function solidify(uint256 liquids) external nonReentrant returns (uint256 solids) {
+    function cool(uint256 liquids) external nonReentrant returns (uint256 solids) {
         uint256 total = totalSupply();
         uint256 pool = balanceOf(address(this));
         uint256 held = total - pool;

@@ -42,10 +42,10 @@ All operations can be performed through Etherscan's "Write Contract" interface. 
 1. Go to your backing token contract (e.g., USDC)
 2. Use the `approve` function to allow the liquid contract to spend your tokens
    - `spender`: The liquid contract address
-   - `amount`: How much you want to liquify (in token's decimals)
+   - `amount`: How much you want to heat (in token's decimals)
 
-**To liquify:**
-1. On the liquid contract, find the `liquify` function
+**To heat:**
+1. On the liquid contract, find the `heat` function
 2. Enter the amount (in token's decimals, e.g., `1000000000` for 1000 USDC with 6 decimals)
 3. Click "Write" and confirm the transaction
 
@@ -61,8 +61,8 @@ This 2x minting creates instant liquidity. Half goes to you, half stays in the p
 
 **Goal:** Convert liquid tokens back to the original ERC-20 tokens.
 
-**To solidify:**
-1. On the liquid contract, find the `solidify` function
+**To cool:**
+1. On the liquid contract, find the `cool` function
 2. Enter how many liquid tokens you want to burn (e.g., `500000000` for 500 liquid-USDC)
 3. Click "Write" and confirm the transaction
 
@@ -71,7 +71,7 @@ This 2x minting creates instant liquidity. Half goes to you, half stays in the p
 - Burns matching amount from the pool
 - Returns the backing tokens (USDC) proportional to pool reserves
 
-The 2x burn (from you and pool) maintains symmetry with the 2x mint in liquify.
+The 2x burn (from you and pool) maintains symmetry with the 2x mint in heat.
 
 ### Step 4: Buy Liquid with Water
 
@@ -161,7 +161,7 @@ The 2x burn (from you and pool) maintains symmetry with the 2x mint in liquify.
 3. Enter your ERC-20 token address
 4. Confirms transaction → new liquid token created
 5. Find the new liquid contract address from the transaction logs
-6. Approve and liquify your tokens into this new liquid
+6. Approve and heat your tokens into this new liquid
 
 ### Workflow 2: Trade Between Two Liquid Tokens
 
@@ -176,20 +176,20 @@ The 2x burn (from you and pool) maintains symmetry with the 2x mint in liquify.
 ### Workflow 3: Add Liquidity to Existing Liquid
 
 1. Approve the backing token (e.g., USDC)
-2. Call `liquify(amount)` on the liquid contract
+2. Call `heat(amount)` on the liquid contract
 3. Receive liquid tokens (you get N, pool gets N)
 4. Pool now has more liquidity for trading
 
 ### Workflow 4: Exit Your Position
 
 **Option A: Solidify to backing token**
-1. Call `solidify(amount)` on the liquid contract
+1. Call `cool(amount)` on the liquid contract
 2. Receive backing tokens based on pool reserves
 
-**Option B: Sell for water, then solidify water**
+**Option B: Sell for water, then cool water**
 1. Call `sell(amount)` to convert liquid → water
 2. Go to water contract
-3. Call `solidify(amount)` to convert water → ice (water's solid)
+3. Call `cool(amount)` to convert water → ice (water's solid)
 
 **Option C: Trade on external DEX**
 - Liquid tokens are standard ERC-20s
@@ -304,7 +304,7 @@ When you approve a contract:
 - Uniswap: Trade token pairs through router contract
 
 **Liquidity:**
-- Liquid: Automatic 2x mint when you liquify (you get half, pool gets half)
+- Liquid: Automatic 2x mint when you heat (you get half, pool gets half)
 - Uniswap: Manually add/remove liquidity, receive separate LP tokens
 
 ### vs. Wrapped Tokens (WETH)
@@ -347,7 +347,7 @@ Yes. Risks include:
 
 ### Who provides the liquidity?
 
-Everyone who liquifies. When you liquify 1,000 USDC:
+Everyone who liquifies. When you heat 1,000 USDC:
 - You get 1,000 liquid-USDC to hold
 - Pool gets 1,000 liquid-USDC to trade
 
@@ -391,7 +391,7 @@ No oracles, no governance, no external inputs.
 
 On average, yes—but it varies above and below 1:1 over time.
 
-When you solidify, the amount of solids you receive depends on how much of the liquid supply is in the pool versus held outside:
+When you cool, the amount of solids you receive depends on how much of the liquid supply is in the pool versus held outside:
 - **More liquid in pool** (less held outside) → You get more solids per liquid
 - **Less liquid in pool** (more held outside) → You get fewer solids per liquid
 - **On average across all users** → Approaches 1:1 ratio
@@ -410,12 +410,12 @@ Think of it like wrapping + being an LP simultaneously. Your share of backing to
 
 **Alice's actions on Etherscan:**
 1. USDC contract → `approve(liquidUSDC, 10000e6)`
-2. liquid-USDC contract → `liquify(10000e6)`
+2. liquid-USDC contract → `heat(10000e6)`
 
 **Result:**
 - Alice receives 10,000 liquid-USDC
 - Pool grows to 15,000 liquid-USDC
-- Alice can now trade, hold, or solidify
+- Alice can now trade, hold, or cool
 
 ### Scenario 2: Bob Buys Liquid
 
@@ -455,8 +455,8 @@ Think of it like wrapping + being an LP simultaneously. Your share of backing to
 - Dave has 3,000 liquid-USDC
 
 **Dave's actions on Etherscan:**
-1. liquid-USDC contract → Read → `solidify` preview (via staticcall or quote if available)
-2. liquid-USDC contract → Write → `solidify(3000e6)`
+1. liquid-USDC contract → Read → `cool` preview (via staticcall or quote if available)
+2. liquid-USDC contract → Write → `cool(3000e6)`
 
 **Result:**
 - Burns 3,000 liquid-USDC from Dave
@@ -504,7 +504,7 @@ To see all activity on a liquid:
 **Health indicators:**
 - Large pool + lake = good liquidity
 - Very small pool = high price impact
-- Zero lake = can't sell (but can still solidify)
+- Zero lake = can't sell (but can still cool)
 
 ## Network Information
 
