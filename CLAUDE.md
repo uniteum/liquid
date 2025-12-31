@@ -273,6 +273,21 @@ using SafeERC20 for IERC20Metadata;
 - Handles non-standard ERC-20 implementations
 - No raw `transfer()` or `transferFrom()` calls
 
+### Token Approval Requirements
+
+**IMPORTANT:** Token approval is ONLY required for liquify operations.
+
+**Requires approval:**
+- `liquify(solids)` - User must approve liquid contract to spend backing tokens
+
+**NO approval needed (only requires msg.sender ownership):**
+- `solidify(liquids)` - Burns from msg.sender's balance
+- `buy(liquids)` - Transfers water from msg.sender
+- `sell(liquids)` - Transfers liquids from msg.sender
+- `buy(liquids, other)` - Cross-swap using msg.sender's liquids
+
+The contract uses `transferFrom(msg.sender, ...)` which works directly when msg.sender owns the tokens being transferred.
+
 ## Development Workflow
 
 ### Build & Test

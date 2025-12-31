@@ -79,7 +79,6 @@ The 2x burn (from you and pool) maintains symmetry with the 2x mint in liquify.
 
 **Before you start:**
 1. You need water tokens in your wallet
-2. Approve the liquid contract to spend your water tokens
 
 **To buy:**
 1. On the liquid contract, find the `buy` function (the one with just `uint256 liquids` parameter)
@@ -99,9 +98,6 @@ The 2x burn (from you and pool) maintains symmetry with the 2x mint in liquify.
 ### Step 5: Sell Liquid for Water
 
 **Goal:** Trade liquid tokens for water tokens.
-
-**Before you start:**
-1. Approve the liquid contract to spend your liquid tokens (if not already approved)
 
 **To sell:**
 1. On the liquid contract, find the `sell` function (the one with just `uint256 liquids` parameter)
@@ -123,9 +119,6 @@ The 2x burn (from you and pool) maintains symmetry with the 2x mint in liquify.
 **Goal:** Swap one liquid token for another in a single transaction.
 
 **Example:** Swap liquid-USDC for liquid-DAI
-
-**Before you start:**
-1. Approve the first liquid contract to spend your liquid tokens
 
 **To swap:**
 1. On the first liquid contract (e.g., liquid-USDC), find the `buy` function with two parameters: `(uint256 liquids, Liquid other)`
@@ -174,12 +167,11 @@ The 2x burn (from you and pool) maintains symmetry with the 2x mint in liquify.
 
 **Example:** Trade liquid-USDC → liquid-DAI
 
-1. Approve liquid-USDC contract to spend your liquid-USDC tokens
-2. On liquid-USDC contract, use `buy(uint256 liquids, Liquid other)`
-3. Enter amount of liquid-DAI you want
-4. Enter liquid-DAI contract address
-5. Confirm transaction
-6. Receive liquid-DAI directly
+1. On liquid-USDC contract, use `buy(uint256 liquids, Liquid other)`
+2. Enter amount of liquid-DAI you want
+3. Enter liquid-DAI contract address
+4. Confirm transaction
+5. Receive liquid-DAI directly
 
 ### Workflow 3: Add Liquidity to Existing Liquid
 
@@ -422,8 +414,7 @@ Think of it like wrapping + being an LP simultaneously.
 **Bob's actions on Etherscan:**
 1. liquid-USDC contract → Read → `buyQuote(1000e6)`
    - Returns: ~222 water needed
-2. water contract → `approve(liquidUSDC, 222e18)`
-3. liquid-USDC contract → Write → `buy(1000e6)`
+2. liquid-USDC contract → Write → `buy(1000e6)`
 
 **Result:**
 - Bob receives 1,000 liquid-USDC
@@ -438,8 +429,7 @@ Think of it like wrapping + being an LP simultaneously.
 **Carol's actions on Etherscan:**
 1. liquid-USDC contract → Read → `buyQuote(1000e6, liquidDAI_address)`
    - Check water used and DAI received
-2. liquid-USDC contract → `approve(liquidUSDC, 5000e6)`
-3. liquid-USDC contract → Write → `buy(1000e6, liquidDAI_address)`
+2. liquid-USDC contract → Write → `buy(1000e6, liquidDAI_address)`
 
 **Result:**
 - Carol's liquid-USDC sold for water
