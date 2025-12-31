@@ -11,8 +11,6 @@ contract LiquidTest is BaseTest {
     Liquid public immutable WATER = new Liquid();
     Liquid public U;
     Liquid public V;
-    TestToken public u_;
-    TestToken public v_;
     LiquidUser public owen;
     LiquidUser public alex;
     LiquidUser public beck;
@@ -23,10 +21,8 @@ contract LiquidTest is BaseTest {
         owen = newUser("owen");
         alex = newUser("alex");
         beck = newUser("beck");
-        u_ = owen.newToken("U", 1e9);
-        v_ = owen.newToken("V", 1e9);
-        U = WATER.make(u_);
-        V = WATER.make(v_);
+        U = WATER.make(owen.newToken("U", 1e9));
+        V = WATER.make(owen.newToken("V", 1e9));
 
         address spring = WATER.WATER_UTILITY();
         console.log("spring:", spring);
@@ -43,11 +39,11 @@ contract LiquidTest is BaseTest {
 
     function test_Pool() public returns (uint256 du, uint256 out) {
         owen.give(address(alex), 1e3, WATER);
-        owen.give(address(alex), 1e3, u_);
-        owen.give(address(alex), 1e3, v_);
+        owen.give(address(alex), 1e3, U.solid());
+        owen.give(address(alex), 1e3, V.solid());
         owen.give(address(beck), 1e7, WATER);
-        owen.give(address(beck), 1e3, u_);
-        owen.give(address(beck), 1e3, v_);
+        owen.give(address(beck), 1e3, U.solid());
+        owen.give(address(beck), 1e3, V.solid());
         owen.melt(U, 500);
         alex.melt(U, 500);
         beck.melt(U, 500);
