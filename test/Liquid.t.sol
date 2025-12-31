@@ -64,11 +64,12 @@ contract LiquidTest is BaseTest {
         assertEq(liquids, solids, "beck liquids != solids");
     }
 
-    function test_MeltSellFreezeBuy() public returns (uint256 water) {
+    function test_MeltSellFreezeBuy() public returns (uint256 water, uint256 solids) {
         giveaway();
         owen.give(address(U), 1000, WATER);
         owen.melt(U, 1000);
         alex.melt(U, 100);
-        water = alex.sell(U, 100);
+        water = alex.sell(U, 50);
+        solids = alex.freeze(U, U.balanceOf(address(alex)));
     }
 }
