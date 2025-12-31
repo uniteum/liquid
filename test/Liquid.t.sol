@@ -37,13 +37,17 @@ contract LiquidTest is BaseTest {
         user = new LiquidUser(name, WATER);
     }
 
-    function test_Pool() public returns (uint256 liquids, uint256 solids) {
+    function giveaway() internal {
         owen.give(address(alex), 1e3, WATER);
         owen.give(address(alex), 1e3, U.solid());
         owen.give(address(alex), 1e3, V.solid());
         owen.give(address(beck), 1e7, WATER);
         owen.give(address(beck), 1e3, U.solid());
         owen.give(address(beck), 1e3, V.solid());
+    }
+
+    function test_Pool() public returns (uint256 liquids, uint256 solids) {
+        giveaway();
         owen.melt(U, 500);
         alex.melt(U, 500);
         beck.melt(U, 500);
