@@ -7,7 +7,7 @@ import {BaseTest, console} from "./Base.t.sol";
 import {LiquidUser, IERC20} from "./LiquidUser.sol";
 
 contract LiquidTest is BaseTest {
-    Liquid public immutable WATER = new Liquid();
+    Liquid public WATER;
     Liquid public U;
     Liquid public V;
     LiquidUser public owen;
@@ -20,16 +20,10 @@ contract LiquidTest is BaseTest {
         owen = newUser("owen");
         alex = newUser("alex");
         beck = newUser("beck");
+        WATER = new Liquid(owen.newToken("WATER", 1e9));
+        owen.liquify(WATER, 1e9);
         U = WATER.make(owen.newToken("U", 1e9));
         V = WATER.make(owen.newToken("V", 1e9));
-
-        address utility = WATER.WATER_UTILITY();
-        console.log("utility:", utility);
-        uint256 all = WATER.balanceOf(utility);
-
-        vm.prank(utility);
-        // forge-lint: disable-next-line(erc20-unchecked-transfer)
-        WATER.transfer(address(owen), all);
     }
 
     function newUser(string memory name) internal returns (LiquidUser user) {

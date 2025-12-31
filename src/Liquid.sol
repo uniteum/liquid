@@ -10,15 +10,9 @@ import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/Reentrancy
 contract Liquid is ERC20, ReentrancyGuardTransient {
     using SafeERC20 for IERC20Metadata;
 
-    uint256 public constant WATER_SUPPLY = 1e9 ether;
-    uint8 public constant WATER_DECIMALS = 18;
-    string public constant WATER_NAME = "Tatar";
-    string public constant WATER_SYMBOL = "TATAR";
-
     Liquid public immutable WATER = this;
-    address public immutable WATER_UTILITY = 0xEbCaD83FeAD16e7D18DD691fFD2b39eca56677d8;
 
-    IERC20Metadata public solid = IERC20Metadata(address(0x1CE));
+    IERC20Metadata public solid;
 
     function liquify(uint256 solids) external nonReentrant {
         solid.safeTransferFrom(msg.sender, address(this), solids);
@@ -169,15 +163,15 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function name() public view virtual override returns (string memory) {
-        return this == WATER ? WATER_NAME : solid.name();
+        return solid.name();
     }
 
     function symbol() public view virtual override returns (string memory) {
-        return this == WATER ? WATER_SYMBOL : solid.symbol();
+        return solid.symbol();
     }
 
     function decimals() public view virtual override returns (uint8) {
-        return this == WATER ? WATER_DECIMALS : solid.decimals();
+        return solid.decimals();
     }
 
     function predict(IERC20Metadata stuff) public view returns (address future, bytes32 salt) {
@@ -208,8 +202,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         }
     }
 
-    constructor() ERC20("", "") {
-        _mint(WATER_UTILITY, WATER_SUPPLY);
+    constructor(IERC20Metadata ice) ERC20("", "") {
+        solid = ice;
     }
 
     modifier onlyLiquid() {
