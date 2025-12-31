@@ -52,11 +52,11 @@ contract LiquidTest is BaseTest {
 
     function test_MeltFreeze() public returns (uint256 liquids, uint256 solids) {
         giveaway();
-        owen.melt(U, 500);
-        alex.melt(U, 500);
-        beck.melt(U, 500);
+        owen.liquify(U, 500);
+        alex.liquify(U, 500);
+        beck.liquify(U, 500);
         liquids = 100;
-        solids = alex.freeze(U, liquids);
+        solids = alex.solidify(U, liquids);
         assertEq(liquids, solids, "1. alex liquids != solids");
         (liquids, solids) = alex.liquidate(U);
         assertEq(liquids, solids, "2. alex liquids != solids");
@@ -67,9 +67,9 @@ contract LiquidTest is BaseTest {
     function test_MeltSellFreezeBuy() public returns (uint256 water, uint256 solids) {
         giveaway();
         owen.give(address(U), 1000, WATER);
-        owen.melt(U, 1000);
-        alex.melt(U, 100);
+        owen.liquify(U, 1000);
+        alex.liquify(U, 100);
         water = alex.sell(U, 50);
-        solids = alex.freeze(U, U.balanceOf(address(alex)));
+        solids = alex.solidify(U, U.balanceOf(address(alex)));
     }
 }

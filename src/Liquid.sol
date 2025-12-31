@@ -21,14 +21,14 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     IERC20Metadata public solid = IERC20Metadata(address(0x1CE));
 
-    function melt(uint256 solids) external nonReentrant {
+    function liquify(uint256 solids) external nonReentrant {
         solid.safeTransferFrom(msg.sender, address(this), solids);
         _mint(address(this), solids);
         _mint(msg.sender, solids);
-        emit Melted(this, solids);
+        emit Liquify(this, solids);
     }
 
-    function freeze(uint256 liquids) external nonReentrant returns (uint256 solids) {
+    function solidify(uint256 liquids) external nonReentrant returns (uint256 solids) {
         uint256 total = totalSupply();
         uint256 pool = balanceOf(address(this));
         uint256 held = total - pool;
@@ -38,7 +38,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _burn(address(this), ours);
         _burn(msg.sender, mine);
         solid.safeTransfer(msg.sender, solids);
-        emit Frozen(this, liquids, solids);
+        emit Solidify(this, liquids, solids);
     }
 
     function balances() public view returns (uint256 pool, uint256 lake) {
@@ -226,8 +226,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         }
     }
 
-    event Melted(Liquid indexed liquid, uint256 liquids);
-    event Frozen(Liquid indexed liquid, uint256 liquids, uint256 solids);
+    event Liquify(Liquid indexed liquid, uint256 liquids);
+    event Solidify(Liquid indexed liquid, uint256 liquids, uint256 solids);
     event Bought(Liquid indexed liquid, uint256 liquids, uint256 water);
     event Sold(Liquid indexed liquid, uint256 liquids, uint256 water);
     event Made(IERC20Metadata indexed solid, Liquid indexed liquid);
