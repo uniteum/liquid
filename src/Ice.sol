@@ -4,7 +4,7 @@ pragma solidity ^0.8.30;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract Water is ERC20 {
+contract Ice is ERC20 {
     string constant NAME = "Watar";
     string constant SYMBOL = "WATAR";
     uint256 constant SUPPLY = 1e9 ether;

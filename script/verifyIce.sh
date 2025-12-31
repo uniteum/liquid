@@ -1,0 +1,2 @@
+contract=$(jq -r '.transactions[0].contractAddress' broadcast/Ice.s.sol/$chain/dry-run/run-latest.json)
+forge verify-contract $contract Ice --chain $chain --verifier etherscan --show-standard-json-input > io/$chain/Ice.json
