@@ -465,11 +465,10 @@ Think of it like wrapping + being an LP simultaneously. Your share of backing to
 Liquid uses deterministic addresses. Same backing token → same liquid address always.
 
 **To predict a liquid address before creation:**
-1. Compute CREATE2 address using:
-   - Factory: water contract address
-   - Salt: `bytes32(uint160(address(backingToken)))`
-   - Bytecode: EIP-1167 minimal proxy bytecode
-   - Implementation: Liquid implementation address
+1. Go to the water contract on Etherscan
+2. Use the "Read Contract" tab
+3. Call `predict(address stuff)` with the backing token address
+4. Returns the future liquid contract address (works even if not created yet)
 
 ### Batch Operations
 
