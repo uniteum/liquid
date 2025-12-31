@@ -70,14 +70,14 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         water = sellQuote(hot, pool, lake);
     }
 
-    function buyQuote(uint256 hot, Liquid other) public view returns (uint256 water, uint256 others) {
+    function buyQuote(uint256 hot, Liquid other) public view returns (uint256 water, uint256 hotter) {
         water = buyQuote(hot);
-        others = other.buyWithQuote(water);
+        hotter = other.buyWithQuote(water);
     }
 
-    function sellQuote(uint256 hot, Liquid other) public view returns (uint256 water, uint256 others) {
+    function sellQuote(uint256 hot, Liquid other) public view returns (uint256 water, uint256 hotter) {
         water = sellQuote(hot);
-        others = other.sellForQuote(water);
+        hotter = other.sellForQuote(water);
     }
 
     function buyWithQuote(uint256 water) public view returns (uint256 hot) {
@@ -90,13 +90,13 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         water = buyQuote(hot, lake, pool);
     }
 
-    function buyWithQuote(uint256 others, Liquid other) public view returns (uint256 water, uint256 hot) {
-        water = buyWithQuote(others);
+    function buyWithQuote(uint256 hotter, Liquid other) public view returns (uint256 water, uint256 hot) {
+        water = buyWithQuote(hotter);
         hot = other.buyWithQuote(water);
     }
 
-    function sellForQuote(uint256 others, Liquid other) public view returns (uint256 water, uint256 hot) {
-        water = sellForQuote(others);
+    function sellForQuote(uint256 hotter, Liquid other) public view returns (uint256 water, uint256 hot) {
+        water = sellForQuote(hotter);
         hot = other.sellForQuote(water);
     }
 
@@ -110,16 +110,16 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _sold(hot, water);
     }
 
-    function buy(uint256 hot, Liquid other) external returns (uint256 water, uint256 others) {
-        (water, others) = buyQuote(hot, other);
-        other.sold(others, water);
+    function buy(uint256 hot, Liquid other) external returns (uint256 water, uint256 hotter) {
+        (water, hotter) = buyQuote(hot, other);
+        other.sold(hotter, water);
         _bought(hot, water);
     }
 
-    function sell(uint256 hot, Liquid other) external returns (uint256 water, uint256 others) {
-        (water, others) = sellQuote(hot, other);
+    function sell(uint256 hot, Liquid other) external returns (uint256 water, uint256 hotter) {
+        (water, hotter) = sellQuote(hot, other);
         _sold(hot, water);
-        other.bought(others, water);
+        other.bought(hotter, water);
     }
 
     function buyWith(uint256 water) external returns (uint256 hot) {
@@ -132,16 +132,16 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _sold(hot, water);
     }
 
-    function buyWith(uint256 others, Liquid other) external returns (uint256 water, uint256 hot) {
-        (water, hot) = buyWithQuote(others, other);
-        other.sold(others, water);
+    function buyWith(uint256 hotter, Liquid other) external returns (uint256 water, uint256 hot) {
+        (water, hot) = buyWithQuote(hotter, other);
+        other.sold(hotter, water);
         _bought(hot, water);
     }
 
-    function sellFor(uint256 others, Liquid other) external returns (uint256 water, uint256 hot) {
-        (water, hot) = sellForQuote(others, other);
+    function sellFor(uint256 hotter, Liquid other) external returns (uint256 water, uint256 hot) {
+        (water, hot) = sellForQuote(hotter, other);
         _sold(hot, water);
-        other.bought(others, water);
+        other.bought(hotter, water);
     }
 
     function bought(uint256 hot, uint256 water) external onlyLiquid {
