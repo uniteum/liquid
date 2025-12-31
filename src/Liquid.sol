@@ -13,9 +13,11 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     Liquid public immutable WATER = this;
 
     IERC20Metadata public solid;
+    mapping(address => IERC20Metadata) public solidOf;
 
     constructor(IERC20Metadata ice) ERC20("", "") {
         solid = ice;
+        solidOf[address(this)] = ice;
     }
 
     function liquify(uint256 solids) external nonReentrant {
@@ -195,6 +197,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
             if (future.code.length == 0) {
                 future = Clones.cloneDeterministic(address(WATER), salt);
                 liquid.__initialize(stuff);
+                solidOf[future] = stuff;
                 emit Made(stuff, liquid);
             }
         }
@@ -212,9 +215,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function _onlyLiquid() internal view {
-        Liquid liquid = Liquid(msg.sender);
-        (address predicted,) = WATER.predict(liquid.solid());
-        if (msg.sender != predicted) {
+        if (address(WATER.solidOf(msg.sender)) == address(0)) {
             revert Unauthorized();
         }
     }
