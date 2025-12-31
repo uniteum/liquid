@@ -46,9 +46,9 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         lake = WATER.balanceOf(address(this));
     }
 
-    function buyQuote(uint256 liquids, uint256 pool, uint256 lake) public pure returns (uint256 water) {
+    function buyQuote(uint256 liquids, uint256 pool, uint256 lake) public view returns (uint256 water) {
         if (pool <= liquids) {
-            revert Drained(pool, liquids);
+            revert Drained(this, pool, liquids);
         }
         uint256 drained = pool - liquids;
         uint256 filled = pool * lake / drained;
@@ -231,6 +231,6 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     event Made(IERC20Metadata indexed solid, Liquid indexed liquid);
 
     error Nothing();
-    error Drained(uint256 pool, uint256 liquids);
+    error Drained(Liquid liquid, uint256 pool, uint256 liquids);
     error Unauthorized();
 }
