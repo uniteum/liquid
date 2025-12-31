@@ -1,942 +1,466 @@
-# CLAUDE.md - Uniteum Protocol
+# CLAUDE.md - Liquid Protocol
 
-> Context guide for AI-assisted development of the Uniteum algebraic liquidity protocol.
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Core Concepts](#core-concepts)
-- [Architecture](#architecture)
-- [Critical Invariants](#critical-invariants)
-- [Contract Reference](#contract-reference)
-- [Development Workflow](#development-workflow)
-- [Testing Patterns](#testing-patterns)
-- [Common Tasks](#common-tasks)
-- [Security Considerations](#security-considerations)
-
----
+> Context guide for AI-assisted development of the Liquid protocol.
 
 ## Overview
 
-**Uniteum** is an algebraic liquidity protocol on Ethereum where Units are ERC-20 tokens with built-in liquidity via reciprocal relationships. The system uses symbolic algebra to represent compound units (like physical dimensions).
+**Liquid** is a constant-product AMM protocol on Ethereum where any ERC-20 token can be wrapped into a "liquid" token with built-in liquidity.
 
-### What Makes It Unique
+### Core Metaphor
 
-- **Built-in Liquidity**: Every unit U has a reciprocal 1/U with a constant product invariant `sqrt(u * v) = w`
-- **Symbolic Algebra**: Units compose algebraically: `kg*m/s^2`, `USD*ETH`, `m^2\3`
-- **Rational Exponents**: Full support for rational number exponents (e.g., `x^2\3`, `kg^-1\2`)
-- **Anchored Units**: Custodial wrappers for external ERC-20 tokens (e.g., `$0xdAC17F958D2ee523a2206206994597C13D831ec7` for USDT)
-- **Kiosk System**: Native currency ↔ ERC-20 trading with fixed or discount pricing
+- **Ice/Solid** = External ERC-20 backing token
+- **Liquid** = Wrapped ERC-20 with AMM liquidity
+- **Water** = Base Liquid instance used for cross-pool swaps
+- **Pool** = Liquid tokens held by contract
+- **Lake** = Water tokens held by contract
 
-### Key Files
+### Key File
 
-- **Core Protocol**: [src/Unit.sol](src/Unit.sol) - The main algebraic liquidity contract
-- **Symbol System**: [src/Units.sol](src/Units.sol) - Symbol parsing and term manipulation
-- **Rational Math**: [src/Rationals.sol](src/Rationals.sol) - Rational number arithmetic
-- **Trading**: [src/Kiosk.sol](src/Kiosk.sol), [src/FixedKiosk.sol](src/FixedKiosk.sol), [src/DiscountKiosk.sol](src/DiscountKiosk.sol)
+**[src/Liquid.sol](src/Liquid.sol)** (232 lines) - Single contract implementing entire protocol
 
----
+## Core Operations
 
-## Core Concepts
-
-### 1. The Central Unit "1"
-
-The identity unit is the foundation of the system:
+### 1. Liquify (Solid → Liquid)
 
 ```solidity
-IUnit one = new Unit(upstreamToken);
+function liquify(uint256 solids) external nonReentrant
 ```
 
-- Symbol: `"1"`
-- Self-reciprocal: `one.reciprocal() == one`
-- All other units are created from and relate back to "1"
-- Only "1" supports `migrate()` and `unmigrate()` operations
-
-### 2. Reciprocal Relationship
-
-Every unit has an automatically-created reciprocal:
-
-```solidity
-IUnit U = one.multiply("USD");
-IUnit V = U.reciprocal();  // "1/USD"
-assert(V.reciprocal() == U);
-```
-
-### 3. Constant Product Invariant
-
-The core mathematical relationship:
-
-```solidity
-// From Unit.sol:46-47
-function invariant(uint256 u, uint256 v) public pure returns (uint256 w) {
-    w = Math.sqrt(u * v);  // Geometric mean
-}
-```
-
-For any unit U and its reciprocal 1/U:
-- `u` = total supply of U
-- `v` = total supply of 1/U
-- `w` = sqrt(u * v) must remain constant (or increase systematically)
-
-### 4. The Forge Operation
-
-The primary operation for minting/burning while maintaining invariants:
-
-```solidity
-function forge(IUnit V, int256 du, int256 dv)
-    external
-    returns (IUnit W, int256 dw)
-```
-
-**Parameters:**
-- `V`: The second unit (often the reciprocal)
-- `du`: Signed change in balance of calling unit
-- `dv`: Signed change in balance of unit V
-- Returns `W` (product unit, usually "1") and `dw` (change in W balance)
+**What it does:**
+- User deposits `solids` of backing token
+- Contract mints `solids` to pool AND `solids` to user (2x mint)
+- Result: User owns `solids` liquids, pool grows by `solids`
 
 **Example:**
 ```solidity
-// Mint 1000 USD and 500 1/USD, burn appropriate amount of "1"
-(W, dw) = USD.forge(reciprocalUSD, 1000, 500);
-// W == one, dw < 0 (burned "1" tokens)
+// User has 1000 USDC
+usdc.approve(address(liquidUSDC), 1000);
+liquidUSDC.liquify(1000);
+// User now has: 1000 liquid-USDC
+// Pool now has: 1000 liquid-USDC
 ```
 
-### 5. Symbol Algebra
-
-Units compose using standard algebraic notation:
+### 2. Solidify (Liquid → Solid)
 
 ```solidity
-unit("kg") * unit("m") / unit("s^2")  →  unit("kg*m/s^2")
-unit("ETH") * unit("USD")             →  unit("ETH*USD")
-unit("m^2")                           →  unit("m^2")
-unit("kg^2\\3")                       →  unit("kg^2\\3")  // Note: \\ is escape for \
+function solidify(uint256 liquids) external nonReentrant returns (uint256 solids)
 ```
 
-**Normalization:**
-- Symbols are automatically simplified: `"a*b/a"` → `"b"`
-- Exponents are reduced: `"a^15\\6"` → `"a^5\\2"` (15/6 = 5/2)
-- Terms are sorted alphabetically
+**What it does:**
+- Burns liquids proportionally from both user and pool
+- Returns backing tokens based on: `liquids * (backing_balance / user_held_liquids)`
+- Burns total of `2 * liquids` (maintaining symmetry with liquify)
 
-### 6. Anchored Units
+**Formula:**
+```solidity
+pool_burn = 2 * liquids * pool / totalSupply
+user_burn = 2 * liquids * held / totalSupply
+solids = liquids * solid.balanceOf(address(this)) / held
+```
 
-Wrap external ERC-20 tokens with custodial semantics:
+### 3. Buy (Water → Liquid)
 
 ```solidity
-// Symbol format: $0x<address>
-IUnit wrappedUSDT = one.multiply("$0xdAC17F958D2ee523a2206206994597C13D831ec7");
-
-// Minting transfers underlying tokens to Unit contract
-wrappedUSDT.forge(reciprocal, 1000, 1000);  // Transfers 1000 USDT from user
+function buy(uint256 liquids) external returns (uint256 water)
 ```
 
-**Rules:**
-- Only base units (exponent 1/1) can be anchored
-- Underlying tokens are held by the Unit contract
-- Symbol must start with `$0x` followed by the token address
+**Constant Product Formula:**
+```solidity
+// Invariant: pool * lake = k
+water = pool * lake / (pool - liquids) - lake
+```
 
----
+**What it does:**
+- Calculates water cost for buying `liquids` from pool
+- Transfers water from user to pool's lake
+- Transfers liquids from pool to user
+
+### 4. Sell (Liquid → Water)
+
+```solidity
+function sell(uint256 liquids) external returns (uint256 water)
+```
+
+**Formula:**
+```solidity
+water = lake - pool * lake / (pool + liquids)
+```
+
+**What it does:**
+- Calculates water received for selling `liquids` to pool
+- Transfers liquids from user to pool
+- Transfers water from pool's lake to user
+
+### 5. Cross-Liquid Swaps
+
+```solidity
+function buy(uint256 liquids, Liquid other) external
+    returns (uint256 water, uint256 others)
+```
+
+**What it does:**
+- Swaps between two different Liquid pools using water as intermediary
+- Example: Swap liquid-USDC for liquid-DAI in single transaction
+- Both pools maintain their AMM invariants
+
+## Factory Pattern
+
+### Creating New Liquids
+
+```solidity
+function make(IERC20Metadata stuff) public returns (Liquid liquid)
+```
+
+**How it works:**
+- Uses CREATE2 with `bytes32(uint160(address(stuff)))` as salt
+- Same backing token always produces same Liquid address
+- Uses EIP-1167 minimal proxy (OpenZeppelin Clones)
+- Only callable from main WATER instance
+
+**Example:**
+```solidity
+IERC20Metadata usdc = IERC20Metadata(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+Liquid liquidUSDC = water.make(usdc);
+// liquidUSDC address is deterministic based on USDC address
+```
 
 ## Architecture
 
-### Contract Hierarchy
-
-```
-Prototype (factory base)
-    ├─ CloneERC20 (cloneable ERC-20)
-    │   └─ Unit (algebraic liquidity)
-    └─ Kiosk (native ↔ ERC-20 trading)
-        ├─ FixedKiosk (constant price)
-        └─ DiscountKiosk (linear discount curve)
-```
-
-### Key Components
-
-#### Unit System
-- **[Unit.sol](src/Unit.sol)**: Core protocol implementing forge, invariant, unit composition
-- **[IUnit.sol](src/IUnit.sol)**: Interface defining the unit operations
-- **[CloneERC20.sol](src/CloneERC20.sol)**: ERC-20 base with cloning support
-
-#### Symbol & Math Libraries
-- **[Units.sol](src/Units.sol)**: Symbol parsing, term manipulation, composition
-- **[Term.sol](src/Term.sol)**: Packed uint256 type for unit terms
-- **[Rationals.sol](src/Rationals.sol)**: 128-bit rational number arithmetic
-- **[Rational.sol](src/Rational.sol)**: 8-bit compact rational for exponents
-
-#### Trading System
-- **[Kiosk.sol](src/Kiosk.sol)**: Abstract base for selling ERC-20 for native currency
-- **[FixedKiosk.sol](src/FixedKiosk.sol)**: Simple fixed-price implementation
-- **[DiscountKiosk.sol](src/DiscountKiosk.sol)**: Linear discount curve with free overflow
-
-#### Utilities
-- **[Prototype.sol](src/Prototype.sol)**: Deterministic CREATE2 minimal proxy factory
-- **[Mintlet.sol](src/Mintlet.sol)**: Minimalist ERC-20 token creator
-
-### Data Structures
-
-#### Term (packed uint256)
-
-```
-+0......0|1.........................20|21................29|30...........31+
-| Symbol/Address                      |    Reserved        |   Exponent    |
-| Type=0: 30-byte base symbol         |                    | Rational8     |
-| Type=1: address (ERC-20 token)      |                    |               |
-```
-
-Encoding examples:
-- `"kg"` → base symbol with exponent 1/1
-- `"m^2"` → base symbol with exponent 2/1
-- `"$0xdAC17F958D2ee523a2206206994597C13D831ec7"` → anchored USDT with exponent 1/1
-
-#### Rational (128-bit)
-
-```
-[int128 numerator | uint128 denominator]
-```
-
-Always stored in reduced form. Examples:
-- `3/4` → `{num: 3, den: 4}`
-- `6/8` → `{num: 3, den: 4}` (reduced)
-- `-5/2` → `{num: -5, den: 2}`
-
-#### Rational8 (16-bit)
-
-```
-[int8 numerator | uint8 denominator]
-```
-
-Compact version for exponents in terms.
-
----
-
-## Critical Invariants
-
-### 1. Constant Product (Geometric Mean)
-
-For any unit U and reciprocal V:
+### Contract Structure
 
 ```solidity
-sqrt(totalSupply(U) * totalSupply(V)) = constant (or increases via forge)
+contract Liquid is ERC20, ReentrancyGuardTransient {
+    Liquid public immutable WATER = this;
+    IERC20Metadata public solid;  // Backing token
+    mapping(address => IERC20Metadata) public solidOf;  // Registry
+}
 ```
 
-**Enforced by:** [Unit.sol:46-55](src/Unit.sol#L46-L55)
-**Tested in:** [test/Forge.t.sol](test/Forge.t.sol)
+### State Variables
 
-### 2. Reciprocal Symmetry
+- `WATER` - Immutable self-reference (main instance for factory)
+- `solid` - The backing ERC-20 token for this Liquid
+- `solidOf[liquidAddress]` - Maps Liquid addresses to their backing tokens
 
-```solidity
-U.reciprocal().reciprocal() == U
+### Key Functions
+
+**Internal Accounting:**
+- `balances()` - Returns `(pool, lake)` balances
+- `update()` - Internal token transfer (callable only by other Liquids)
+
+**Access Control:**
+- `onlyLiquid` modifier - Ensures caller is registered Liquid instance
+- Protects `bought()`, `sold()`, `update()` from external manipulation
+
+## Mathematical Invariants
+
+### 1. Constant Product AMM
+
+```
+pool * lake = k  (constant before and after trades)
 ```
 
-**Enforced by:** Unit creation logic
-**Tested in:** [test/Unit.t.sol](test/Unit.t.sol)
+### 2. Liquify/Solidify Symmetry
 
-### 3. Symbol Normalization
+```
+Total minted in liquify = 2 * solids
+Total burned in solidify = 2 * liquids
+```
 
-Symbols are always in canonical form:
-- Terms sorted alphabetically
-- Exponents reduced to lowest terms
-- Like terms merged
+### 3. Backing Token Conservation
 
-**Example:** `"a*b/a"` → `"b"`, `"m^4\\2"` → `"m^2"`
+```
+solid.balanceOf(address(liquid)) = sum of all liquified solids - sum of all solidified returns
+```
 
-**Enforced by:** [Units.sol:sortAndMerge()](src/Units.sol)
-**Tested in:** [test/Unit.t.sol](test/Unit.t.sol)
+## Security
 
-### 4. Reentrancy Protection
-
-All state-changing operations use transient reentrancy guard:
+### Reentrancy Protection
 
 ```solidity
 modifier nonReentrant() {
-    ONE.__nonReentrantBefore();
+    // Uses EIP-1153 transient storage
+    // from OpenZeppelin ReentrancyGuardTransient
+}
+```
+
+- All state-changing functions use `nonReentrant`
+- Transient storage clears after transaction
+- Protects against malicious ERC-20 callbacks
+
+### Access Control
+
+```solidity
+modifier onlyLiquid() {
+    if (address(WATER.solidOf(msg.sender)) == address(0)) {
+        revert Unauthorized();
+    }
     _;
-    ONE.__nonReentrantAfter();
 }
 ```
 
-**Enforced by:** Guard stored on unit "1" via EIP-1153 transient storage
-**Location:** [Unit.sol](src/Unit.sol) (search for `REENTRANCY_GUARD_STORAGE`)
+- Only registered Liquid instances can call cross-pool functions
+- Prevents unauthorized pool manipulation
+- Applied to: `bought()`, `sold()`, `update()`
 
-### 5. Anchor Token Custody
-
-For anchored units (`$0x...`):
-- Underlying tokens MUST be transferred to Unit contract on mint
-- Underlying tokens MUST be returned on burn
-- Only base units (exponent 1/1) can be anchored
-
-**Enforced by:** [Unit.sol migrate/unmigrate](src/Unit.sol)
-**Tested in:** [test/Unit.t.sol](test/Unit.t.sol)
-
-### 6. Total Supply of "1" Never Increases
+### Safe Token Handling
 
 ```solidity
-totalSupply("1") <= ONE_MINTED
+using SafeERC20 for IERC20Metadata;
 ```
 
-The forge operation may burn "1" tokens but never mints beyond initial supply.
-
-**Enforced by:** Forge logic in [Unit.sol](src/Unit.sol)
-**Tested in:** [test/Forge.t.sol](test/Forge.t.sol)
-
----
-
-## Contract Reference
-
-### Unit.sol
-
-**Key Functions:**
-
-```solidity
-// Create new unit by multiplying symbol
-function multiply(string memory symbol_) external returns (IUnit U)
-
-// Get product of this unit with another
-function product(IUnit V) external view returns (IUnit W, bool reverse)
-
-// Mint/burn maintaining invariant
-function forge(IUnit V, int256 du, int256 dv) external returns (IUnit W, int256 dw)
-
-// Quote forge without execution
-function forgeQuote(IUnit V, int256 du, int256 dv) public view returns (IUnit W, int256 dw)
-
-// Get current invariant state
-function invariant() public view returns (uint256 u, uint256 v, uint256 w)
-
-// Migrate underlying tokens (anchored units only, callable on "1")
-function migrate(IUnit A, uint256 amount) external returns (int256 da)
-
-// Unmigrate underlying tokens (anchored units only, callable on "1")
-function unmigrate(IUnit A, uint256 amount) external returns (int256 da)
-```
-
-**Important State:**
-
-```solidity
-IUnit public reciprocal;      // The reciprocal unit (1/U)
-IERC20 public anchor;         // Underlying ERC-20 (if anchored)
-uint256 public ONE_MINTED;    // Initial supply of "1" (immutable)
-```
-
-### Kiosk.sol
-
-**Abstract Base:**
-
-```solidity
-abstract contract Kiosk {
-    IERC20 public goods;        // Token being sold
-    uint256 public listPrice;   // Reference price
-    address public owner;       // Creator/owner
-
-    // Must be implemented by subclasses
-    function quote(uint256 v) public view virtual returns (uint256 q, bool soldOut);
-
-    // Buy goods with native currency
-    function buy() public payable returns (uint256 q, bool soldOut);
-
-    // Owner functions
-    function reclaim(uint256 quantity) external onlyOwner;
-    function collect(uint256 value) external onlyOwner;
-}
-```
-
-### FixedKiosk.sol
-
-**Simple fixed-price implementation:**
-
-```solidity
-function quote(uint256 v) public view override returns (uint256 q, bool soldOut) {
-    q = 1 ether * v / listPrice;
-    soldOut = q >= inventory();
-    if (soldOut) {
-        q = inventory();
-    }
-}
-```
-
-**Price:** Constant at `listPrice` per unit
-
-### DiscountKiosk.sol
-
-**Linear discount curve:**
-
-```solidity
-function quote(uint256 v) public view override returns (uint256 q, bool soldOut) {
-    uint256 available = inventory();
-    bool beyondCapacity = capacity < available;
-    uint256 d = beyondCapacity ? 0 : capacity - available;
-
-    // Quadratic formula from integral of linear price curve
-    q = Math.sqrt(d * d + 2 ether * v * capacity / listPrice) - d;
-
-    if (beyondCapacity) {
-        q += available - capacity;  // Free region
-    }
-}
-```
-
-**Price Function:** `price(x) = listPrice * (1 - x/capacity)`
-- Price decreases linearly as inventory approaches capacity
-- Beyond capacity, excess inventory is free
-
-**Additional State:**
-
-```solidity
-uint256 public capacity;  // Inventory level at which price → 0
-```
-
----
+- All token transfers use SafeERC20
+- Handles non-standard ERC-20 implementations
+- No raw `transfer()` or `transferFrom()` calls
 
 ## Development Workflow
 
-### Code Style
-
-**NatSpec Documentation:**
-- Use `/** */` multi-line block notation for all NatSpec comments (never `///`)
-- Always use multi-line format even for single-line comments (this is what `forge fmt` enforces)
-- Include `@notice` for public descriptions
-- Add `@param` and `@return` for functions with parameters/returns
-- Keep comments concise and focused
-
-**Examples:**
-```solidity
-/**
- * @notice ERC-20 token being sold.
- */
-IERC20 public goods;
-
-/**
- * @notice Buy goods with native tokens.
- * @param amount Quantity to purchase.
- * @return success True if purchase succeeded.
- */
-function buy(uint256 amount) external returns (bool success);
-```
-
-**Important:** Always run `forge fmt` before committing to ensure consistent formatting.
-
-### Environment Setup
+### Build & Test
 
 ```bash
-# Install NVM and Node.js
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
-nvm install --lts
-nvm use --lts
-
-# Clone and install
-git clone git@github.com:uniteum/uniteum.git
-cd uniteum
-npm install
+forge build          # Compile contracts
+forge test           # Run test suite
+forge test -vvv      # Verbose output with logs
+forge fmt            # Format code
 ```
+
+### Running Specific Tests
+
+```bash
+forge test --match-test test_MeltFreeze
+forge test --match-test test_MeltSellFreezeBuy
+```
+
+### Code Style
+
+**NatSpec:**
+- Use `/** */` multi-line block notation (never `///`)
+- Always multi-line format even for single-line comments
+- Include `@notice` for public descriptions
+- Add `@param` and `@return` as needed
+
+**Formatting:**
+- Run `forge fmt` before committing
+- Follows Foundry's default style guide
+
+## Test Patterns
+
+### Base Test Setup
+
+```solidity
+contract LiquidTest is BaseTest {
+    Liquid public W;    // Water
+    Liquid public U;    // First liquid
+    Liquid public V;    // Second liquid
+    LiquidUser public owen;  // Test users
+    LiquidUser public alex;
+    LiquidUser public beck;
+
+    function setUp() public virtual override {
+        super.setUp();
+        owen = newUser("owen");
+        W = new Liquid(owen.newToken("W", 1e9));
+        owen.liquify(W, 1e9);
+        U = W.make(owen.newToken("U", 1e9));
+        V = W.make(owen.newToken("V", 1e9));
+    }
+}
+```
+
+### Test User Pattern
+
+```solidity
+contract LiquidUser is User {
+    function liquify(Liquid U, uint256 solids) public { }
+    function solidify(Liquid U, uint256 liquids) public returns (uint256 solids) { }
+    function sell(Liquid U, uint256 liquids) public returns (uint256 water) { }
+    function liquidate(Liquid U) public returns (uint256 liquids, uint256 solids) { }
+}
+```
+
+**LiquidUser** wraps operations with automatic logging and balance tracking.
+
+### Example Test
+
+```solidity
+function test_MeltFreeze() public returns (uint256 liquids, uint256 solids) {
+    giveaway();                        // Distribute tokens to users
+    owen.liquify(U, 500);
+    alex.liquify(U, 500);
+    beck.liquify(U, 500);
+
+    liquids = 100;
+    solids = alex.solidify(U, liquids);
+    assertEq(liquids, solids, "alex liquids != solids");
+
+    // Full liquidation
+    (liquids, solids) = alex.liquidate(U);
+    assertEq(liquids, solids, "alex liquids != solids");
+}
+```
+
+## Deployment
 
 ### Environment Variables
 
 ```bash
-# Required for deployment
 export tx_key=<YOUR_PRIVATE_WALLET_KEY>
 export ETHERSCAN_API_KEY=<YOUR_ETHERSCAN_API_KEY>
-
-# Chain selection (examples)
-export chain=11155111  # Sepolia
-export chain=1         # Ethereum Mainnet
-export chain=8453      # Base Mainnet
+export chain=11155111  # Sepolia testnet
 ```
 
-See [foundry.toml](foundry.toml) for full list of supported chains.
-
-### Building & Testing
+### Deploy Script
 
 ```bash
-# Build contracts
-forge build
-
-# Run tests
-forge test
-
-# Run specific test
-forge test --match-test testForgeSimple
-
-# Run with gas report
-forge test --gas-report
-
-# Format code
-forge fmt
-
-# Gas snapshot
-forge snapshot
+chain=11155111
+forge script script/Ice.s.sol \
+  -f $chain \
+  --private-key $tx_key \
+  --broadcast \
+  --verify \
+  --delay 10 \
+  --retries 10
 ```
 
-### Deployment
+### Supported Networks
 
-```bash
-# Deploy using script
-forge script script/Unit.s.sol:UnitScript \
-  --rpc-url sepolia \
-  --private-key "$tx_key" \
-  --broadcast
+See [foundry.toml](foundry.toml) for full chain configuration:
+- Ethereum (1, 11155111)
+- Arbitrum (42161, 421614)
+- Base (8453, 84532)
+- Optimism (10, 11155420)
+- Polygon (137, 80002)
+- BNB Chain (56, 97)
 
-# Verify on Etherscan
-forge verify-contract \
-  --chain-id 11155111 \
-  --etherscan-api-key "$ETHERSCAN_API_KEY" \
-  <contract_address> \
-  src/Unit.sol:Unit \
-  --constructor-args $(cast abi-encode "constructor(address)" <upstream_token>)
-```
+## Configuration
 
-### Solidity Configuration
+### Solidity Settings
 
 From [foundry.toml](foundry.toml):
 
 ```toml
-solc = "0.8.30"
+solc = "0.8.30"           # Required for EIP-1153
 evm_version = "cancun"
 optimizer = true
 optimizer_runs = 200
 via_ir = true
+bytecode_hash = "none"
+cbor_metadata = false
 always_use_create_2_factory = true
 ```
 
-**Key Points:**
-- Requires Solidity 0.8.30+ for transient storage (EIP-1153)
-- Uses Cancun EVM features
-- CREATE2 used for deterministic deployments
-- IR-based compilation for optimization
+**Key Requirements:**
+- Solidity 0.8.30+ for transient storage (EIP-1153)
+- Cancun EVM for latest features
+- CREATE2 for deterministic deployments
 
----
+## Common Operations
 
-## Testing Patterns
-
-### Pattern 1: Basic Forge Test
+### Creating a New Liquid
 
 ```solidity
-function testForgeSimple() public {
-    // Setup: users start with "1" tokens
-    uint256 initialOne = l.balanceOf(address(alex));
-
-    // Execute: forge to mint U and 1/U
-    int256 dw = alex.forge(U, 1, 1);
-
-    // Verify: invariant maintained
-    (uint256 us, uint256 vs, uint256 ws) = U.invariant();
-    uint256 expected = Math.sqrt(us * vs);
-    assertEq(ws, expected, "invariant broken");
-
-    // Cleanup: liquidate returns to initial state
-    alex.liquidate(U);
-    assertEq(l.balanceOf(address(alex)), initialOne);
-}
+// From water instance
+IERC20Metadata dai = IERC20Metadata(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+Liquid liquidDAI = water.make(dai);
 ```
 
-**Key Assertion:** `sqrt(u * v) == w` after every forge operation
-
-### Pattern 2: Symbol Normalization Test
+### Adding Liquidity
 
 ```solidity
-function testSymbolNormalization() public {
-    IUnit u = one.multiply("a*b/a");
-    assertEq(u.symbol(), "b", "should simplify");
-
-    IUnit v = one.multiply("m^4\\2");  // m^(4\2) = m^(4/2)
-    assertEq(v.symbol(), "m^2", "should reduce exponent");
-}
+// User deposits backing token
+dai.approve(address(liquidDAI), 1000 ether);
+liquidDAI.liquify(1000 ether);
+// User receives 1000 liquid-DAI, pool grows by 1000
 ```
 
-**Key Assertion:** Symbols are always canonical form
-
-### Pattern 3: Kiosk Quote/Buy Test
+### Removing Liquidity
 
 ```solidity
-function testKioskBuy() public {
-    // Setup: create and stock kiosk
-    FixedKiosk kiosk = creator.createKiosk(prototype, token, PRICE);
-    creator.give(address(kiosk), 5000 ether, token);
-
-    // Quote
-    uint256 value = 1 ether;
-    (uint256 expected, bool soldOut) = kiosk.quote(value);
-
-    // Buy
-    uint256 balanceBefore = token.balanceOf(address(buyer));
-    buyer.buy{value: value}(kiosk);
-    uint256 balanceAfter = token.balanceOf(address(buyer));
-
-    // Verify
-    assertEq(balanceAfter - balanceBefore, expected);
-    assertFalse(soldOut);
-}
+// User withdraws backing token
+uint256 solids = liquidDAI.solidify(500 ether);
+// User receives DAI, burns liquid-DAI from self and pool
 ```
 
-**Key Assertions:**
-- Quote matches actual purchase
-- Balance changes correctly
-- Sold out detection works
-
-### Pattern 4: Discount Curve Test
+### Trading
 
 ```solidity
-function testDiscountCurveProperties() public {
-    DiscountKiosk kiosk = creator.createDiscountKiosk(
-        prototype, token, PRICE, CAPACITY
-    );
-    creator.give(address(kiosk), CAPACITY, token);
+// Buy liquid with water
+uint256 waterCost = liquidDAI.buy(100 ether);
 
-    // Can buy all for half the "full price"
-    uint256 fullPrice = CAPACITY * PRICE / 1 ether;
-    uint256 actualCost = CAPACITY * PRICE / 2 ether;
-    (uint256 q, bool soldOut) = kiosk.quote(actualCost);
+// Sell liquid for water
+uint256 waterReceived = liquidDAI.sell(50 ether);
 
-    assertEq(q, CAPACITY, "should get all at half price");
-    assertTrue(soldOut);
-}
+// Cross-liquid swap
+(uint256 waterUsed, uint256 usdcReceived) = liquidDAI.buy(100 ether, liquidUSDC);
 ```
 
-**Key Property:** Linear discount means ∫₀ᶜ p(x)dx = capacity × listPrice / 2
+## Key Differences from Unit Protocol
 
-### Test Helpers
+**This is NOT the algebraic Unit protocol described in previous documentation:**
+
+❌ No algebraic composition (kg*m/s^2)
+❌ No rational exponents
+❌ No symbolic algebra
+❌ No reciprocal relationships with geometric mean
+❌ No forge operations with three-way relationships
+
+✅ Simple constant-product AMM
+✅ Single token wrapping
+✅ Standard liquidity pool mechanics
+✅ Cross-pool swaps via water intermediary
+
+## Reference Documentation
+
+- **[README.md](README.md)** - Quick start guide
+- **[foundry.toml](foundry.toml)** - Build configuration
+- **[Foundry Book](https://book.getfoundry.sh/)** - Foundry framework docs
+- **[OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts/)** - Dependency docs
+
+## Events
 
 ```solidity
-// UnitUser - wraps user operations
-contract UnitUser {
-    function forge(IUnit U, int256 du, int256 dv)
-        external returns (IUnit W, int256 dw);
-
-    function liquidate(IUnit U)
-        external returns (int256 du, int256 dv, int256 dw);
-
-    function buy(Kiosk k) external payable returns (uint256 q, bool soldOut);
-}
+event Liquify(Liquid indexed liquid, uint256 liquids);
+event Solidify(Liquid indexed liquid, uint256 liquids, uint256 solids);
+event Bought(Liquid indexed liquid, uint256 liquids, uint256 water);
+event Sold(Liquid indexed liquid, uint256 liquids, uint256 water);
+event Made(IERC20Metadata indexed solid, Liquid indexed liquid);
 ```
 
-### Base Test Contracts
-
-- **[test/Base.t.sol](test/Base.t.sol)**: Foundry base imports
-- **[test/UnitBase.t.sol](test/UnitBase.t.sol)**: Unit testing setup with "1", U, V, users
-- **[test/KioskBase.t.sol](test/KioskBase.t.sol)**: Kiosk testing setup
-
----
-
-## Common Tasks
-
-### Adding a New Kiosk Type
-
-1. **Inherit from Kiosk:**
+## Errors
 
 ```solidity
-// src/MyKiosk.sol
-import {Kiosk} from "./Kiosk.sol";
-
-contract MyKiosk is Kiosk {
-    // Add custom state
-    uint256 public customParameter;
-
-    // Initialize
-    function initialize(
-        address creator,
-        IERC20 goods_,
-        uint256 listPrice_,
-        uint256 customParameter_
-    ) external {
-        __initialize(creator, goods_, listPrice_);
-        customParameter = customParameter_;
-        emit KioskCreated(creator, goods_, listPrice_);
-    }
-
-    // Implement quote logic
-    function quote(uint256 v)
-        public view override
-        returns (uint256 q, bool soldOut)
-    {
-        // Your pricing logic here
-        // Must respect: q <= inventory()
-        // soldOut = true if inventory exhausted
-    }
-}
+error Nothing();                                          // Zero address token
+error Drained(Liquid liquid, uint256 pool, uint256 liquids);  // Insufficient pool
+error Unauthorized();                                     // Non-liquid caller
 ```
 
-2. **Add Tests:**
+## Quick Reference
+
+### Pool State Queries
 
 ```solidity
-// test/MyKiosk.t.sol
-import {KioskBaseTest} from "./KioskBase.t.sol";
-import {MyKiosk} from "../src/MyKiosk.sol";
-
-contract MyKioskTest is KioskBaseTest {
-    MyKiosk public prototype;
-
-    function setUp() public override {
-        super.setUp();
-        prototype = new MyKiosk();
-    }
-
-    function testMyKioskQuote() public {
-        // Test your quote logic
-    }
-
-    function testMyKioskBuy() public {
-        // Test buy flow
-    }
-}
+uint256 pool = liquid.balanceOf(address(liquid));      // Pool liquids
+uint256 lake = water.balanceOf(address(liquid));       // Pool water
+(uint256 pool, uint256 lake) = liquid.balances();      // Both at once
 ```
 
-3. **Add Deployment Script (optional):**
+### Quote Functions
 
 ```solidity
-// script/MyKiosk.s.sol
-import {Script} from "forge-std/Script.sol";
-import {MyKiosk} from "../src/MyKiosk.sol";
-
-contract MyKioskScript is Script {
-    function run() external {
-        vm.startBroadcast();
-        new MyKiosk();
-        vm.stopBroadcast();
-    }
-}
+uint256 water = liquid.buyQuote(100 ether);            // Cost to buy
+uint256 water = liquid.sellQuote(50 ether);            // Return from sell
+(uint256 water, uint256 others) = liquid.buyQuote(100 ether, otherLiquid);
 ```
 
-### Working with Unit Symbols
+### Metadata
 
 ```solidity
-// Create units programmatically
-IUnit USD = one.multiply("USD");
-IUnit ETH = one.multiply("ETH");
-IUnit ETHUSDT = ETH.product(USD);  // "ETH*USD"
-
-// Parse complex symbols
-IUnit force = one.multiply("kg*m/s^2");
-
-// Work with anchored tokens
-IUnit wrappedUSDT = one.multiply("$0xdAC17F958D2ee523a2206206994597C13D831ec7");
-
-// Rational exponents (use \\ in code for \)
-IUnit cubicRoot = one.multiply("m^1\\3");  // m^(1\3) = m^(1/3)
-```
-
-### Forge Operations
-
-```solidity
-// Basic forge: mint equal amounts of U and 1/U
-IUnit U = one.multiply("USD");
-IUnit V = U.reciprocal();
-(IUnit W, int256 dw) = U.forge(V, 1000 ether, 1000 ether);
-// W == one, dw < 0 (burns "1" tokens)
-
-// Asymmetric forge: different amounts
-(W, dw) = U.forge(V, 2000 ether, 500 ether);
-
-// Burn operation: use negative values
-(W, dw) = U.forge(V, -1000 ether, -1000 ether);
-// dw > 0 (mints "1" tokens back)
-
-// Quote before executing
-(W, int256 expectedDw) = U.forgeQuote(V, 1000 ether, 500 ether);
-```
-
-### Anchored Token Migration
-
-```solidity
-// Only callable on "1"
-IUnit wrappedUSDT = one.multiply("$0xdAC17F958D2ee523a2206206994597C13D831ec7");
-
-// Migrate in: transfer USDT to Unit contract, mint wrapped tokens
-int256 da = one.migrate(wrappedUSDT, 1000e6);  // 1000 USDT
-// da > 0, user receives wrapped tokens
-
-// Migrate out: burn wrapped tokens, receive USDT
-da = one.unmigrate(wrappedUSDT, 1000 ether);
-// da < 0, user receives USDT
+string memory name = liquid.name();        // From backing token
+string memory symbol = liquid.symbol();    // From backing token
+uint8 decimals = liquid.decimals();        // From backing token
+IERC20Metadata backing = liquid.solid();   // Get backing token
 ```
 
 ---
 
-## Security Considerations
-
-### 1. Reentrancy
-
-**Protection:** Transient reentrancy guard (EIP-1153) on unit "1"
-
-```solidity
-modifier nonReentrant() {
-    ONE.__nonReentrantBefore();
-    _;
-    ONE.__nonReentrantAfter();
-}
-```
-
-**Why it's safe:**
-- Single guard on "1" protects all units in same transaction
-- Uses transient storage (cleared after transaction)
-- Prevents malicious anchor token callbacks
-
-**When reviewing code:**
-- All state-changing external functions must use `nonReentrant`
-- Pay special attention to anchor token interactions
-
-### 2. Integer Overflow/Underflow
-
-**Protection:** Solidity 0.8.30+ has built-in overflow checks
-
-**Manual checks in critical paths:**
-
-```solidity
-function add(IUnit U, uint256 u0, int256 du) internal view returns (uint256 u1) {
-    if (du < 0) {
-        uint256 delta = uint256(-du);
-        if (delta > u0) revert InsufficientBalance(U, delta, u0);
-        u1 = u0 - delta;
-    } else {
-        u1 = u0 + uint256(du);
-    }
-}
-```
-
-**When reviewing code:**
-- Watch for unsafe casts: `uint256(int256)`, `int256(uint256)`
-- Verify bounds before type conversions
-- Check invariant calculations don't overflow
-
-### 3. Anchor Token Trust
-
-**Risk:** Malicious ERC-20 tokens could:
-- Revert on transfer (DoS)
-- Have callbacks (reentrancy)
-- Have incorrect balances (accounting errors)
-
-**Mitigations:**
-- Reentrancy guard protects against callbacks
-- Use `SafeERC20` for all token interactions
-- Anchor tokens should be well-audited (USDT, USDC, etc.)
-
-**When reviewing code:**
-- Never trust anchor token behavior
-- Always use `safeTransfer` / `safeTransferFrom`
-- Consider anchor token balance changes carefully
-
-### 4. Invariant Manipulation
-
-**Risk:** Attacker tries to break `sqrt(u * v) = w`
-
-**Protections:**
-- All minting/burning goes through `forge()` which enforces invariant
-- Direct transfers don't affect invariant (just user balances)
-- `forgeQuote()` uses same math as `forge()` (no arbitrage)
-
-**When reviewing code:**
-- Any new mint/burn logic MUST maintain invariant
-- Test edge cases: huge amounts, dust amounts, zero
-- Fuzz test invariant preservation
-
-### 5. Kiosk Pricing Bugs
-
-**Risk:** Quote calculation errors could:
-- Allow buying more than inventory
-- Cause integer overflow
-- Give incorrect prices
-
-**Protections:**
-- Quote must respect: `q <= inventory()`
-- Use Math library for sqrt, etc.
-- Comprehensive tests for edge cases
-
-**When reviewing new kiosk types:**
-- Test: zero value, dust, huge amounts
-- Test: empty inventory, full inventory
-- Test: quote matches actual buy
-- Verify: no refunds means user risk
-
-### 6. Rational Math Precision
-
-**Risk:** Rational arithmetic could:
-- Lose precision in reduction
-- Overflow in numerator/denominator
-- Produce incorrect results
-
-**Protections:**
-- Always reduce to lowest terms
-- Use 128-bit for intermediate calculations
-- Test edge cases (large exponents, negative, zero)
-
-**When reviewing code:**
-- Check GCD algorithm correctness
-- Verify reduction before storage
-- Test overflow boundaries
-
-### 7. Symbol Parsing Vulnerabilities
-
-**Risk:** Malformed symbols could:
-- Cause incorrect normalization
-- Create duplicate units
-- Break invariants
-
-**Protections:**
-- Symbol parsing is pure (no state changes)
-- Normalization is deterministic
-- Unit addresses are deterministic (CREATE2)
-
-**When reviewing code:**
-- Test malformed input: `"a*b*c/d/e"`, `"^2"`, `"$0xinvalid"`
-- Verify same symbol → same address
-- Check term ordering/merging logic
-
----
-
-## Additional Resources
-
-### Foundry Documentation
-- [Foundry Book](https://book.getfoundry.sh/)
-- [Forge Testing Guide](https://book.getfoundry.sh/forge/tests)
-- [Cheatcodes Reference](https://book.getfoundry.sh/cheatcodes/)
-
-### EIP References
-- [EIP-1153: Transient Storage](https://eips.ethereum.org/EIPS/eip-1153)
-- [EIP-1167: Minimal Proxy (Clones)](https://eips.ethereum.org/EIPS/eip-1167)
-- [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20)
-
-### OpenZeppelin Contracts
-- [SafeERC20](https://docs.openzeppelin.com/contracts/4.x/api/token/erc20#SafeERC20)
-- [ReentrancyGuardTransient](https://docs.openzeppelin.com/contracts/5.x/api/utils#ReentrancyGuardTransient)
-- [Math](https://docs.openzeppelin.com/contracts/4.x/api/utils#Math)
-
----
-
-## Questions? Common Pitfalls?
-
-### Why does `forge()` return negative `dw`?
-
-When you mint U and 1/U, the invariant requires burning "1" tokens:
-- `du > 0`, `dv > 0` → `dw < 0` (burn "1")
-- `du < 0`, `dv < 0` → `dw > 0` (mint "1")
-
-This maintains: `sqrt(u * v) = constant`
-
-### Why use `\\` for exponent division?
-
-Solidity strings require escaping backslashes:
-- In code: `"m^1\\3"`
-- Actual symbol: `"m^1\3"` (m to the 1/3 power)
-
-### What happens if a kiosk runs out of inventory during `buy()`?
-
-No refunds! The quote calculates based on current inventory:
-- If inventory depleted, `soldOut = true`
-- User receives whatever is available
-- Excess ETH is NOT refunded (kept by kiosk)
-
-### Can I create two units with the same symbol?
-
-No. Unit addresses are deterministic (CREATE2):
-- Same symbol → same salt → same address
-- Attempting to create duplicate reverts
-- Use `getUnit(symbol)` to get existing unit
-
-### Why is "1" special?
-
-The identity unit is the foundation:
-- All forge operations ultimately involve "1"
-- Reentrancy guard lives on "1"
-- Only "1" has `migrate()` / `unmigrate()`
-- Its reciprocal is itself
-
----
-
-*This document is maintained for AI-assisted development. When making significant architectural changes, update this file.*
+*This document is optimized for AI-assisted development. For human-readable introduction, see [README.md](README.md).*
