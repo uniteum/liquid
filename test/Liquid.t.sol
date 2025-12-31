@@ -4,7 +4,6 @@ pragma solidity ^0.8.30;
 
 import {Liquid} from "../src/Liquid.sol";
 import {BaseTest, console} from "./Base.t.sol";
-import {TestToken} from "./TestToken.sol";
 import {LiquidUser, IERC20} from "./LiquidUser.sol";
 
 contract LiquidTest is BaseTest {

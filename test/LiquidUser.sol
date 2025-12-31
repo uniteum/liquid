@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.30;
 
-import {User, TestToken, console} from "./User.sol";
-import {Liquid, IERC20} from "../src/Liquid.sol";
+import {User, TestToken, IERC20, console} from "./User.sol";
+import {Liquid} from "../src/Liquid.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
