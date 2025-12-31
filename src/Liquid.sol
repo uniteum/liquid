@@ -14,6 +14,10 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     IERC20Metadata public solid;
 
+    constructor(IERC20Metadata ice) ERC20("", "") {
+        solid = ice;
+    }
+
     function liquify(uint256 solids) external nonReentrant {
         solid.safeTransferFrom(msg.sender, address(this), solids);
         _mint(address(this), solids);
@@ -200,10 +204,6 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         if (address(solid) == address(0)) {
             solid = stuff;
         }
-    }
-
-    constructor(IERC20Metadata ice) ERC20("", "") {
-        solid = ice;
     }
 
     modifier onlyLiquid() {
