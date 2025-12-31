@@ -383,12 +383,16 @@ No oracles, no governance, no external inputs.
 
 ### Can I get my exact deposit back?
 
-Not always. When you solidify:
-- You burn liquid tokens proportionally
-- You receive backing tokens based on current pool reserves
-- If trading happened, reserves may differ from your deposit
+On average, yes—but it varies above and below 1:1 over time.
 
-Think of it like wrapping + being an LP simultaneously.
+When you solidify, the amount of solids you receive depends on how much of the liquid supply is in the pool versus held outside:
+- **More liquid in pool** (less held outside) → You get more solids per liquid
+- **Less liquid in pool** (more held outside) → You get fewer solids per liquid
+- **On average across all users** → Approaches 1:1 ratio
+
+The formula is: `solids = liquids * solid.balanceOf(contract) / total_held_outside_pool`
+
+Think of it like wrapping + being an LP simultaneously. Your share of backing tokens fluctuates based on pool distribution.
 
 ## Example Scenarios
 
