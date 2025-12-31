@@ -33,11 +33,11 @@ contract LiquidTest is BaseTest {
         WATER.transfer(address(owen), all);
     }
 
-    function newUser(string memory name) internal returns (LiquidUser u) {
-        u = new LiquidUser(name, WATER);
+    function newUser(string memory name) internal returns (LiquidUser user) {
+        user = new LiquidUser(name, WATER);
     }
 
-    function test_Pool() public returns (uint256 du, uint256 out) {
+    function test_Pool() public returns (uint256 liquids, uint256 solids) {
         owen.give(address(alex), 1e3, WATER);
         owen.give(address(alex), 1e3, U.solid());
         owen.give(address(alex), 1e3, V.solid());
@@ -47,11 +47,11 @@ contract LiquidTest is BaseTest {
         owen.melt(U, 500);
         alex.melt(U, 500);
         beck.melt(U, 500);
-        du = 100;
-        out = alex.freeze(U, du);
-        (du, out) = alex.liquidate(U);
+        liquids = 100;
+        solids = alex.freeze(U, liquids);
+        (liquids, solids) = alex.liquidate(U);
         assertEq(1e3, alex.balance(WATER), "alex should have the same 1");
-        (du, out) = beck.liquidate(U);
+        (liquids, solids) = beck.liquidate(U);
         assertEq(beck.balance(WATER), 1e7, "beck should have the same 1");
     }
 }
