@@ -17,7 +17,7 @@ contract TestToken is ERC20 {
     function(IERC20Metadata, address, address, uint256) external afterUpdate;
 
     constructor(string memory name, uint256 value) ERC20(name, name) {
-        console.log("Token %s created at %s", name, address(this));
+        console.log("%s created %s", name, address(this));
         _mint(msg.sender, value);
     }
 
@@ -34,7 +34,7 @@ contract TestToken is ERC20 {
     function _update(address from, address to, uint256 value) internal virtual override {
         super._update(from, to, value);
 
-        string memory format = string.concat(symbol(), "._update(%s, %s, %s)");
+        string memory format = string.concat(symbol(), " update %s %s %s");
 
         console.log(format, namer.name(from), namer.name(to), value);
 

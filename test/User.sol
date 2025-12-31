@@ -16,7 +16,7 @@ contract User is Random, Test {
 
     constructor(string memory name_) {
         name = name_;
-        console.log("new User %s @ %s", name, address(this));
+        console.log("%s born %s", name, address(this));
     }
 
     function addToken(IERC20Metadata token) public {
