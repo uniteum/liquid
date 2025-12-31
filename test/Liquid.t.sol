@@ -49,6 +49,7 @@ contract LiquidTest is BaseTest {
         beck.melt(U, 500);
         liquids = 100;
         solids = alex.freeze(U, liquids);
+        assertEq(liquids, solids, "liquids != solids");
         (liquids, solids) = alex.liquidate(U);
         assertEq(1e3, alex.balance(WATER), "alex should have the same 1");
         (liquids, solids) = beck.liquidate(U);
