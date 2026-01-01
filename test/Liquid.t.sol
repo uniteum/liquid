@@ -87,14 +87,6 @@ contract LiquidTest is BaseTest {
         cold = alex.cool(U, hotToCool);
         assertGt(cold, 0, "alex should receive cold from cool");
         assertLt(U.balanceOf(address(alex)), alexHotBeforeCool, "alex hot should decrease after cool");
-
-        // Beck buys hot with water
-        uint256 hotToBuy = 25;
-        uint256 beckWaterBefore = W.balanceOf(address(beck));
-        uint256 waterSpent = beck.buy(U, hotToBuy);
-        assertGt(waterSpent, 0, "beck should spend water to buy");
-        assertEq(U.balanceOf(address(beck)), hotToBuy, "beck should have bought hot");
-        assertEq(W.balanceOf(address(beck)), beckWaterBefore - waterSpent, "beck water should decrease by amount spent");
     }
 
     /**
