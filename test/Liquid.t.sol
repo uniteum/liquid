@@ -119,7 +119,7 @@ contract LiquidTest is BaseTest {
         // Step 3: Buy back hot with the water gained (if any)
         uint256 waterGained = W.balanceOf(address(alex)) - alexInitialWater;
         if (waterGained > 0) {
-            alex.buyWith(U, waterGained);
+            alex.buy(U, waterGained);
         }
 
         // Step 4: Cool all hot back to cold

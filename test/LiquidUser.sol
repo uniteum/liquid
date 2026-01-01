@@ -63,17 +63,17 @@ contract LiquidUser is User {
         console.log("hotter:", hotter);
     }
 
-    function buyWith(Liquid U, uint256 water) public waterlog("buyWith", U, 0, water) returns (uint256 hot) {
-        hot = U.buyWith(water);
+    function buy(Liquid U, uint256 water) public waterlog("buy", U, 0, water) returns (uint256 hot) {
+        hot = U.buy(water);
         console.log("hot:", hot);
     }
 
-    function buyWith(Liquid U, uint256 hotter, Liquid V)
+    function buy(Liquid U, uint256 hotter, Liquid V)
         public
-        waterlog("buyWith", U, hotter, 0)
+        waterlog("buy", U, hotter, 0)
         returns (uint256 water, uint256 hot)
     {
-        (water, hot) = U.buyWith(hotter, V);
+        (water, hot) = U.buy(hotter, V);
         console.log("water:", water);
         console.log("hot:", hot);
     }
