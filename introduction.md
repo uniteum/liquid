@@ -301,37 +301,84 @@ When you approve a contract:
 - Use reasonable approval amounts
 - You can revoke by calling `approve(contract, 0)`
 
+## Why Liquid?
+
+Liquid improves on traditional AMM designs in several key ways:
+
+### Zero Fees Forever
+- **No protocol fees**: The protocol charges zero fees on all operations (heat, cool, buy, sell, swaps)
+- **Only gas costs**: You pay standard Ethereum transaction fees, nothing more
+- **No governance to change this**: Fees are hardcoded as zero—no DAO can add them later
+- **Developer monetization**: Protocol creators reserved a portion of Water tokens, not ongoing transaction fees
+
+### Universal Token Connectivity
+- **n pools instead of n²**: Traditional AMMs need separate pools for every token pair (USDC/DAI, USDC/WETH, DAI/WETH, etc.)
+- **Single intermediary**: Water connects all liquid tokens, so you only need one pool per token
+- **Cross-liquid swaps**: Trade any hot token for any other in a single transaction
+- **Example**: With 100 tokens, Uniswap needs ~5,000 pairs; Liquid needs 100 pools
+
+### No Governance Risk
+- **Pure math pricing**: Prices determined solely by constant-product formula (pool × lake = k)
+- **No admin keys**: No multisig, no DAO, no governance votes
+- **No protocol updates**: Cannot change fee structure, formulas, or access control
+- **Immutable**: What you see is what you get forever
+
+**Note**: Backing token risk still exists. If your cold token (USDC, DAI, etc.) has governance issues or fails, the liquid token inherits that risk.
+
+### Automatic Liquidity Creation
+- **2x mint pattern**: When you heat 1,000 cold, you get 1,000 hot AND the pool gets 1,000 hot
+- **Instant liquidity**: Every deposit automatically creates tradeable liquidity
+- **No separate LP tokens**: You hold the hot tokens directly—no staking or complex LP positions
+- **Simple exit**: Cool back to cold anytime, no unstaking required
+
 ## Comparison to Other Protocols
 
 ### vs. Uniswap
 
-**Trading:**
-- Liquid: Trade hot tokens against water directly through contract
-- Uniswap: Trade token pairs through router contract
+**Fees:**
+- Liquid: Zero protocol fees
+- Uniswap: 0.05% to 1% swap fees (varies by pool)
 
-**Liquidity:**
-- Liquid: Automatic 2x mint when you heat cold (you get half hot, pool gets half hot)
-- Uniswap: Manually add/remove liquidity, receive separate LP tokens
+**Pair Management:**
+- Liquid: n pools total, all connected through Water
+- Uniswap: n² pairs needed for full connectivity
+
+**Liquidity Provision:**
+- Liquid: Automatic 2x mint when you heat (you get hot, pool gets hot)
+- Uniswap: Manually add liquidity to specific pairs, receive separate LP tokens
+
+**Trading:**
+- Liquid: Trade hot tokens against water directly, or cross-swap any hot for any other
+- Uniswap: Route through multiple pools for indirect pairs
 
 ### vs. Wrapped Tokens (WETH)
 
 **Similar:**
 - Both wrap underlying tokens (cold → hot is similar to ETH → WETH)
+- Both maintain backing 1:1 on average
 
 **Different:**
-- Liquid: Built-in AMM for instant trading, 2x mint creates liquidity
-- WETH: No liquidity, just 1:1 wrapped for compatibility
+- Liquid: Built-in AMM for instant trading, 2x mint creates automatic liquidity, variable cool ratio
+- WETH: No liquidity mechanism, strict 1:1 wrap/unwrap, just for compatibility
 
 ### vs. Curve/Balancer
 
 **Formula:**
-- Liquid: Constant-product (x × y = k)
-- Curve: Stableswap (optimized for low slippage)
-- Balancer: Weighted pools with customizable ratios
+- Liquid: Constant-product (x × y = k), general-purpose
+- Curve: Stableswap (optimized for low slippage on similar-priced assets)
+- Balancer: Weighted pools with customizable ratios and multi-token pools
+
+**Fees:**
+- Liquid: Zero
+- Curve/Balancer: Variable fees set by governance or pool creators
 
 **Complexity:**
-- Liquid: Simple wrap/unwrap + trade
-- Curve/Balancer: Advanced pool configurations
+- Liquid: Simple wrap/unwrap + trade, single formula
+- Curve/Balancer: Advanced pool configurations, multiple formulas, complex incentives
+
+**Governance:**
+- Liquid: None
+- Curve/Balancer: Extensive governance for fees, pool parameters, token emissions
 
 ## Frequently Asked Questions
 
