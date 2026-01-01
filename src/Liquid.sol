@@ -62,7 +62,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function sell(uint256 hot) external returns (uint256 water) {
-        water = proceeds(hot);
+        water = yield(hot);
         _sold(hot, water);
     }
 
@@ -73,29 +73,29 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function sell(uint256 hot, Liquid liquid) external returns (uint256 water, uint256 hotter) {
-        (water, hotter) = proceeds(hot, liquid);
+        (water, hotter) = yield(hot, liquid);
         _sold(hot, water);
         liquid.bought(hotter, water);
     }
 
     function buyWith(uint256 water) external returns (uint256 hot) {
-        hot = spent(water);
+        hot = proceeds(water);
         _bought(hot, water);
     }
 
     function sellFor(uint256 water) external returns (uint256 hot) {
-        hot = receives(water);
+        hot = charge(water);
         _sold(hot, water);
     }
 
     function buyWith(uint256 hotter, Liquid liquid) external returns (uint256 water, uint256 hot) {
-        (water, hot) = spent(hotter, liquid);
+        (water, hot) = proceeds(hotter, liquid);
         liquid.sold(hotter, water);
         _bought(hot, water);
     }
 
     function sellFor(uint256 hotter, Liquid liquid) external returns (uint256 water, uint256 hot) {
-        (water, hot) = receives(hotter, liquid);
+        (water, hot) = charge(hotter, liquid);
         _sold(hot, water);
         liquid.bought(hotter, water);
     }
@@ -107,7 +107,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         water = pool_ * lake_ / (pool_ - hot) - lake_;
     }
 
-    function proceeds(uint256 hot, uint256 pool_, uint256 lake_) public pure returns (uint256 water) {
+    function yield(uint256 hot, uint256 pool_, uint256 lake_) public pure returns (uint256 water) {
         water = lake_ - pool_ * lake_ / (pool_ + hot);
     }
 
@@ -115,36 +115,36 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         water = cost(hot, pool(), lake());
     }
 
-    function proceeds(uint256 hot) public view returns (uint256 water) {
-        water = proceeds(hot, pool(), lake());
+    function yield(uint256 hot) public view returns (uint256 water) {
+        water = yield(hot, pool(), lake());
     }
 
     function cost(uint256 hot, Liquid liquid) public view returns (uint256 water, uint256 hotter) {
         water = cost(hot);
-        hotter = liquid.spent(water);
+        hotter = liquid.proceeds(water);
     }
 
-    function proceeds(uint256 hot, Liquid liquid) public view returns (uint256 water, uint256 hotter) {
-        water = proceeds(hot);
-        hotter = liquid.receives(water);
+    function yield(uint256 hot, Liquid liquid) public view returns (uint256 water, uint256 hotter) {
+        water = yield(hot);
+        hotter = liquid.charge(water);
     }
 
-    function spent(uint256 water) public view returns (uint256 hot) {
-        hot = proceeds(water, lake(), pool());
+    function proceeds(uint256 water) public view returns (uint256 hot) {
+        hot = yield(water, lake(), pool());
     }
 
-    function receives(uint256 water) public view returns (uint256 hot) {
+    function charge(uint256 water) public view returns (uint256 hot) {
         water = cost(hot, lake(), pool());
     }
 
-    function spent(uint256 hotter, Liquid liquid) public view returns (uint256 water, uint256 hot) {
-        water = spent(hotter);
-        hot = liquid.spent(water);
+    function proceeds(uint256 hotter, Liquid liquid) public view returns (uint256 water, uint256 hot) {
+        water = proceeds(hotter);
+        hot = liquid.proceeds(water);
     }
 
-    function receives(uint256 hotter, Liquid liquid) public view returns (uint256 water, uint256 hot) {
-        water = receives(hotter);
-        hot = liquid.receives(water);
+    function charge(uint256 hotter, Liquid liquid) public view returns (uint256 water, uint256 hot) {
+        water = charge(hotter);
+        hot = liquid.charge(water);
     }
 
     function bought(uint256 hot, uint256 water) external onlyLiquid {
