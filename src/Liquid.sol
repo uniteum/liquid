@@ -20,6 +20,12 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         solidOf[address(this)] = ice;
     }
 
+    function heat(uint256 cold, IERC20Metadata stuff) external {
+        Liquid liquid = heat(stuff);
+        liquid.heat(cold);
+        IERC20Metadata(liquid).safeTransfer(msg.sender, cold);
+    }
+
     function heat(uint256 cold) external nonReentrant {
         solid.safeTransferFrom(msg.sender, address(this), cold);
         _mint(address(this), cold);
