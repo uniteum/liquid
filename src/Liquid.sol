@@ -107,7 +107,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     function _bought(uint256 liquid, uint256 water) private {
         WATER.update(msg.sender, address(this), water);
         _update(address(this), msg.sender, liquid);
-        emit Bought(this, liquid, water);
+        emit Buy(this, liquid, water);
     }
 
     function sold(uint256 liquid, uint256 water) external onlyLiquid {
@@ -117,7 +117,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     function _sold(uint256 liquid, uint256 water) private {
         WATER.update(address(this), msg.sender, water);
         _update(msg.sender, address(this), liquid);
-        emit Sold(this, liquid, water);
+        emit Sell(this, liquid, water);
     }
 
     function update(address from, address to, uint256 amount) external onlyLiquid {
@@ -153,7 +153,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
             if (future.code.length == 0) {
                 future = Clones.cloneDeterministic(address(WATER), salt);
                 fluid.__initialize(stuff);
-                emit Liquified(stuff, fluid);
+                emit Liquify(stuff, fluid);
             }
         }
     }
@@ -179,9 +179,9 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     event Heat(Liquid indexed fluid, uint256 solid);
     event Cool(Liquid indexed fluid, uint256 liquid, uint256 solid);
-    event Bought(Liquid indexed fluid, uint256 liquid, uint256 water);
-    event Sold(Liquid indexed fluid, uint256 liquid, uint256 water);
-    event Liquified(IERC20Metadata indexed substance, Liquid indexed fluid);
+    event Buy(Liquid indexed fluid, uint256 liquid, uint256 water);
+    event Sell(Liquid indexed fluid, uint256 liquid, uint256 water);
+    event Liquify(IERC20Metadata indexed substance, Liquid indexed fluid);
 
     error Nothing();
     error Unauthorized();
