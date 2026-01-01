@@ -66,16 +66,16 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _sold(hot, water);
     }
 
-    function buy(uint256 hot, Liquid other) external returns (uint256 water, uint256 hotter) {
-        (water, hotter) = cost(hot, other);
-        other.sold(hotter, water);
+    function buy(uint256 hot, Liquid liquid) external returns (uint256 water, uint256 hotter) {
+        (water, hotter) = cost(hot, liquid);
+        liquid.sold(hotter, water);
         _bought(hot, water);
     }
 
-    function sell(uint256 hot, Liquid other) external returns (uint256 water, uint256 hotter) {
-        (water, hotter) = proceeds(hot, other);
+    function sell(uint256 hot, Liquid liquid) external returns (uint256 water, uint256 hotter) {
+        (water, hotter) = proceeds(hot, liquid);
         _sold(hot, water);
-        other.bought(hotter, water);
+        liquid.bought(hotter, water);
     }
 
     function buyWith(uint256 water) external returns (uint256 hot) {
@@ -88,16 +88,16 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _sold(hot, water);
     }
 
-    function buyWith(uint256 hotter, Liquid other) external returns (uint256 water, uint256 hot) {
-        (water, hot) = spent(hotter, other);
-        other.sold(hotter, water);
+    function buyWith(uint256 hotter, Liquid liquid) external returns (uint256 water, uint256 hot) {
+        (water, hot) = spent(hotter, liquid);
+        liquid.sold(hotter, water);
         _bought(hot, water);
     }
 
-    function sellFor(uint256 hotter, Liquid other) external returns (uint256 water, uint256 hot) {
-        (water, hot) = receives(hotter, other);
+    function sellFor(uint256 hotter, Liquid liquid) external returns (uint256 water, uint256 hot) {
+        (water, hot) = receives(hotter, liquid);
         _sold(hot, water);
-        other.bought(hotter, water);
+        liquid.bought(hotter, water);
     }
 
     function cost(uint256 hot, uint256 pool_, uint256 lake_) public view returns (uint256 water) {
@@ -119,14 +119,14 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         water = proceeds(hot, pool(), lake());
     }
 
-    function cost(uint256 hot, Liquid other) public view returns (uint256 water, uint256 hotter) {
+    function cost(uint256 hot, Liquid liquid) public view returns (uint256 water, uint256 hotter) {
         water = cost(hot);
-        hotter = other.spent(water);
+        hotter = liquid.spent(water);
     }
 
-    function proceeds(uint256 hot, Liquid other) public view returns (uint256 water, uint256 hotter) {
+    function proceeds(uint256 hot, Liquid liquid) public view returns (uint256 water, uint256 hotter) {
         water = proceeds(hot);
-        hotter = other.receives(water);
+        hotter = liquid.receives(water);
     }
 
     function spent(uint256 water) public view returns (uint256 hot) {
@@ -137,14 +137,14 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         water = cost(hot, lake(), pool());
     }
 
-    function spent(uint256 hotter, Liquid other) public view returns (uint256 water, uint256 hot) {
+    function spent(uint256 hotter, Liquid liquid) public view returns (uint256 water, uint256 hot) {
         water = spent(hotter);
-        hot = other.spent(water);
+        hot = liquid.spent(water);
     }
 
-    function receives(uint256 hotter, Liquid other) public view returns (uint256 water, uint256 hot) {
+    function receives(uint256 hotter, Liquid liquid) public view returns (uint256 water, uint256 hot) {
         water = receives(hotter);
-        hot = other.receives(water);
+        hot = liquid.receives(water);
     }
 
     function bought(uint256 hot, uint256 water) external onlyLiquid {
