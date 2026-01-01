@@ -53,6 +53,45 @@ contract LiquidUser is User {
         console.log("water:", water);
     }
 
+    function buy(Liquid U, uint256 hot) public logging("buy", U, hot) returns (uint256 water) {
+        water = U.buy(hot);
+        console.log("water:", water);
+    }
+
+    function buy(Liquid U, uint256 hot, Liquid V) public waterlogging("buy", U, hot, 0) returns (uint256 water, uint256 hotter) {
+        (water, hotter) = U.buy(hot, V);
+        console.log("water:", water);
+        console.log("hotter:", hotter);
+    }
+
+    function sell(Liquid U, uint256 hot, Liquid V) public waterlogging("sell", U, hot, 0) returns (uint256 water, uint256 hotter) {
+        (water, hotter) = U.sell(hot, V);
+        console.log("water:", water);
+        console.log("hotter:", hotter);
+    }
+
+    function buyWith(Liquid U, uint256 water) public waterlogging("buyWith", U, 0, water) returns (uint256 hot) {
+        hot = U.buyWith(water);
+        console.log("hot:", hot);
+    }
+
+    function sellFor(Liquid U, uint256 water) public waterlogging("sellFor", U, 0, water) returns (uint256 hot) {
+        hot = U.sellFor(water);
+        console.log("hot:", hot);
+    }
+
+    function buyWith(Liquid U, uint256 hotter, Liquid V) public waterlogging("buyWith", U, hotter, 0) returns (uint256 water, uint256 hot) {
+        (water, hot) = U.buyWith(hotter, V);
+        console.log("water:", water);
+        console.log("hot:", hot);
+    }
+
+    function sellFor(Liquid U, uint256 hotter, Liquid V) public waterlogging("sellFor", U, hotter, 0) returns (uint256 water, uint256 hot) {
+        (water, hot) = U.sellFor(hotter, V);
+        console.log("water:", water);
+        console.log("hot:", hot);
+    }
+
     function liquidate(Liquid U) public returns (uint256 hot, uint256 cold) {
         hot = U.balanceOf(address(this));
         cold = cool(U, hot);
