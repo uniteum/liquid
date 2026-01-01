@@ -96,4 +96,59 @@ contract LiquidTest is BaseTest {
         assertEq(U.balanceOf(address(beck)), hotToBuy, "beck should have bought hot");
         assertEq(W.balanceOf(address(beck)), beckWaterBefore - waterSpent, "beck water should decrease by amount spent");
     }
+
+    /**
+     * Parameterized test: Verify trader cannot profit from heat → sell → cool → buy cycle
+     */
+    function test_NoArbitrage() public {
+        giveaway();
+        owen.give(address(U), 10000, W);
+        owen.heat(U, 10000);
+
+        _testNoArbitrage(100);
+        _testNoArbitrage(500);
+        _testNoArbitrage(1000);
+    }
+
+    function _testNoArbitrage(uint256 heatAmount) internal {
+        // Record alex's initial balances
+        uint256 alexInitialCold = U.solid().balanceOf(address(alex));
+        uint256 alexInitialWater = W.balanceOf(address(alex));
+        uint256 alexInitialHot = U.balanceOf(address(alex));
+
+        // Alex attempts arbitrage cycle: heat → sell → cool
+        // Step 1: Heat cold → hot
+        alex.heat(U, heatAmount);
+
+        // Step 2: Sell all hot for water
+        uint256 hotBalance = U.balanceOf(address(alex)) - alexInitialHot;
+        alex.sell(U, hotBalance);
+
+        // Step 3: Buy back hot with the water gained (if any)
+        uint256 waterGained = W.balanceOf(address(alex)) - alexInitialWater;
+        if (waterGained > 0) {
+            alex.buyWith(U, waterGained);
+        }
+
+        // Step 4: Cool all hot back to cold
+        uint256 finalHot = U.balanceOf(address(alex)) - alexInitialHot;
+        if (finalHot > 0) {
+            alex.cool(U, finalHot);
+        }
+
+        // Final balances
+        uint256 alexFinalCold = U.solid().balanceOf(address(alex));
+        uint256 alexFinalWater = W.balanceOf(address(alex));
+        uint256 alexFinalHot = U.balanceOf(address(alex));
+
+        // Verify no profit: final balances should be ≤ initial balances
+        assertLe(alexFinalCold, alexInitialCold, "alex should not gain cold from arbitrage");
+        assertEq(alexFinalWater, alexInitialWater, "alex water should return to initial");
+        assertEq(alexFinalHot, alexInitialHot, "alex hot should return to initial");
+
+        // Total value should not increase
+        uint256 initialValue = alexInitialCold + alexInitialWater + alexInitialHot;
+        uint256 finalValue = alexFinalCold + alexFinalWater + alexFinalHot;
+        assertLe(finalValue, initialValue, "alex total value should not increase from arbitrage");
+    }
 }
