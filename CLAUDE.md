@@ -25,7 +25,7 @@ This file provides context for AI assistants (primarily Claude) to understand th
 ### How to Update
 
 **Optimization Guidelines:**
-- Keep total length under 500 lines (currently ~467 lines)
+- Keep total length under 600 lines (currently ~596 lines)
 - Prioritize formulas, patterns, and non-obvious mechanics
 - Remove redundant explanations
 - Use concise code examples over prose
@@ -68,107 +68,139 @@ This file provides context for AI assistants (primarily Claude) to understand th
 
 ### Core Metaphor
 
-- **Ice/Solid** = External ERC-20 backing token
-- **Liquid** = Wrapped ERC-20 with AMM liquidity
+- **Ice/Solid/Cold** = External ERC-20 backing token (variable: `cold`)
+- **Liquid/Hot** = Wrapped ERC-20 with AMM liquidity (variable: `hot`)
+- **Hotter** = Variable name for other liquid amounts in cross-swaps
 - **Water** = Base Liquid instance used for cross-pool swaps
 - **Pool** = Liquid tokens held by contract
 - **Lake** = Water tokens held by contract
 
 ### Key File
 
-**[src/Liquid.sol](src/Liquid.sol)** (232 lines) - Single contract implementing entire protocol
+**[src/Liquid.sol](src/Liquid.sol)** (238 lines) - Single contract implementing entire protocol
 
 ## Core Operations
 
-### 1. Liquify (Solid → Liquid)
+### 1. Heat (Cold → Hot)
 
 ```solidity
-function heat(uint256 solids) external nonReentrant
+function heat(uint256 cold) external nonReentrant
 ```
 
 **What it does:**
-- User deposits `solids` of backing token
-- Contract mints `solids` to pool AND `solids` to user (2x mint)
-- Result: User owns `solids` liquids, pool grows by `solids`
+- User deposits `cold` of backing token
+- Contract mints `cold` to pool AND `cold` to user (2x mint)
+- Result: User owns `cold` hot tokens, pool grows by `cold`
 
 **Example:**
 ```solidity
 // User has 1000 USDC
 usdc.approve(address(liquidUSDC), 1000);
 liquidUSDC.heat(1000);
-// User now has: 1000 liquid-USDC
-// Pool now has: 1000 liquid-USDC
+// User now has: 1000 hot (liquid-USDC)
+// Pool now has: 1000 hot (liquid-USDC)
 ```
 
-### 2. Solidify (Liquid → Solid)
+### 2. Cool (Hot → Cold)
 
 ```solidity
-function cool(uint256 liquids) external nonReentrant returns (uint256 solids)
+function cool(uint256 hot) external nonReentrant returns (uint256 cold)
 ```
 
 **What it does:**
-- Burns liquids proportionally from both user and pool
-- Returns backing tokens based on: `liquids * (backing_balance / user_held_liquids)`
-- Burns total of `2 * liquids` (maintaining symmetry with heat)
+- Burns hot proportionally from both user and pool
+- Returns backing tokens based on: `hot * (backing_balance / user_held_hot)`
+- Burns total of `2 * hot` (maintaining symmetry with heat)
 
 **Formula:**
 ```solidity
-pool_burn = 2 * liquids * pool / totalSupply
-user_burn = 2 * liquids * held / totalSupply
-solids = liquids * solid.balanceOf(address(this)) / held
+ours = 2 * hot * pool / totalSupply      // pool burn
+mine = 2 * hot * held / totalSupply      // user burn
+cold = hot * solid.balanceOf(address(this)) / held
 ```
 
-### 3. Buy (Water → Liquid)
+### 3. Buy (Water → Hot)
 
 ```solidity
-function buy(uint256 liquids) external returns (uint256 water)
+function buy(uint256 hot) external returns (uint256 water)
 ```
 
 **Constant Product Formula:**
 ```solidity
 // Invariant: pool * lake = k
-water = pool * lake / (pool - liquids) - lake
+drained = pool - hot
+filled = pool * lake / drained
+water = filled - lake
 ```
 
 **What it does:**
-- Calculates water cost for buying `liquids` from pool
+- Calculates water cost for buying `hot` from pool
 - Transfers water from user to pool's lake
-- Transfers liquids from pool to user
+- Transfers hot from pool to user
 
-### 4. Sell (Liquid → Water)
+### 4. Sell (Hot → Water)
 
 ```solidity
-function sell(uint256 liquids) external returns (uint256 water)
+function sell(uint256 hot) external returns (uint256 water)
 ```
 
 **Formula:**
 ```solidity
-water = lake - pool * lake / (pool + liquids)
+filled = pool + hot
+drained = pool * lake / filled
+water = lake - drained
 ```
 
 **What it does:**
-- Calculates water received for selling `liquids` to pool
-- Transfers liquids from user to pool
+- Calculates water received for selling `hot` to pool
+- Transfers hot from user to pool
 - Transfers water from pool's lake to user
 
-### 5. Cross-Liquid Swaps
+### 5. BuyWith (Water → Hot, specifying water amount)
 
 ```solidity
-function buy(uint256 liquids, Liquid other) external
-    returns (uint256 water, uint256 others)
+function buyWith(uint256 water) external returns (uint256 hot)
+```
+
+**What it does:**
+- Buys hot by spending exactly `water` amount
+- Inverse of `buy(hot)` - you specify water input instead of hot output
+
+### 6. SellFor (Hot → Water, specifying water amount)
+
+```solidity
+function sellFor(uint256 water) external returns (uint256 hot)
+```
+
+**What it does:**
+- Sells hot to receive exactly `water` amount
+- Inverse of `sell(hot)` - you specify water output instead of hot input
+
+### 7. Cross-Liquid Swaps
+
+```solidity
+function buy(uint256 hot, Liquid other) external
+    returns (uint256 water, uint256 hotter)
+function sell(uint256 hot, Liquid other) external
+    returns (uint256 water, uint256 hotter)
+function buyWith(uint256 hotter, Liquid other) external
+    returns (uint256 water, uint256 hot)
+function sellFor(uint256 hotter, Liquid other) external
+    returns (uint256 water, uint256 hot)
 ```
 
 **What it does:**
 - Swaps between two different Liquid pools using water as intermediary
 - Example: Swap liquid-USDC for liquid-DAI in single transaction
 - Both pools maintain their AMM invariants
+- Four variants for different use cases (specify input/output on either side)
 
 ## Factory Pattern
 
 ### Creating New Liquids
 
 ```solidity
-function make(IERC20Metadata stuff) public returns (Liquid liquid)
+function heat(IERC20Metadata stuff) public returns (Liquid liquid)
 ```
 
 **How it works:**
@@ -180,8 +212,27 @@ function make(IERC20Metadata stuff) public returns (Liquid liquid)
 **Example:**
 ```solidity
 IERC20Metadata usdc = IERC20Metadata(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-Liquid liquidUSDC = water.make(usdc);
+Liquid liquidUSDC = water.heat(usdc);
 // liquidUSDC address is deterministic based on USDC address
+```
+
+### Convenience: Create and Heat in One Call
+
+```solidity
+function heat(uint256 cold, IERC20Metadata stuff) external
+```
+
+**What it does:**
+- Creates new liquid for `stuff` (if doesn't exist)
+- Heats `cold` amount into that liquid
+- Transfers the resulting hot tokens to msg.sender
+
+**Example:**
+```solidity
+// Create liquid-USDC and heat 1000 USDC in one transaction
+usdc.approve(address(water), 1000);
+water.heat(1000, usdc);
+// Creates liquidUSDC if needed, heats 1000, sends hot tokens to msg.sender
 ```
 
 ## Architecture
@@ -192,7 +243,6 @@ Liquid liquidUSDC = water.make(usdc);
 contract Liquid is ERC20, ReentrancyGuardTransient {
     Liquid public immutable WATER = this;
     IERC20Metadata public solid;  // Backing token
-    mapping(address => IERC20Metadata) public solidOf;  // Registry
 }
 ```
 
@@ -200,7 +250,6 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
 - `WATER` - Immutable self-reference (main instance for factory)
 - `solid` - The backing ERC-20 token for this Liquid
-- `solidOf[liquidAddress]` - Maps Liquid addresses to their backing tokens
 
 ### Key Functions
 
@@ -220,17 +269,17 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 pool * lake = k  (constant before and after trades)
 ```
 
-### 2. Liquify/Solidify Symmetry
+### 2. Heat/Cool Symmetry
 
 ```
-Total minted in heat = 2 * solids
-Total burned in cool = 2 * liquids
+Total minted in heat = 2 * cold
+Total burned in cool = 2 * hot
 ```
 
 ### 3. Backing Token Conservation
 
 ```
-solid.balanceOf(address(liquid)) = sum of all liquified solids - sum of all solidified returns
+solid.balanceOf(address(liquid)) = sum of all heated cold - sum of all cooled cold
 ```
 
 ## Security
@@ -252,7 +301,9 @@ modifier nonReentrant() {
 
 ```solidity
 modifier onlyLiquid() {
-    if (address(WATER.solidOf(msg.sender)) == address(0)) {
+    Liquid liquid = Liquid(msg.sender);
+    (address predicted,) = WATER.heated(liquid.solid());
+    if (msg.sender != predicted) {
         revert Unauthorized();
     }
     _;
@@ -260,7 +311,7 @@ modifier onlyLiquid() {
 ```
 
 - Only registered Liquid instances can call cross-pool functions
-- Prevents unauthorized pool manipulation
+- Validates caller by checking predicted CREATE2 address
 - Applied to: `bought()`, `sold()`, `update()`
 
 ### Safe Token Handling
@@ -278,13 +329,13 @@ using SafeERC20 for IERC20Metadata;
 **IMPORTANT:** Token approval is ONLY required for heat operations.
 
 **Requires approval:**
-- `heat(solids)` - User must approve liquid contract to spend backing tokens
+- `heat(cold)` - User must approve liquid contract to spend backing tokens
 
 **NO approval needed (only requires msg.sender ownership):**
-- `cool(liquids)` - Burns from msg.sender's balance
-- `buy(liquids)` - Transfers water from msg.sender
-- `sell(liquids)` - Transfers liquids from msg.sender
-- `buy(liquids, other)` - Cross-swap using msg.sender's liquids
+- `cool(hot)` - Burns from msg.sender's balance
+- `buy(hot)` - Transfers water from msg.sender
+- `sell(hot)` - Transfers hot from msg.sender
+- `buy(hot, other)` - Cross-swap using msg.sender's hot
 
 The contract uses `transferFrom(msg.sender, ...)` which works directly when msg.sender owns the tokens being transferred.
 
@@ -302,8 +353,8 @@ forge fmt            # Format code
 ### Running Specific Tests
 
 ```bash
-forge test --match-test test_MeltFreeze
-forge test --match-test test_MeltSellFreezeBuy
+forge test --match-test test_HeatCool
+forge test --match-test test_HeatSellCoolBuy
 ```
 
 ### Code Style
@@ -336,8 +387,8 @@ contract LiquidTest is BaseTest {
         owen = newUser("owen");
         W = new Liquid(owen.newToken("W", 1e9));
         owen.heat(W, 1e9);
-        U = W.make(owen.newToken("U", 1e9));
-        V = W.make(owen.newToken("V", 1e9));
+        U = W.heat(owen.newToken("U", 1e9));
+        V = W.heat(owen.newToken("V", 1e9));
     }
 }
 ```
@@ -346,10 +397,10 @@ contract LiquidTest is BaseTest {
 
 ```solidity
 contract LiquidUser is User {
-    function heat(Liquid U, uint256 solids) public { }
-    function cool(Liquid U, uint256 liquids) public returns (uint256 solids) { }
-    function sell(Liquid U, uint256 liquids) public returns (uint256 water) { }
-    function liquidate(Liquid U) public returns (uint256 liquids, uint256 solids) { }
+    function heat(Liquid U, uint256 cold) public { }
+    function cool(Liquid U, uint256 hot) public returns (uint256 cold) { }
+    function sell(Liquid U, uint256 hot) public returns (uint256 water) { }
+    function liquidate(Liquid U) public returns (uint256 hot, uint256 cold) { }
 }
 ```
 
@@ -358,19 +409,19 @@ contract LiquidUser is User {
 ### Example Test
 
 ```solidity
-function test_MeltFreeze() public returns (uint256 liquids, uint256 solids) {
+function test_HeatCool() public returns (uint256 hot, uint256 cold) {
     giveaway();                        // Distribute tokens to users
     owen.heat(U, 500);
     alex.heat(U, 500);
     beck.heat(U, 500);
 
-    liquids = 100;
-    solids = alex.cool(U, liquids);
-    assertEq(liquids, solids, "alex liquids != solids");
+    hot = 100;
+    cold = alex.cool(U, hot);
+    assertEq(hot, cold, "alex hot != cold");
 
     // Full liquidation
-    (liquids, solids) = alex.liquidate(U);
-    assertEq(liquids, solids, "alex liquids != solids");
+    (hot, cold) = alex.liquidate(U);
+    assertEq(hot, cold, "alex hot != cold");
 }
 ```
 
@@ -396,6 +447,8 @@ forge script script/Ice.s.sol \
   --delay 10 \
   --retries 10
 ```
+
+Note: Ice.s.sol deploys the initial WATAR token which serves as the base water instance.
 
 ### Supported Networks
 
@@ -436,37 +489,37 @@ always_use_create_2_factory = true
 ```solidity
 // From water instance
 IERC20Metadata dai = IERC20Metadata(0x6B175474E89094C44Da98b954EedeAC495271d0F);
-Liquid liquidDAI = water.make(dai);
+Liquid liquidDAI = water.heat(dai);
 ```
 
 ### Adding Liquidity
 
 ```solidity
-// User deposits backing token
+// User deposits backing token (cold)
 dai.approve(address(liquidDAI), 1000 ether);
 liquidDAI.heat(1000 ether);
-// User receives 1000 liquid-DAI, pool grows by 1000
+// User receives 1000 hot (liquid-DAI), pool grows by 1000
 ```
 
 ### Removing Liquidity
 
 ```solidity
-// User withdraws backing token
-uint256 solids = liquidDAI.cool(500 ether);
-// User receives DAI, burns liquid-DAI from self and pool
+// User withdraws backing token (cold)
+uint256 cold = liquidDAI.cool(500 ether);
+// User receives DAI, burns hot (liquid-DAI) from self and pool
 ```
 
 ### Trading
 
 ```solidity
-// Buy liquid with water
+// Buy hot with water
 uint256 waterCost = liquidDAI.buy(100 ether);
 
-// Sell liquid for water
+// Sell hot for water
 uint256 waterReceived = liquidDAI.sell(50 ether);
 
 // Cross-liquid swap
-(uint256 waterUsed, uint256 usdcReceived) = liquidDAI.buy(100 ether, liquidUSDC);
+(uint256 waterUsed, uint256 hotter) = liquidDAI.buy(100 ether, liquidUSDC);
 ```
 
 ## Key Differences from Unit Protocol
@@ -494,19 +547,19 @@ uint256 waterReceived = liquidDAI.sell(50 ether);
 ## Events
 
 ```solidity
-event Liquify(Liquid indexed liquid, uint256 liquids);
-event Solidify(Liquid indexed liquid, uint256 liquids, uint256 solids);
-event Bought(Liquid indexed liquid, uint256 liquids, uint256 water);
-event Sold(Liquid indexed liquid, uint256 liquids, uint256 water);
-event Made(IERC20Metadata indexed solid, Liquid indexed liquid);
+event Heat(Liquid indexed liquid, uint256 hot);
+event Cool(Liquid indexed liquid, uint256 hot, uint256 cold);
+event Bought(Liquid indexed liquid, uint256 hot, uint256 water);
+event Sold(Liquid indexed liquid, uint256 hot, uint256 water);
+event Heat(IERC20Metadata indexed solid, Liquid indexed liquid);
 ```
 
 ## Errors
 
 ```solidity
-error Nothing();                                          // Zero address token
-error Drained(Liquid liquid, uint256 pool, uint256 liquids);  // Insufficient pool
-error Unauthorized();                                     // Non-liquid caller
+error Nothing();                                     // Zero address token
+error Drained(Liquid liquid, uint256 pool, uint256 hot);  // Insufficient pool
+error Unauthorized();                                // Non-liquid caller
 ```
 
 ## Quick Reference
@@ -522,9 +575,11 @@ uint256 lake = water.balanceOf(address(liquid));       // Pool water
 ### Quote Functions
 
 ```solidity
-uint256 water = liquid.buyQuote(100 ether);            // Cost to buy
-uint256 water = liquid.sellQuote(50 ether);            // Return from sell
-(uint256 water, uint256 others) = liquid.buyQuote(100 ether, otherLiquid);
+uint256 water = liquid.buyQuote(100 ether);               // Cost to buy
+uint256 water = liquid.sellQuote(50 ether);               // Return from sell
+(uint256 water, uint256 hotter) = liquid.buyQuote(100 ether, otherLiquid);
+uint256 hot = liquid.buyWithQuote(100 ether);             // Hot from water
+uint256 hot = liquid.sellForQuote(50 ether);              // Hot from selling water
 ```
 
 ### Metadata
