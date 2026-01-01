@@ -204,7 +204,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
                 future = Clones.cloneDeterministic(address(WATER), salt);
                 liquid.__initialize(stuff);
                 solidOf[future] = stuff;
-                emit Made(stuff, liquid);
+                emit Heat(stuff, liquid);
             }
         }
     }
@@ -230,7 +230,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     event Cool(Liquid indexed liquid, uint256 hot, uint256 cold);
     event Bought(Liquid indexed liquid, uint256 hot, uint256 water);
     event Sold(Liquid indexed liquid, uint256 hot, uint256 water);
-    event Made(IERC20Metadata indexed solid, Liquid indexed liquid);
+    event Heat(IERC20Metadata indexed solid, Liquid indexed liquid);
 
     error Nothing();
     error Drained(Liquid liquid, uint256 pool, uint256 hot);
