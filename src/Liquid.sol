@@ -184,6 +184,5 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     event Heat(IERC20Metadata indexed substance, Liquid indexed L);
 
     error Nothing();
-    error Drained(Liquid L, uint256 pool_, uint256 liquid);
     error Unauthorized();
 }
