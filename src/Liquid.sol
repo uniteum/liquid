@@ -18,6 +18,14 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         solid = ice;
     }
 
+    function pool() public view returns (uint256) {
+        return balanceOf(address(this));
+    }
+
+    function lake() public view returns (uint256) {
+        return WATER.balanceOf(address(this));
+    }
+
     function heat(uint256 cold, IERC20Metadata stuff) external {
         Liquid liquid = heat(stuff);
         liquid.heat(cold);
@@ -33,9 +41,9 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function cool(uint256 hot) external nonReentrant returns (uint256 cold) {
         uint256 total = totalSupply();
-        uint256 pool = balanceOf(address(this));
-        uint256 held = total - pool;
-        uint256 ours = 2 * hot * pool / total;
+        uint256 pool_ = balanceOf(address(this));
+        uint256 held = total - pool_;
+        uint256 ours = 2 * hot * pool_ / total;
         uint256 mine = 2 * hot * held / total;
         cold = hot * solid.balanceOf(address(this)) / held;
         _burn(address(this), ours);
@@ -44,34 +52,23 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         emit Cool(this, hot, cold);
     }
 
-    function balances() public view returns (uint256 pool, uint256 lake) {
-        pool = balanceOf(address(this));
-        lake = WATER.balanceOf(address(this));
-    }
-
-    function buyQuote(uint256 hot, uint256 pool, uint256 lake) public view returns (uint256 water) {
-        if (pool <= hot) {
-            revert Drained(this, pool, hot);
+    function buyQuote(uint256 hot, uint256 pool_, uint256 lake_) public view returns (uint256 water) {
+        if (pool_ <= hot) {
+            revert Drained(this, pool_, hot);
         }
-        uint256 drained = pool - hot;
-        uint256 filled = pool * lake / drained;
-        water = filled - lake;
+        water = pool_ * lake_ / (pool_ - hot) - lake_;
     }
 
-    function sellQuote(uint256 hot, uint256 pool, uint256 lake) public pure returns (uint256 water) {
-        uint256 filled = pool + hot;
-        uint256 drained = pool * lake / filled;
-        water = lake - drained;
+    function sellQuote(uint256 hot, uint256 pool_, uint256 lake_) public pure returns (uint256 water) {
+        water = lake_ - pool_ * lake_ / (pool_ + hot);
     }
 
     function buyQuote(uint256 hot) public view returns (uint256 water) {
-        (uint256 pool, uint256 lake) = balances();
-        water = buyQuote(hot, pool, lake);
+        water = buyQuote(hot, pool(), lake());
     }
 
     function sellQuote(uint256 hot) public view returns (uint256 water) {
-        (uint256 pool, uint256 lake) = balances();
-        water = sellQuote(hot, pool, lake);
+        water = sellQuote(hot, pool(), lake());
     }
 
     function buyQuote(uint256 hot, Liquid other) public view returns (uint256 water, uint256 hotter) {
@@ -85,13 +82,11 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function buyWithQuote(uint256 water) public view returns (uint256 hot) {
-        (uint256 pool, uint256 lake) = balances();
-        hot = sellQuote(water, lake, pool);
+        hot = sellQuote(water, lake(), pool());
     }
 
     function sellForQuote(uint256 water) public view returns (uint256 hot) {
-        (uint256 pool, uint256 lake) = balances();
-        water = buyQuote(hot, lake, pool);
+        water = buyQuote(hot, lake(), pool());
     }
 
     function buyWithQuote(uint256 hotter, Liquid other) public view returns (uint256 water, uint256 hot) {
@@ -232,6 +227,6 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     event Heat(IERC20Metadata indexed solid, Liquid indexed liquid);
 
     error Nothing();
-    error Drained(Liquid liquid, uint256 pool, uint256 hot);
+    error Drained(Liquid liquid, uint256 pool_, uint256 hot);
     error Unauthorized();
 }
