@@ -48,15 +48,15 @@ contract LiquidUser is User {
         console.log("cold:", cold);
     }
 
-    function sell(Liquid U, uint256 hot) public logging("sell", U, hot) returns (uint256 water) {
-        water = U.sell(hot);
-        console.log("water:", water);
-    }
-
     function liquidate(Liquid U) public returns (uint256 hot, uint256 cold) {
         hot = U.balanceOf(address(this));
         cold = cool(U, hot);
         assertHasNo(U);
+    }
+
+    function sell(Liquid U, uint256 hot) public logging("sell", U, hot) returns (uint256 water) {
+        water = U.sell(hot);
+        console.log("water:", water);
     }
 
     function rndUnits(Liquid U) public returns (int256 hot) {
