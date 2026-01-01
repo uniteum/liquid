@@ -31,9 +31,9 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function liquify(uint256 solid, IERC20Metadata stuff) external {
-        Liquid L = liquify(stuff);
-        L.heat(solid);
-        L.transfer(msg.sender, solid);
+        Liquid fluid = liquify(stuff);
+        fluid.heat(solid);
+        fluid.transfer(msg.sender, solid);
     }
 
     function heat(uint256 solid) external nonReentrant {
@@ -61,10 +61,10 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _sold(liquid, water);
     }
 
-    function sell(uint256 liquid, Liquid L) external returns (uint256 water, uint256 other) {
-        (water, other) = sells(liquid, L);
+    function sell(uint256 liquid, Liquid fluid) external returns (uint256 water, uint256 fluids) {
+        (water, fluids) = sells(liquid, fluid);
         _sold(liquid, water);
-        L.bought(other, water);
+        fluid.bought(fluids, water);
     }
 
     function buy(uint256 water) external returns (uint256 liquid) {
@@ -72,10 +72,10 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _bought(liquid, water);
     }
 
-    function buy(uint256 liquid, Liquid L) external returns (uint256 water, uint256 other) {
-        (water, other) = buys(liquid, L);
-        L.sold(liquid, water);
-        _bought(other, water);
+    function buy(uint256 liquid, Liquid fluid) external returns (uint256 water, uint256 fluids) {
+        (water, fluids) = buys(liquid, fluid);
+        fluid.sold(liquid, water);
+        _bought(fluids, water);
     }
 
     function sells(uint256 liquid, uint256 pool_, uint256 lake_) public pure returns (uint256 water) {
@@ -86,18 +86,18 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         water = sells(liquid, pool(), lake());
     }
 
-    function sells(uint256 liquid, Liquid L) public view returns (uint256 water, uint256 other) {
+    function sells(uint256 liquid, Liquid fluid) public view returns (uint256 water, uint256 fluids) {
         water = sells(liquid);
-        other = L.buys(water);
+        fluids = fluid.buys(water);
     }
 
     function buys(uint256 water) public view returns (uint256 liquid) {
         liquid = sells(water, lake(), pool());
     }
 
-    function buys(uint256 other, Liquid L) public view returns (uint256 water, uint256 liquid) {
-        water = buys(other);
-        liquid = L.buys(water);
+    function buys(uint256 fluids, Liquid fluid) public view returns (uint256 water, uint256 liquid) {
+        water = buys(fluids);
+        liquid = fluid.buys(water);
     }
 
     function bought(uint256 liquid, uint256 water) external onlyLiquid {
@@ -144,16 +144,16 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         future = Clones.predictDeterministicAddress(address(WATER), salt, address(WATER));
     }
 
-    function liquify(IERC20Metadata stuff) public returns (Liquid L) {
+    function liquify(IERC20Metadata stuff) public returns (Liquid fluid) {
         if (this != WATER) {
-            L = WATER.liquify(stuff);
+            fluid = WATER.liquify(stuff);
         } else {
             (address future, bytes32 salt) = liquified(stuff);
-            L = Liquid(future);
+            fluid = Liquid(future);
             if (future.code.length == 0) {
                 future = Clones.cloneDeterministic(address(WATER), salt);
-                L.__initialize(stuff);
-                emit Liquified(stuff, L);
+                fluid.__initialize(stuff);
+                emit Liquified(stuff, fluid);
             }
         }
     }
@@ -170,18 +170,18 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function _onlyLiquid() internal view {
-        Liquid L = Liquid(msg.sender);
-        (address predicted,) = WATER.liquified(L.substance());
+        Liquid fluid = Liquid(msg.sender);
+        (address predicted,) = WATER.liquified(fluid.substance());
         if (msg.sender != predicted) {
             revert Unauthorized();
         }
     }
 
-    event Heat(Liquid indexed L, uint256 solid);
-    event Cool(Liquid indexed L, uint256 liquid, uint256 solid);
-    event Bought(Liquid indexed L, uint256 liquid, uint256 water);
-    event Sold(Liquid indexed L, uint256 liquid, uint256 water);
-    event Liquified(IERC20Metadata indexed substance, Liquid indexed L);
+    event Heat(Liquid indexed fluid, uint256 solid);
+    event Cool(Liquid indexed fluid, uint256 liquid, uint256 solid);
+    event Bought(Liquid indexed fluid, uint256 liquid, uint256 water);
+    event Sold(Liquid indexed fluid, uint256 liquid, uint256 water);
+    event Liquified(IERC20Metadata indexed substance, Liquid indexed fluid);
 
     error Nothing();
     error Unauthorized();
