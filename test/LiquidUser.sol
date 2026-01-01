@@ -28,44 +28,44 @@ contract LiquidUser is User {
         console.log(string.concat(name, " ", method, " ", amount.toString(), " ", U.name()));
     }
 
-    function heat(Liquid U, uint256 solids) public logging("heat", U, solids) {
-        U.solid().approve(address(U), solids);
-        U.heat(solids);
+    function heat(Liquid U, uint256 cold) public logging("heat", U, cold) {
+        U.solid().approve(address(U), cold);
+        U.heat(cold);
     }
 
-    function cool(Liquid U, uint256 liquids) public logging("cool", U, liquids) returns (uint256 solids) {
-        solids = U.cool(liquids);
-        console.log("solids:", solids);
+    function cool(Liquid U, uint256 hot) public logging("cool", U, hot) returns (uint256 cold) {
+        cold = U.cool(hot);
+        console.log("cold:", cold);
     }
 
-    function sell(Liquid U, uint256 liquids) public logging("sell", U, liquids) returns (uint256 water) {
-        water = U.sell(liquids);
+    function sell(Liquid U, uint256 hot) public logging("sell", U, hot) returns (uint256 water) {
+        water = U.sell(hot);
         console.log("water:", water);
     }
 
-    function liquidate(Liquid U) public returns (uint256 liquids, uint256 solids) {
-        liquids = U.balanceOf(address(this));
-        solids = cool(U, liquids);
+    function liquidate(Liquid U) public returns (uint256 hot, uint256 cold) {
+        hot = U.balanceOf(address(this));
+        cold = cool(U, hot);
         assertHasNo(U);
     }
 
-    function rndUnits(Liquid U) public returns (int256 liquids) {
+    function rndUnits(Liquid U) public returns (int256 hot) {
         int256 min = -int256(U.balanceOf(address(this)));
         // forge-lint: disable-next-line(unsafe-typecast)
         int256 max = int256(WATER.balanceOf(address(this)));
-        liquids = rnd(min, max);
+        hot = rnd(min, max);
     }
 
-    function rndForge(Liquid U) public returns (int256 liquids) {
-        liquids = rndUnits(U);
-        if (liquids < -int256(WATER.balanceOf(address(this)))) {
+    function rndForge(Liquid U) public returns (int256 hot) {
+        hot = rndUnits(U);
+        if (hot < -int256(WATER.balanceOf(address(this)))) {
             console.log("forge not called because insufficient balance");
-        } else if (liquids < 0) {
+        } else if (hot < 0) {
             // forge-lint: disable-next-line(unsafe-typecast)
-            cool(U, uint256(-liquids));
+            cool(U, uint256(-hot));
         } else {
             // forge-lint: disable-next-line(unsafe-typecast)
-            heat(U, uint256(liquids));
+            heat(U, uint256(hot));
         }
     }
 }

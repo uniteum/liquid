@@ -43,26 +43,26 @@ contract LiquidTest is BaseTest {
         give(beck, 1e3, V.solid());
     }
 
-    function test_MeltFreeze() public returns (uint256 liquids, uint256 solids) {
+    function test_MeltFreeze() public returns (uint256 hot, uint256 cold) {
         giveaway();
         owen.heat(U, 500);
         alex.heat(U, 500);
         beck.heat(U, 500);
-        liquids = 100;
-        solids = alex.cool(U, liquids);
-        assertEq(liquids, solids, "1. alex liquids != solids");
-        (liquids, solids) = alex.liquidate(U);
-        assertEq(liquids, solids, "2. alex liquids != solids");
-        (liquids, solids) = beck.liquidate(U);
-        assertEq(liquids, solids, "beck liquids != solids");
+        hot = 100;
+        cold = alex.cool(U, hot);
+        assertEq(hot, cold, "1. alex hot != cold");
+        (hot, cold) = alex.liquidate(U);
+        assertEq(hot, cold, "2. alex hot != cold");
+        (hot, cold) = beck.liquidate(U);
+        assertEq(hot, cold, "beck hot != cold");
     }
 
-    function test_MeltSellFreezeBuy() public returns (uint256 water, uint256 solids) {
+    function test_MeltSellFreezeBuy() public returns (uint256 water, uint256 cold) {
         giveaway();
         owen.give(address(U), 1000, W);
         owen.heat(U, 1000);
         alex.heat(U, 100);
         water = alex.sell(U, 50);
-        solids = alex.cool(U, U.balanceOf(address(alex)));
+        cold = alex.cool(U, U.balanceOf(address(alex)));
     }
 }
