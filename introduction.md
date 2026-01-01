@@ -14,16 +14,18 @@ You can interact with the entire protocol through Etherscan contract interaction
 
 The protocol uses an intuitive temperature metaphor:
 
-- **Cold/Solid/Ice** = Your original ERC-20 token (USDC, DAI, etc.)
-  - Variable name in code: `cold`
-  - Ice is the cold token for water specifically
-  - Each liquid has its own solid (e.g., USDC is the solid for liquid-USDC)
-- **Hot/Liquid** = The wrapped version with built-in liquidity (liquid-USDC, liquid-DAI)
-  - Variable name in code: `hot`
-  - Also called "hotter" when referring to other liquids in cross-swaps
+- **Ice/Substance** = Your original ERC-20 token (USDC, DAI, etc.)
+  - State variable in code: `substance`
+  - Ice is the backing token for water specifically
+  - Each liquid has its own substance (e.g., USDC is the substance for liquid-USDC)
+- **Solid** = Amount of backing token (parameter: `solid`)
+- **Liquid** = The wrapped version with built-in liquidity (liquid-USDC, liquid-DAI)
+  - Variable name in code: `liquid`
+  - Also called "fluids" when referring to other liquids in cross-swaps
 - **Water** = The base Liquid instance used for cross-pool trading
-- **Pool** = Hot tokens (liquids) held by the contract
+- **Pool** = Liquid tokens held by the contract
 - **Lake** = Water tokens held by the contract
+- **Mass** = Backing token balance held by contract
 
 ## How to Use Liquid (via Etherscan)
 
@@ -39,128 +41,124 @@ All operations can be performed through Etherscan's "Write Contract" interface. 
 
 ### Step 2: Heat (Wrap Your Tokens)
 
-**Goal:** Convert your ERC-20 tokens (cold) into hot tokens with built-in liquidity.
+**Goal:** Convert your ERC-20 tokens (solid backing tokens) into liquid tokens with built-in liquidity.
 
 **Before you start:**
 1. Go to your backing token contract (e.g., USDC)
 2. Use the `approve` function to allow the liquid contract to spend your tokens
    - `spender`: The liquid contract address
-   - `amount`: How much cold you want to heat (in token's decimals)
+   - `amount`: How much solid you want to heat (in token's decimals)
 
 **To heat:**
-1. On the liquid contract, find the `heat` function (with `uint256 cold` parameter)
+1. On the liquid contract, find the `heat` function (with `uint256 solid` parameter)
 2. Enter the amount (in token's decimals, e.g., `1000000000` for 1000 USDC with 6 decimals)
 3. Click "Write" and confirm the transaction
 
 **What happens:**
-- You deposit 1,000 USDC (cold)
-- You receive 1,000 hot tokens (liquid-USDC)
-- The pool also gets 1,000 hot tokens
-- Total: 2,000 hot minted from your 1,000 cold
+- You deposit 1,000 USDC (solid backing token)
+- You receive 1,000 liquid tokens (liquid-USDC)
+- The pool also gets 1,000 liquid tokens
+- Total: 2,000 liquid minted from your 1,000 solid
 
 This 2x minting creates instant liquidity. Half goes to you, half stays in the pool for trading.
 
 ### Step 3: Cool (Unwrap Back to Original Tokens)
 
-**Goal:** Convert hot tokens back to the original cold ERC-20 tokens.
+**Goal:** Convert liquid tokens back to the original solid backing tokens.
 
 **To cool:**
 1. On the liquid contract, find the `cool` function
-2. Enter how many hot tokens you want to burn (e.g., `500000000` for 500 hot)
+2. Enter how many liquid tokens you want to burn (e.g., `500000000` for 500 liquid)
 3. Click "Write" and confirm the transaction
 
 **What happens:**
-- Burns your hot tokens
+- Burns your liquid tokens
 - Burns matching amount from the pool
-- Returns the cold backing tokens (USDC) proportional to pool reserves
+- Returns the solid backing tokens (USDC) proportional to pool reserves
 
 The 2x burn (from you and pool) maintains symmetry with the 2x mint in heat.
 
-### Step 4: Buy Hot with Water
+### Step 4: Sell Liquid for Water
 
-**Goal:** Trade water tokens for hot tokens from the pool.
+**Goal:** Trade liquid tokens for water tokens.
+
+**To sell:**
+1. On the liquid contract, find the `sell` function (the one with just `uint256 liquid` parameter)
+2. Enter how many liquid tokens you want to sell
+3. Click "Write" and confirm the transaction
+
+**What happens:**
+- Calculates water received using: `water = lake - pool * lake / (pool + liquid)`
+- Transfers liquid tokens from you to the pool
+- Transfers water from pool's lake to you
+
+**To check the return before selling:**
+- Use the "Read Contract" tab
+- Call `sells` with the amount you want to sell
+- This shows how much water you'll receive (no transaction needed)
+
+### Step 5: Buy Liquid with Water
+
+**Goal:** Trade water tokens for liquid tokens from the pool.
 
 **Before you start:**
 1. You need water tokens in your wallet
 
 **To buy:**
-1. On the liquid contract, find the `buy` function (the one with just `uint256 hot` parameter)
-2. Enter how many hot tokens you want to buy
+1. On the liquid contract, find the `buy` function (the one with just `uint256 water` parameter)
+2. Enter how much water you want to spend
 3. Click "Write" and confirm the transaction
 
 **What happens:**
-- Calculates water cost using: `water = pool * lake / (pool - hot) - lake`
+- Calculates liquid received using: `liquid = pool - pool * lake / (lake + water)`
 - Transfers water from you to the pool's lake
-- Transfers hot tokens from pool to you
+- Transfers liquid tokens from pool to you
 
-**To check the cost before buying:**
+**To check the amount before buying:**
 - Use the "Read Contract" tab
-- Call `buyQuote` with the amount you want to buy
-- This shows how much water it will cost (no transaction needed)
-
-### Step 5: Sell Hot for Water
-
-**Goal:** Trade hot tokens for water tokens.
-
-**To sell:**
-1. On the liquid contract, find the `sell` function (the one with just `uint256 hot` parameter)
-2. Enter how many hot tokens you want to sell
-3. Click "Write" and confirm the transaction
-
-**What happens:**
-- Calculates water received using: `water = lake - pool * lake / (pool + hot)`
-- Transfers hot tokens from you to the pool
-- Transfers water from pool's lake to you
-
-**To check the return before selling:**
-- Use the "Read Contract" tab
-- Call `sellQuote` with the amount you want to sell
-- This shows how much water you'll receive
+- Call `buys` with the water amount you want to spend
+- This shows how much liquid you'll receive
 
 ### Step 6: Cross-Liquid Swaps
 
-**Goal:** Swap one hot token for another in a single transaction.
+**Goal:** Swap one liquid token for another in a single transaction.
 
 **Example:** Swap liquid-USDC for liquid-DAI
 
 **To swap:**
-1. On the first liquid contract (e.g., liquid-USDC), find the `buy` function with two parameters: `(uint256 hot, Liquid other)`
-2. Enter the amount you want to buy of the target liquid
+1. On the first liquid contract (e.g., liquid-USDC), find the `sell` function with two parameters: `(uint256 liquid, Liquid fluid)`
+2. Enter the amount of liquid-USDC you want to sell
 3. Enter the address of the target liquid contract (e.g., liquid-DAI address)
 4. Click "Write" and confirm the transaction
 
 **What happens:**
-- Sells your hot liquid-USDC for water
-- Buys hot liquid-DAI with that water
+- Sells your liquid-USDC for water
+- Buys liquid-DAI with that water
 - All in one transaction
 
-**To check the cost before swapping:**
+**To check the result before swapping:**
 - Use the "Read Contract" tab
-- Call `buyQuote(uint256,Liquid)` with the amount and target liquid address
-- This shows water used and how much hotter (of the other liquid) you'll receive
+- Call `sells(uint256,Liquid)` with the amount and target liquid address
+- This shows water used and how much fluids (of the other liquid) you'll receive
 
 ### Step 7: Check Pool State
 
 **To see pool liquidity:**
 1. Go to "Read Contract" tab
-2. Call `balanceOf` with the liquid contract's own address
-   - This shows how many hot tokens are in the pool
+2. Call `pool()` to see liquid tokens in the pool
+3. Call `lake()` to see water tokens in the lake
+4. Call `mass()` to see backing token balance
 
-**To see pool's water balance:**
-1. Go to the water contract
-2. Call `balanceOf` with the liquid contract's address
-   - This shows how many water tokens are in the lake
-
-**Quick way to see both:**
-1. On the liquid contract, call `balances()`
-2. Returns `(pool, lake)` - both balances at once
+**Alternative method:**
+1. Call `balanceOf` with the liquid contract's own address
+   - This shows how many liquid tokens are in the pool
 
 ## Common Workflows
 
 ### Workflow 1: Create Liquidity for Your Token
 
 1. Go to the water contract on Etherscan
-2. Use `heat(address stuff)` function (the factory function)
+2. Use `liquify(address stuff)` function (the factory function)
 3. Enter your ERC-20 token address
 4. Confirm transaction → new liquid token created
 5. Find the new liquid contract address from the transaction logs
@@ -170,43 +168,43 @@ The 2x burn (from you and pool) maintains symmetry with the 2x mint in heat.
 
 **Example:** Trade liquid-USDC → liquid-DAI
 
-1. On liquid-USDC contract, use `buy(uint256 hot, Liquid other)`
-2. Enter amount of liquid-DAI you want
+1. On liquid-USDC contract, use `sell(uint256 liquid, Liquid fluid)`
+2. Enter amount of liquid-USDC you want to sell
 3. Enter liquid-DAI contract address
 4. Confirm transaction
 5. Receive liquid-DAI directly
 
 ### Workflow 3: Add Liquidity to Existing Liquid
 
-1. Approve the backing token (cold, e.g., USDC)
+1. Approve the backing token (solid, e.g., USDC)
 2. Call `heat(amount)` on the liquid contract
-3. Receive hot tokens (you get N, pool gets N)
+3. Receive liquid tokens (you get N, pool gets N)
 4. Pool now has more liquidity for trading
 
 ### Workflow 4: Exit Your Position
 
 **Option A: Cool to backing token**
 1. Call `cool(amount)` on the liquid contract
-2. Receive cold backing tokens based on pool reserves
+2. Receive solid backing tokens based on pool reserves
 
 **Option B: Sell for water, then cool water**
-1. Call `sell(amount)` to convert hot → water
+1. Call `sell(amount)` to convert liquid → water
 2. Go to water contract
-3. Call `cool(amount)` to convert water → ice (water's cold backing token)
+3. Call `cool(amount)` to convert water → ice (water's backing token)
 
 **Option C: Trade on external DEX**
-- Hot tokens (liquids) are standard ERC-20s
+- Liquid tokens are standard ERC-20s
 - Can trade on Uniswap, Curve, or any DEX
 
 ## Reading Contract Information
 
 ### Check Your Balances
 
-**Your hot token balance:**
+**Your liquid token balance:**
 1. "Read Contract" tab on liquid contract
 2. Call `balanceOf(address)` with your wallet address
 
-**Your cold backing token balance:**
+**Your backing token balance:**
 1. Go to the backing token contract
 2. Call `balanceOf(address)` with your wallet address
 
@@ -219,12 +217,12 @@ The 2x burn (from you and pool) maintains symmetry with the 2x mint in heat.
 - Call `decimals()` (matches backing token)
 
 **What's the backing token?**
-- Call `solid()` returns the cold backing token address
+- Call `substance()` returns the backing token address
 
 ### Check if Address is a Liquid
 
 1. Go to the water contract
-2. Call `heated(address stuff)` with a backing token address
+2. Call `liquified(address stuff)` with a backing token address
 3. Returns `(address predicted, bytes32 salt)`
 4. The `predicted` address is where that liquid is (or will be) deployed
 5. Check if code exists at that address to see if it's already created
@@ -241,11 +239,10 @@ The constant-product formula means:
 ### Checking Quotes
 
 Always use quote functions before trading:
-- `buyQuote(hot)` - Shows water cost to buy hot
-- `sellQuote(hot)` - Shows water return from selling hot
-- `buyQuote(hot, otherLiquid)` - Shows cost for cross-liquid swap
-- `buyWithQuote(water)` - Shows hot received for spending water
-- `sellForQuote(water)` - Shows hot needed to receive water
+- `sells(liquid)` - Shows water return from selling liquid
+- `buys(water)` - Shows liquid received for spending water
+- `sells(liquid, otherLiquid)` - Shows water used and fluids received for cross-liquid swap
+- `buys(liquid, otherLiquid)` - Shows water used and liquid received for cross-liquid swap
 
 These are read-only calls (no gas cost, no transaction needed).
 
@@ -263,17 +260,17 @@ The AMM formula automatically adjusts based on current pool state.
 ### Before Interacting with a Liquid
 
 ✅ **Verify the backing token:**
-- Call `solid()` to see what cold token backs this liquid
+- Call `substance()` to see what backing token this liquid wraps
 - Check that backing token is legitimate
 
 ✅ **Verify the liquid is authentic (extra paranoid):**
 - Go to the verified water contract on Etherscan
-- Call `heated(address stuff)` with the backing token address
+- Call `liquified(address stuff)` with the backing token address
 - Confirm the returned predicted address matches the liquid contract you're interacting with
 - This ensures the liquid is legitimately created by the official water contract
 
 ✅ **Check pool liquidity:**
-- Call `balances()` to see pool size
+- Call `pool()`, `lake()`, and `mass()` to see pool state
 - Larger pools generally have better prices
 
 ✅ **Use quote functions:**
@@ -326,10 +323,10 @@ Liquid improves on traditional AMM designs in several key ways:
 **Note**: Backing token risk still exists. If your cold token (USDC, DAI, etc.) has governance issues or fails, the liquid token inherits that risk.
 
 ### Automatic Liquidity Creation
-- **2x mint pattern**: When you heat 1,000 cold, you get 1,000 hot AND the pool gets 1,000 hot
+- **2x mint pattern**: When you heat 1,000 solid, you get 1,000 liquid AND the pool gets 1,000 liquid
 - **Instant liquidity**: Every deposit automatically creates tradeable liquidity
-- **No separate LP tokens**: You hold the hot tokens directly—no staking or complex LP positions
-- **Simple exit**: Cool back to cold anytime, no unstaking required
+- **No separate LP tokens**: You hold the liquid tokens directly—no staking or complex LP positions
+- **Simple exit**: Cool back to solid anytime, no unstaking required
 
 ## Comparison to Other Protocols
 
@@ -344,17 +341,17 @@ Liquid improves on traditional AMM designs in several key ways:
 - Uniswap: n² pairs needed for full connectivity
 
 **Liquidity Provision:**
-- Liquid: Automatic 2x mint when you heat (you get hot, pool gets hot)
+- Liquid: Automatic 2x mint when you heat (you get liquid, pool gets liquid)
 - Uniswap: Manually add liquidity to specific pairs, receive separate LP tokens
 
 **Trading:**
-- Liquid: Trade hot tokens against water directly, or cross-swap any hot for any other
+- Liquid: Trade liquid tokens against water directly, or cross-swap any liquid for any other
 - Uniswap: Route through multiple pools for indirect pairs
 
 ### vs. Wrapped Tokens (WETH)
 
 **Similar:**
-- Both wrap underlying tokens (cold → hot is similar to ETH → WETH)
+- Both wrap underlying tokens (solid → liquid is similar to ETH → WETH)
 - Both maintain backing 1:1 on average
 
 **Different:**
@@ -385,7 +382,7 @@ Liquid improves on traditional AMM designs in several key ways:
 ### How do I create a liquid for my token?
 
 1. Go to the water contract on Etherscan
-2. Use the `heat(address stuff)` factory function
+2. Use the `liquify(address stuff)` factory function
 3. Enter your token's address
 4. Confirm the transaction
 5. The new liquid address is in the transaction logs
@@ -394,15 +391,15 @@ Liquid improves on traditional AMM designs in several key ways:
 
 Yes. Risks include:
 - Price impact on trades (AMM slippage)
-- Backing token issues (if underlying cold token fails)
+- Backing token issues (if underlying backing token fails)
 - Smart contract risk
-- Market volatility between hot and cold
+- Market volatility between liquid and solid
 
 ### Who provides the liquidity?
 
-Everyone who heats. When you heat 1,000 USDC (cold):
-- You get 1,000 hot tokens (liquid-USDC) to hold
-- Pool gets 1,000 hot tokens to trade
+Everyone who heats. When you heat 1,000 USDC (solid):
+- You get 1,000 liquid tokens (liquid-USDC) to hold
+- Pool gets 1,000 liquid tokens to trade
 
 You're both a holder and liquidity provider simultaneously.
 
@@ -412,9 +409,9 @@ No. The protocol charges no fees beyond standard Ethereum gas costs. There never
 
 The protocol developers reserved a portion of Water tokens as their monetization strategy, not ongoing transaction fees.
 
-### Can I trade hot tokens on other DEXs?
+### Can I trade liquid tokens on other DEXs?
 
-Yes! Hot tokens (liquids) are standard ERC-20s. You can:
+Yes! Liquid tokens are standard ERC-20s. You can:
 - Trade them on Uniswap, SushiSwap, etc.
 - Add them to other liquidity pools
 - Use them in any DeFi protocol that accepts ERC-20s
@@ -427,15 +424,15 @@ The constant-product formula prevents complete drainage. As pool liquidity decre
 
 1. Go to the water contract on Etherscan
 2. Check the "Events" tab
-3. Filter for `Heat(IERC20Metadata,Liquid)` events (the factory event)
+3. Filter for `Liquify(IERC20Metadata,Liquid)` events (the factory event)
 4. Each event shows a new liquid and its backing token
 
 ### How are prices determined?
 
 Pure math based on pool reserves:
 ```
-buy:  water_cost = pool × lake / (pool - hot) - lake
-sell: water_return = lake - pool × lake / (pool + hot)
+sell: water_return = lake - pool × lake / (pool + liquid)
+buy:  liquid_return = pool - pool × lake / (lake + water)
 ```
 
 No oracles, no governance, no external inputs.
@@ -444,89 +441,89 @@ No oracles, no governance, no external inputs.
 
 On average, yes—but it varies above and below 1:1 over time.
 
-When you cool, the amount of cold you receive depends on how much of the hot supply is in the pool versus held outside:
-- **More hot in pool** (less held outside) → You get more cold per hot
-- **Less hot in pool** (more held outside) → You get fewer cold per hot
+When you cool, the amount of solid you receive depends on how much of the liquid supply is in the pool versus held outside:
+- **More liquid in pool** (less held outside) → You get more solid per liquid
+- **Less liquid in pool** (more held outside) → You get fewer solid per liquid
 - **On average across all users** → Approaches 1:1 ratio
 
-The formula is: `cold = hot * solid.balanceOf(contract) / total_held_outside_pool`
+The formula is: `solid = liquid * mass() / total_held_outside_pool`
 
-Think of it like wrapping + being an LP simultaneously. Your share of cold backing tokens fluctuates based on pool distribution.
+Think of it like wrapping + being an LP simultaneously. Your share of solid backing tokens fluctuates based on pool distribution.
 
 ## Example Scenarios
 
 ### Scenario 1: Alice Adds Liquidity
 
 **Starting state:**
-- Alice has 10,000 USDC (cold)
-- liquid-USDC pool has 5,000 hot tokens
+- Alice has 10,000 USDC (solid)
+- liquid-USDC pool has 5,000 liquid tokens
 
 **Alice's actions on Etherscan:**
 1. USDC contract → `approve(liquidUSDC, 10000e6)`
 2. liquid-USDC contract → `heat(10000e6)`
 
 **Result:**
-- Alice receives 10,000 hot tokens (liquid-USDC)
-- Pool grows to 15,000 hot tokens
+- Alice receives 10,000 liquid tokens (liquid-USDC)
+- Pool grows to 15,000 liquid tokens
 - Alice can now trade, hold, or cool
 
-### Scenario 2: Bob Buys Hot
+### Scenario 2: Bob Buys Liquid
 
 **Starting state:**
 - Bob has 1,000 water
-- liquid-USDC pool: 10,000 hot, 2,000 water
+- liquid-USDC pool: 10,000 liquid, 2,000 water
 
 **Bob's actions on Etherscan:**
-1. liquid-USDC contract → Read → `buyQuote(1000e6)`
-   - Returns: ~222 water needed
-2. liquid-USDC contract → Write → `buy(1000e6)`
+1. liquid-USDC contract → Read → `buys(222e6)`
+   - Check how much liquid received for 222 water
+2. liquid-USDC contract → Write → `buy(222e6)`
 
 **Result:**
-- Bob receives 1,000 hot (liquid-USDC)
-- Pool now: 9,000 hot, 2,222 water
-- Bob paid ~222 water
+- Bob receives ~1,000 liquid (liquid-USDC)
+- Pool now: 9,000 liquid, 2,222 water
+- Bob paid 222 water
 
 ### Scenario 3: Carol Swaps Liquid-USDC for Liquid-DAI
 
 **Starting state:**
-- Carol has 5,000 hot liquid-USDC
+- Carol has 5,000 liquid-USDC
 
 **Carol's actions on Etherscan:**
-1. liquid-USDC contract → Read → `buyQuote(1000e6, liquidDAI_address)`
-   - Check water used and hotter DAI received
-2. liquid-USDC contract → Write → `buy(1000e6, liquidDAI_address)`
+1. liquid-USDC contract → Read → `sells(1000e6, liquidDAI_address)`
+   - Check water used and fluids (liquid-DAI) received
+2. liquid-USDC contract → Write → `sell(1000e6, liquidDAI_address)`
 
 **Result:**
-- Carol's hot liquid-USDC sold for water
-- That water bought hotter liquid-DAI
-- Carol now holds hot liquid-DAI
+- Carol's liquid-USDC sold for water
+- That water bought liquid-DAI
+- Carol now holds liquid-DAI
 - Both pools' states updated
 
 ### Scenario 4: Dave Exits His Position
 
 **Starting state:**
-- Dave has 3,000 hot liquid-USDC
+- Dave has 3,000 liquid-USDC
 
 **Dave's actions on Etherscan:**
 1. liquid-USDC contract → Read → `cool` preview (via staticcall or quote if available)
 2. liquid-USDC contract → Write → `cool(3000e6)`
 
 **Result:**
-- Burns 3,000 hot from Dave
+- Burns 3,000 liquid from Dave
 - Burns matching amount from pool
-- Dave receives USDC (cold) based on pool reserves
+- Dave receives USDC (solid) based on pool reserves
 - Pool liquidity decreases
 
 ## Advanced Usage
 
 ### Checking CREATE2 Addresses
 
-Liquid uses deterministic addresses. Same cold backing token → same liquid address always.
+Liquid uses deterministic addresses. Same backing token → same liquid address always.
 
 **To predict a liquid address before creation:**
 1. Go to the water contract on Etherscan
 2. Use the "Read Contract" tab
-3. Call `heated(address stuff)` with the cold backing token address
+3. Call `liquified(address stuff)` with the backing token address
 4. Returns `(address predicted, bytes32 salt)` - the future liquid contract address (works even if not created yet)
 
 ### Batch Operations
@@ -541,19 +538,19 @@ Etherscan doesn't support batch transactions directly, but you can:
 To see all activity on a liquid:
 1. Go to "Events" tab on Etherscan
 2. Filter by event type:
-   - `Heat(Liquid,uint256)` - Deposits (heating cold → hot)
-   - `Cool(Liquid,uint256,uint256)` - Withdrawals (cooling hot → cold)
-   - `Bought(Liquid,uint256,uint256)` - Purchases from pool
-   - `Sold(Liquid,uint256,uint256)` - Sales to pool
-   - `Heat(IERC20Metadata,Liquid)` - New liquid created (factory event)
+   - `Heat(Liquid,uint256)` - Deposits (heating solid → liquid)
+   - `Cool(Liquid,uint256,uint256)` - Withdrawals (cooling liquid → solid)
+   - `Buy(Liquid,uint256,uint256)` - Purchases from pool
+   - `Sell(Liquid,uint256,uint256)` - Sales to pool
+   - `Liquify(IERC20Metadata,Liquid)` - New liquid created (factory event)
 
 ### Monitoring Pool Health
 
 **Key metrics:**
-1. Pool size: `balanceOf(liquidAddress)` - hot tokens in pool
-2. Lake size: `water.balanceOf(liquidAddress)` - water in lake
-3. Ratio: pool/lake indicates price level
-4. Total supply: `totalSupply()` shows all hot tokens
+1. Pool size: `pool()` - liquid tokens in pool
+2. Lake size: `lake()` - water in lake
+3. Mass: `mass()` - backing tokens held
+4. Total supply: `totalSupply()` shows all liquid tokens
 
 **Health indicators:**
 - Large pool + lake = good liquidity
@@ -576,7 +573,7 @@ Use the appropriate network explorer (e.g., arbiscan.io for Arbitrum, basescan.o
 
 ## Getting Help
 
-- Read the code: [src/Liquid.sol](src/Liquid.sol) (237 lines, well-commented)
+- Read the code: [src/Liquid.sol](src/Liquid.sol) (189 lines, well-commented)
 - Technical documentation: [CLAUDE.md](CLAUDE.md)
 - Development setup: [README.md](README.md)
 
@@ -584,15 +581,14 @@ Use the appropriate network explorer (e.g., arbiscan.io for Arbitrum, basescan.o
 
 Using Liquid via Etherscan is straightforward:
 
-1. **Heat** = Deposit cold backing tokens, receive hot tokens + create pool liquidity
-2. **Cool** = Burn hot tokens, withdraw cold backing tokens
-3. **Buy** = Trade water for hot tokens
-4. **Sell** = Trade hot tokens for water
-5. **BuyWith/SellFor** = Alternative forms specifying water amount instead of hot amount
-6. **Cross-swap** = Trade one hot for another using water as intermediary
+1. **Heat** = Deposit solid backing tokens, receive liquid tokens + create pool liquidity
+2. **Cool** = Burn liquid tokens, withdraw solid backing tokens
+3. **Sell** = Trade liquid tokens for water
+4. **Buy** = Trade water for liquid tokens
+5. **Cross-swap** = Trade one liquid for another using water as intermediary
 
 All operations available through Etherscan's Contract → Write Contract interface. No special tools needed.
 
 ---
 
-*Last updated: 2025-12-31*
+*Last updated: 2026-01-01*
