@@ -30,8 +30,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         return substance.balanceOf(address(this));
     }
 
-    function heat(uint256 solid, IERC20Metadata stuff) external {
-        Liquid L = heat(stuff);
+    function liquify(uint256 solid, IERC20Metadata stuff) external {
+        Liquid L = liquify(stuff);
         L.heat(solid);
         L.transfer(msg.sender, solid);
     }
@@ -136,7 +136,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         return substance.decimals();
     }
 
-    function heated(IERC20Metadata stuff) public view returns (address future, bytes32 salt) {
+    function liquified(IERC20Metadata stuff) public view returns (address future, bytes32 salt) {
         if (address(stuff) == address(0)) {
             revert Nothing();
         }
@@ -144,16 +144,16 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         future = Clones.predictDeterministicAddress(address(WATER), salt, address(WATER));
     }
 
-    function heat(IERC20Metadata stuff) public returns (Liquid L) {
+    function liquify(IERC20Metadata stuff) public returns (Liquid L) {
         if (this != WATER) {
-            L = WATER.heat(stuff);
+            L = WATER.liquify(stuff);
         } else {
-            (address future, bytes32 salt) = heated(stuff);
+            (address future, bytes32 salt) = liquified(stuff);
             L = Liquid(future);
             if (future.code.length == 0) {
                 future = Clones.cloneDeterministic(address(WATER), salt);
                 L.__initialize(stuff);
-                emit Heat(stuff, L);
+                emit Liquified(stuff, L);
             }
         }
     }
@@ -171,7 +171,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function _onlyLiquid() internal view {
         Liquid L = Liquid(msg.sender);
-        (address predicted,) = WATER.heated(L.substance());
+        (address predicted,) = WATER.liquified(L.substance());
         if (msg.sender != predicted) {
             revert Unauthorized();
         }
@@ -181,7 +181,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     event Cool(Liquid indexed L, uint256 liquid, uint256 solid);
     event Bought(Liquid indexed L, uint256 liquid, uint256 water);
     event Sold(Liquid indexed L, uint256 liquid, uint256 water);
-    event Heat(IERC20Metadata indexed substance, Liquid indexed L);
+    event Liquified(IERC20Metadata indexed substance, Liquid indexed L);
 
     error Nothing();
     error Unauthorized();
