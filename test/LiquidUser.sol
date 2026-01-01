@@ -28,6 +28,16 @@ contract LiquidUser is User {
         console.log(string.concat(name, " ", method, " ", amount.toString(), " ", U.name()));
     }
 
+    modifier waterlogging(string memory method, Liquid U, uint256 amount, uint256 water) {
+        _waterlogging(method, U, amount, water);
+        _;
+        logBalances();
+    }
+
+    function _waterlogging(string memory method, Liquid U, uint256 amount, uint256 water) private view {
+        console.log(string.concat(name, " ", method, " ", amount.toString(), " ", U.name(), " ", water.toString()));
+    }
+
     function heat(Liquid U, uint256 cold) public logging("heat", U, cold) {
         U.solid().approve(address(U), cold);
         U.heat(cold);
