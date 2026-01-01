@@ -43,7 +43,7 @@ contract LiquidTest is BaseTest {
         give(beck, 1e3, V.solid());
     }
 
-    function test_MeltFreeze() public returns (uint256 hot, uint256 cold) {
+    function test_HeatCool() public returns (uint256 hot, uint256 cold) {
         giveaway();
         owen.heat(U, 500);
         alex.heat(U, 500);
@@ -57,7 +57,7 @@ contract LiquidTest is BaseTest {
         assertEq(hot, cold, "beck hot != cold");
     }
 
-    function test_MeltSellFreezeBuy() public returns (uint256 water, uint256 cold) {
+    function test_HeatSellCoolBuy() public returns (uint256 water, uint256 cold) {
         giveaway();
         owen.give(address(U), 1000, W);
         owen.heat(U, 1000);
