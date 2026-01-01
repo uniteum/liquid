@@ -66,10 +66,10 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _sold(hot, water);
     }
 
-    function buy(uint256 hot, Liquid L) external returns (uint256 water, uint256 hotter) {
-        (water, hotter) = buys(hot, L);
-        L.sold(hotter, water);
-        _bought(hot, water);
+    function buy(uint256 hotter, Liquid L) external returns (uint256 water, uint256 hot) {
+        (water, hot) = buys(hotter, L);
+        L.sold(hot, water);
+        _bought(hotter, water);
     }
 
     function sell(uint256 hot, Liquid L) external returns (uint256 water, uint256 hotter) {
@@ -88,10 +88,10 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _sold(hot, water);
     }
 
-    function buyWith(uint256 hotter, Liquid L) external returns (uint256 water, uint256 hot) {
-        (water, hot) = buysWith(hotter, L);
-        L.sold(hotter, water);
-        _bought(hot, water);
+    function buyWith(uint256 hot, Liquid L) external returns (uint256 water, uint256 hotter) {
+        (water, hotter) = buysWith(hot, L);
+        L.sold(hot, water);
+        _bought(hotter, water);
     }
 
     function sellFor(uint256 hotter, Liquid L) external returns (uint256 water, uint256 hot) {
@@ -119,9 +119,9 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         water = sells(hot, pool(), lake());
     }
 
-    function buys(uint256 hot, Liquid L) public view returns (uint256 water, uint256 hotter) {
-        water = buys(hot);
-        hotter = L.buysWith(water);
+    function buys(uint256 hotter, Liquid L) public view returns (uint256 water, uint256 hot) {
+        water = buys(hotter);
+        hot = L.buysWith(water);
     }
 
     function sells(uint256 hot, Liquid L) public view returns (uint256 water, uint256 hotter) {
@@ -137,9 +137,9 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         water = buys(hot, lake(), pool());
     }
 
-    function buysWith(uint256 hotter, Liquid L) public view returns (uint256 water, uint256 hot) {
-        water = buysWith(hotter);
-        hot = L.buysWith(water);
+    function buysWith(uint256 hot, Liquid L) public view returns (uint256 water, uint256 hotter) {
+        water = buysWith(hot);
+        hotter = L.buysWith(water);
     }
 
     function sellsFor(uint256 hotter, Liquid L) public view returns (uint256 water, uint256 hot) {
