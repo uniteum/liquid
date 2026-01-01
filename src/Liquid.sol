@@ -26,6 +26,10 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         return WATER.balanceOf(address(this));
     }
 
+    function mass() public view returns (uint256) {
+        return solid.balanceOf(address(this));
+    }
+
     function heat(uint256 cold, IERC20Metadata stuff) external {
         Liquid liquid = heat(stuff);
         liquid.heat(cold);
@@ -41,11 +45,11 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function cool(uint256 hot) external nonReentrant returns (uint256 cold) {
         uint256 total = totalSupply();
-        uint256 pool_ = balanceOf(address(this));
+        uint256 pool_ = pool();
         uint256 held = total - pool_;
         uint256 ours = 2 * hot * pool_ / total;
         uint256 mine = 2 * hot * held / total;
-        cold = hot * solid.balanceOf(address(this)) / held;
+        cold = hot * mass() / held;
         _burn(address(this), ours);
         _burn(msg.sender, mine);
         solid.safeTransfer(msg.sender, cold);
