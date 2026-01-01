@@ -31,9 +31,9 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function heat(uint256 cold, IERC20Metadata stuff) external {
-        Liquid liquid = heat(stuff);
-        liquid.heat(cold);
-        liquid.transfer(msg.sender, cold);
+        Liquid L = heat(stuff);
+        L.heat(cold);
+        L.transfer(msg.sender, cold);
     }
 
     function heat(uint256 cold) external nonReentrant {
@@ -66,16 +66,16 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _sold(hot, water);
     }
 
-    function buy(uint256 hot, Liquid liquid) external returns (uint256 water, uint256 hotter) {
-        (water, hotter) = buys(hot, liquid);
-        liquid.sold(hotter, water);
+    function buy(uint256 hot, Liquid L) external returns (uint256 water, uint256 hotter) {
+        (water, hotter) = buys(hot, L);
+        L.sold(hotter, water);
         _bought(hot, water);
     }
 
-    function sell(uint256 hot, Liquid liquid) external returns (uint256 water, uint256 hotter) {
-        (water, hotter) = sells(hot, liquid);
+    function sell(uint256 hot, Liquid L) external returns (uint256 water, uint256 hotter) {
+        (water, hotter) = sells(hot, L);
         _sold(hot, water);
-        liquid.bought(hotter, water);
+        L.bought(hotter, water);
     }
 
     function buyWith(uint256 water) external returns (uint256 hot) {
@@ -88,16 +88,16 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _sold(hot, water);
     }
 
-    function buyWith(uint256 hotter, Liquid liquid) external returns (uint256 water, uint256 hot) {
-        (water, hot) = buysWith(hotter, liquid);
-        liquid.sold(hotter, water);
+    function buyWith(uint256 hotter, Liquid L) external returns (uint256 water, uint256 hot) {
+        (water, hot) = buysWith(hotter, L);
+        L.sold(hotter, water);
         _bought(hot, water);
     }
 
-    function sellFor(uint256 hotter, Liquid liquid) external returns (uint256 water, uint256 hot) {
-        (water, hot) = sellsFor(hotter, liquid);
+    function sellFor(uint256 hotter, Liquid L) external returns (uint256 water, uint256 hot) {
+        (water, hot) = sellsFor(hotter, L);
         _sold(hot, water);
-        liquid.bought(hotter, water);
+        L.bought(hotter, water);
     }
 
     function buys(uint256 hot, uint256 pool_, uint256 lake_) public view returns (uint256 water) {
@@ -119,14 +119,14 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         water = sells(hot, pool(), lake());
     }
 
-    function buys(uint256 hot, Liquid liquid) public view returns (uint256 water, uint256 hotter) {
+    function buys(uint256 hot, Liquid L) public view returns (uint256 water, uint256 hotter) {
         water = buys(hot);
-        hotter = liquid.buysWith(water);
+        hotter = L.buysWith(water);
     }
 
-    function sells(uint256 hot, Liquid liquid) public view returns (uint256 water, uint256 hotter) {
+    function sells(uint256 hot, Liquid L) public view returns (uint256 water, uint256 hotter) {
         water = sells(hot);
-        hotter = liquid.sellsFor(water);
+        hotter = L.sellsFor(water);
     }
 
     function buysWith(uint256 water) public view returns (uint256 hot) {
@@ -137,14 +137,14 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         water = buys(hot, lake(), pool());
     }
 
-    function buysWith(uint256 hotter, Liquid liquid) public view returns (uint256 water, uint256 hot) {
+    function buysWith(uint256 hotter, Liquid L) public view returns (uint256 water, uint256 hot) {
         water = buysWith(hotter);
-        hot = liquid.buysWith(water);
+        hot = L.buysWith(water);
     }
 
-    function sellsFor(uint256 hotter, Liquid liquid) public view returns (uint256 water, uint256 hot) {
+    function sellsFor(uint256 hotter, Liquid L) public view returns (uint256 water, uint256 hot) {
         water = sellsFor(hotter);
-        hot = liquid.sellsFor(water);
+        hot = L.sellsFor(water);
     }
 
     function bought(uint256 hot, uint256 water) external onlyLiquid {
@@ -191,16 +191,16 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         future = Clones.predictDeterministicAddress(address(WATER), salt, address(WATER));
     }
 
-    function heat(IERC20Metadata stuff) public returns (Liquid liquid) {
+    function heat(IERC20Metadata stuff) public returns (Liquid L) {
         if (this != WATER) {
-            liquid = WATER.heat(stuff);
+            L = WATER.heat(stuff);
         } else {
             (address future, bytes32 salt) = heated(stuff);
-            liquid = Liquid(future);
+            L = Liquid(future);
             if (future.code.length == 0) {
                 future = Clones.cloneDeterministic(address(WATER), salt);
-                liquid.__initialize(stuff);
-                emit Heat(stuff, liquid);
+                L.__initialize(stuff);
+                emit Heat(stuff, L);
             }
         }
     }
@@ -217,20 +217,20 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function _onlyLiquid() internal view {
-        Liquid liquid = Liquid(msg.sender);
-        (address predicted,) = WATER.heated(liquid.solid());
+        Liquid L = Liquid(msg.sender);
+        (address predicted,) = WATER.heated(L.solid());
         if (msg.sender != predicted) {
             revert Unauthorized();
         }
     }
 
-    event Heat(Liquid indexed liquid, uint256 hot);
-    event Cool(Liquid indexed liquid, uint256 hot, uint256 cold);
-    event Bought(Liquid indexed liquid, uint256 hot, uint256 water);
-    event Sold(Liquid indexed liquid, uint256 hot, uint256 water);
-    event Heat(IERC20Metadata indexed solid, Liquid indexed liquid);
+    event Heat(Liquid indexed L, uint256 hot);
+    event Cool(Liquid indexed L, uint256 hot, uint256 cold);
+    event Bought(Liquid indexed L, uint256 hot, uint256 water);
+    event Sold(Liquid indexed L, uint256 hot, uint256 water);
+    event Heat(IERC20Metadata indexed solid, Liquid indexed L);
 
     error Nothing();
-    error Drained(Liquid liquid, uint256 pool_, uint256 hot);
+    error Drained(Liquid L, uint256 pool_, uint256 hot);
     error Unauthorized();
 }
