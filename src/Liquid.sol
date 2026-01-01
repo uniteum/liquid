@@ -57,94 +57,94 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function buy(uint256 hot) external returns (uint256 water) {
-        water = buyQuote(hot);
+        water = cost(hot);
         _bought(hot, water);
     }
 
     function sell(uint256 hot) external returns (uint256 water) {
-        water = sellQuote(hot);
+        water = got(hot);
         _sold(hot, water);
     }
 
     function buy(uint256 hot, Liquid other) external returns (uint256 water, uint256 hotter) {
-        (water, hotter) = buyQuote(hot, other);
+        (water, hotter) = cost(hot, other);
         other.sold(hotter, water);
         _bought(hot, water);
     }
 
     function sell(uint256 hot, Liquid other) external returns (uint256 water, uint256 hotter) {
-        (water, hotter) = sellQuote(hot, other);
+        (water, hotter) = got(hot, other);
         _sold(hot, water);
         other.bought(hotter, water);
     }
 
     function buyWith(uint256 water) external returns (uint256 hot) {
-        hot = buyWithQuote(water);
+        hot = spent(water);
         _bought(hot, water);
     }
 
     function sellFor(uint256 water) external returns (uint256 hot) {
-        hot = sellForQuote(water);
+        hot = received(water);
         _sold(hot, water);
     }
 
     function buyWith(uint256 hotter, Liquid other) external returns (uint256 water, uint256 hot) {
-        (water, hot) = buyWithQuote(hotter, other);
+        (water, hot) = spent(hotter, other);
         other.sold(hotter, water);
         _bought(hot, water);
     }
 
     function sellFor(uint256 hotter, Liquid other) external returns (uint256 water, uint256 hot) {
-        (water, hot) = sellForQuote(hotter, other);
+        (water, hot) = received(hotter, other);
         _sold(hot, water);
         other.bought(hotter, water);
     }
 
-    function buyQuote(uint256 hot, uint256 pool_, uint256 lake_) public view returns (uint256 water) {
+    function cost(uint256 hot, uint256 pool_, uint256 lake_) public view returns (uint256 water) {
         if (pool_ <= hot) {
             revert Drained(this, pool_, hot);
         }
         water = pool_ * lake_ / (pool_ - hot) - lake_;
     }
 
-    function sellQuote(uint256 hot, uint256 pool_, uint256 lake_) public pure returns (uint256 water) {
+    function got(uint256 hot, uint256 pool_, uint256 lake_) public pure returns (uint256 water) {
         water = lake_ - pool_ * lake_ / (pool_ + hot);
     }
 
-    function buyQuote(uint256 hot) public view returns (uint256 water) {
-        water = buyQuote(hot, pool(), lake());
+    function cost(uint256 hot) public view returns (uint256 water) {
+        water = cost(hot, pool(), lake());
     }
 
-    function sellQuote(uint256 hot) public view returns (uint256 water) {
-        water = sellQuote(hot, pool(), lake());
+    function got(uint256 hot) public view returns (uint256 water) {
+        water = got(hot, pool(), lake());
     }
 
-    function buyQuote(uint256 hot, Liquid other) public view returns (uint256 water, uint256 hotter) {
-        water = buyQuote(hot);
-        hotter = other.buyWithQuote(water);
+    function cost(uint256 hot, Liquid other) public view returns (uint256 water, uint256 hotter) {
+        water = cost(hot);
+        hotter = other.spent(water);
     }
 
-    function sellQuote(uint256 hot, Liquid other) public view returns (uint256 water, uint256 hotter) {
-        water = sellQuote(hot);
-        hotter = other.sellForQuote(water);
+    function got(uint256 hot, Liquid other) public view returns (uint256 water, uint256 hotter) {
+        water = got(hot);
+        hotter = other.received(water);
     }
 
-    function buyWithQuote(uint256 water) public view returns (uint256 hot) {
-        hot = sellQuote(water, lake(), pool());
+    function spent(uint256 water) public view returns (uint256 hot) {
+        hot = got(water, lake(), pool());
     }
 
-    function sellForQuote(uint256 water) public view returns (uint256 hot) {
-        water = buyQuote(hot, lake(), pool());
+    function received(uint256 water) public view returns (uint256 hot) {
+        water = cost(hot, lake(), pool());
     }
 
-    function buyWithQuote(uint256 hotter, Liquid other) public view returns (uint256 water, uint256 hot) {
-        water = buyWithQuote(hotter);
-        hot = other.buyWithQuote(water);
+    function spent(uint256 hotter, Liquid other) public view returns (uint256 water, uint256 hot) {
+        water = spent(hotter);
+        hot = other.spent(water);
     }
 
-    function sellForQuote(uint256 hotter, Liquid other) public view returns (uint256 water, uint256 hot) {
-        water = sellForQuote(hotter);
-        hot = other.sellForQuote(water);
+    function received(uint256 hotter, Liquid other) public view returns (uint256 water, uint256 hot) {
+        water = received(hotter);
+        hot = other.received(water);
     }
 
     function bought(uint256 hot, uint256 water) external onlyLiquid {
