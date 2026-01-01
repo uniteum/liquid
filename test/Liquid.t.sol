@@ -36,11 +36,11 @@ contract LiquidTest is BaseTest {
 
     function giveaway() internal {
         give(alex, 1e3, W);
-        give(alex, 1e3, U.solid());
-        give(alex, 1e3, V.solid());
+        give(alex, 1e3, U.substance());
+        give(alex, 1e3, V.substance());
         give(beck, 1e7, W);
-        give(beck, 1e3, U.solid());
-        give(beck, 1e3, V.solid());
+        give(beck, 1e3, U.substance());
+        give(beck, 1e3, V.substance());
     }
 
     function test_HeatCool() public returns (uint256 hot, uint256 cold) {
@@ -104,7 +104,7 @@ contract LiquidTest is BaseTest {
 
     function _testNoArbitrage(uint256 heatAmount) internal {
         // Record alex's initial balances
-        uint256 alexInitialCold = U.solid().balanceOf(address(alex));
+        uint256 alexInitialCold = U.substance().balanceOf(address(alex));
         uint256 alexInitialWater = W.balanceOf(address(alex));
         uint256 alexInitialHot = U.balanceOf(address(alex));
 
@@ -129,7 +129,7 @@ contract LiquidTest is BaseTest {
         }
 
         // Final balances
-        uint256 alexFinalCold = U.solid().balanceOf(address(alex));
+        uint256 alexFinalCold = U.substance().balanceOf(address(alex));
         uint256 alexFinalWater = W.balanceOf(address(alex));
         uint256 alexFinalHot = U.balanceOf(address(alex));
 

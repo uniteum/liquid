@@ -12,10 +12,10 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     Liquid public immutable WATER = this;
 
-    IERC20Metadata public solid;
+    IERC20Metadata public substance;
 
     constructor(IERC20Metadata ice) ERC20("", "") {
-        solid = ice;
+        substance = ice;
     }
 
     function pool() public view returns (uint256) {
@@ -27,7 +27,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function mass() public view returns (uint256) {
-        return solid.balanceOf(address(this));
+        return substance.balanceOf(address(this));
     }
 
     function heat(uint256 cold, IERC20Metadata stuff) external {
@@ -37,7 +37,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function heat(uint256 cold) external nonReentrant {
-        solid.safeTransferFrom(msg.sender, address(this), cold);
+        substance.safeTransferFrom(msg.sender, address(this), cold);
         _mint(address(this), cold);
         _mint(msg.sender, cold);
         emit Heat(this, cold);
@@ -52,7 +52,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         cold = hot * mass() / held;
         _burn(address(this), ours);
         _burn(msg.sender, mine);
-        solid.safeTransfer(msg.sender, cold);
+        substance.safeTransfer(msg.sender, cold);
         emit Cool(this, hot, cold);
     }
 
@@ -125,15 +125,15 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function name() public view virtual override returns (string memory) {
-        return solid.name();
+        return substance.name();
     }
 
     function symbol() public view virtual override returns (string memory) {
-        return solid.symbol();
+        return substance.symbol();
     }
 
     function decimals() public view virtual override returns (uint8) {
-        return solid.decimals();
+        return substance.decimals();
     }
 
     function heated(IERC20Metadata stuff) public view returns (address future, bytes32 salt) {
@@ -159,8 +159,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function __initialize(IERC20Metadata stuff) public {
-        if (address(solid) == address(0)) {
-            solid = stuff;
+        if (address(substance) == address(0)) {
+            substance = stuff;
         }
     }
 
@@ -171,7 +171,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function _onlyLiquid() internal view {
         Liquid L = Liquid(msg.sender);
-        (address predicted,) = WATER.heated(L.solid());
+        (address predicted,) = WATER.heated(L.substance());
         if (msg.sender != predicted) {
             revert Unauthorized();
         }
@@ -181,7 +181,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     event Cool(Liquid indexed L, uint256 hot, uint256 cold);
     event Bought(Liquid indexed L, uint256 hot, uint256 water);
     event Sold(Liquid indexed L, uint256 hot, uint256 water);
-    event Heat(IERC20Metadata indexed solid, Liquid indexed L);
+    event Heat(IERC20Metadata indexed substance, Liquid indexed L);
 
     error Nothing();
     error Drained(Liquid L, uint256 pool_, uint256 hot);
