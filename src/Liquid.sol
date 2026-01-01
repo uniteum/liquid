@@ -177,7 +177,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         }
     }
 
-    event Heat(Liquid indexed L, uint256 liquid);
+    event Heat(Liquid indexed L, uint256 solid);
     event Cool(Liquid indexed L, uint256 liquid, uint256 solid);
     event Bought(Liquid indexed L, uint256 liquid, uint256 water);
     event Sold(Liquid indexed L, uint256 liquid, uint256 water);
