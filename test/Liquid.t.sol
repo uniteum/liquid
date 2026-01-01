@@ -59,10 +59,41 @@ contract LiquidTest is BaseTest {
 
     function test_HeatSellCoolBuy() public returns (uint256 water, uint256 cold) {
         giveaway();
+
+        // Setup: Give U pool some water for trading
         owen.give(address(U), 1000, W);
+
+        // Owen heats to establish pool
         owen.heat(U, 1000);
-        alex.heat(U, 100);
-        water = alex.sell(U, 50);
-        cold = alex.cool(U, U.balanceOf(address(alex)));
+        uint256 poolAfterOwenHeat = U.balanceOf(address(U));
+
+        // Alex heats 100 cold into hot
+        uint256 alexInitialHot = 100;
+        alex.heat(U, alexInitialHot);
+        assertEq(U.balanceOf(address(alex)), alexInitialHot, "alex should have 100 hot after heat");
+
+        // Alex sells 50 hot for water
+        uint256 hotToSell = 50;
+        uint256 alexHotBeforeSell = U.balanceOf(address(alex));
+        water = alex.sell(U, hotToSell);
+        assertGt(water, 0, "alex should receive water from sell");
+        assertEq(U.balanceOf(address(alex)), alexHotBeforeSell - hotToSell, "alex hot should decrease after sell");
+        uint256 poolAfterSell = U.balanceOf(address(U));
+        assertEq(poolAfterSell, poolAfterOwenHeat + alexInitialHot + hotToSell, "pool should grow from sell");
+
+        // Alex cools some hot back to cold
+        uint256 alexHotBeforeCool = U.balanceOf(address(alex));
+        uint256 hotToCool = 25;
+        cold = alex.cool(U, hotToCool);
+        assertGt(cold, 0, "alex should receive cold from cool");
+        assertLt(U.balanceOf(address(alex)), alexHotBeforeCool, "alex hot should decrease after cool");
+
+        // Beck buys hot with water
+        uint256 hotToBuy = 25;
+        uint256 beckWaterBefore = W.balanceOf(address(beck));
+        uint256 waterSpent = beck.buy(U, hotToBuy);
+        assertGt(waterSpent, 0, "beck should spend water to buy");
+        assertEq(U.balanceOf(address(beck)), hotToBuy, "beck should have bought hot");
+        assertEq(W.balanceOf(address(beck)), beckWaterBefore - waterSpent, "beck water should decrease by amount spent");
     }
 }
