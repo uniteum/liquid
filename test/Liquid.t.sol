@@ -10,6 +10,7 @@ contract LiquidTest is BaseTest {
     Liquid public W;
     Liquid public U;
     Liquid public V;
+    IERC20 public S;
     LiquidUser public owen;
     LiquidUser public alex;
     LiquidUser public beck;
@@ -24,6 +25,7 @@ contract LiquidTest is BaseTest {
         owen.heat(W, 1e9);
         U = W.liquify(owen.newToken("U", 1e9));
         V = W.liquify(owen.newToken("V", 1e9));
+        S = U.substance();
         giveaway();
     }
 
@@ -66,9 +68,9 @@ contract LiquidTest is BaseTest {
         uint256 poolAfterOwenHeat = U.balanceOf(address(U));
 
         // Alex heats 100 solid into liquid
-        uint256 alexLiquid0 = 100;
-        alex.heat(U, alexLiquid0);
-        assertEq(U.balanceOf(address(alex)), alexLiquid0, "alex should have 100 liquid after heat");
+        uint256 alexU0 = 100;
+        alex.heat(U, alexU0);
+        assertEq(U.balanceOf(address(alex)), alexU0, "alex should have 100 liquid after heat");
 
         // Alex sells 50 liquid for water
         uint256 hotToSell = 50;
@@ -77,7 +79,7 @@ contract LiquidTest is BaseTest {
         assertGt(water, 0, "alex should receive water from sell");
         assertEq(U.balanceOf(address(alex)), alexHotBeforeSell - hotToSell, "alex liquid should decrease after sell");
         uint256 poolAfterSell = U.balanceOf(address(U));
-        assertEq(poolAfterSell, poolAfterOwenHeat + alexLiquid0 + hotToSell, "pool should grow from sell");
+        assertEq(poolAfterSell, poolAfterOwenHeat + alexU0 + hotToSell, "pool should grow from sell");
 
         // Alex cools some liquid back to solid
         uint256 alexHotBeforeCool = U.balanceOf(address(alex));
@@ -101,42 +103,42 @@ contract LiquidTest is BaseTest {
 
     function _testNoArbitrage(uint256 liquid) internal {
         // Record alex's initial balances
-        uint256 alexSolid0 = alex.balance(U.substance());
-        uint256 alexWater0 = alex.balance(W);
-        uint256 alexLiquid0 = alex.balance(U);
+        uint256 alexS0 = alex.balance(S);
+        uint256 alexW0 = alex.balance(W);
+        uint256 alexU0 = alex.balance(U);
 
         // Alex attempts arbitrage cycle: heat → sell → cool
         // Step 1: Heat solid → liquid
         alex.heat(U, liquid);
 
         // Step 2: Sell all liquid for water
-        uint256 hotBalance = alex.balance(U) - alexLiquid0;
+        uint256 hotBalance = alex.balance(U) - alexU0;
         alex.sell(U, hotBalance);
 
         // Step 3: Buy back liquid with the water gained (if any)
-        uint256 waterGained = W.balanceOf(address(alex)) - alexWater0;
+        uint256 waterGained = W.balanceOf(address(alex)) - alexW0;
         if (waterGained > 0) {
             alex.buy(U, waterGained);
         }
 
         // Step 4: Cool all liquid back to solid
-        uint256 finalHot = U.balanceOf(address(alex)) - alexLiquid0;
+        uint256 finalHot = U.balanceOf(address(alex)) - alexU0;
         if (finalHot > 0) {
             alex.cool(U, finalHot);
         }
 
         // Final balances
-        uint256 alexFinalCold = U.substance().balanceOf(address(alex));
+        uint256 alexFinalCold = S.balanceOf(address(alex));
         uint256 alexFinalWater = W.balanceOf(address(alex));
         uint256 alexFinalHot = U.balanceOf(address(alex));
 
         // Verify no profit: final balances should be ≤ initial balances
-        assertLe(alexFinalCold, alexSolid0, "alex should not gain solid from arbitrage");
-        assertEq(alexFinalWater, alexWater0, "alex water should return to initial");
-        assertEq(alexFinalHot, alexLiquid0, "alex liquid should return to initial");
+        assertLe(alexFinalCold, alexS0, "alex should not gain solid from arbitrage");
+        assertEq(alexFinalWater, alexW0, "alex water should return to initial");
+        assertEq(alexFinalHot, alexU0, "alex liquid should return to initial");
 
         // Total value should not increase
-        uint256 initialValue = alexSolid0 + alexWater0 + alexLiquid0;
+        uint256 initialValue = alexS0 + alexW0 + alexU0;
         uint256 finalValue = alexFinalCold + alexFinalWater + alexFinalHot;
         assertLe(finalValue, initialValue, "alex total value should not increase from arbitrage");
     }
