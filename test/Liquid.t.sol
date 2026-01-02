@@ -43,21 +43,21 @@ contract LiquidTest is BaseTest {
         give(beck, 1e3, V.substance());
     }
 
-    function test_HeatCool() public returns (uint256 liquid, uint256 cold) {
+    function test_HeatCool() public returns (uint256 liquid, uint256 solid) {
         giveaway();
         owen.heat(U, 500);
         alex.heat(U, 500);
         beck.heat(U, 500);
         liquid = 100;
-        cold = alex.cool(U, liquid);
-        assertEq(liquid, cold, "1. alex liquid != cold");
-        (liquid, cold) = alex.liquidate(U);
-        assertEq(liquid, cold, "2. alex liquid != cold");
-        (liquid, cold) = beck.liquidate(U);
-        assertEq(liquid, cold, "beck liquid != cold");
+        solid = alex.cool(U, liquid);
+        assertEq(liquid, solid, "1. alex liquid != solid");
+        (liquid, solid) = alex.liquidate(U);
+        assertEq(liquid, solid, "2. alex liquid != solid");
+        (liquid, solid) = beck.liquidate(U);
+        assertEq(liquid, solid, "beck liquid != solid");
     }
 
-    function test_HeatSellCoolBuy() public returns (uint256 water, uint256 cold) {
+    function test_HeatSellCoolBuy() public returns (uint256 water, uint256 solid) {
         giveaway();
 
         // Setup: Give U pool some water for trading
@@ -67,7 +67,7 @@ contract LiquidTest is BaseTest {
         owen.heat(U, 1000);
         uint256 poolAfterOwenHeat = U.balanceOf(address(U));
 
-        // Alex heats 100 cold into liquid
+        // Alex heats 100 solid into liquid
         uint256 alexInitialHot = 100;
         alex.heat(U, alexInitialHot);
         assertEq(U.balanceOf(address(alex)), alexInitialHot, "alex should have 100 liquid after heat");
@@ -81,11 +81,11 @@ contract LiquidTest is BaseTest {
         uint256 poolAfterSell = U.balanceOf(address(U));
         assertEq(poolAfterSell, poolAfterOwenHeat + alexInitialHot + hotToSell, "pool should grow from sell");
 
-        // Alex cools some liquid back to cold
+        // Alex cools some liquid back to solid
         uint256 alexHotBeforeCool = U.balanceOf(address(alex));
         uint256 hotToCool = 25;
-        cold = alex.cool(U, hotToCool);
-        assertGt(cold, 0, "alex should receive cold from cool");
+        solid = alex.cool(U, hotToCool);
+        assertGt(solid, 0, "alex should receive solid from cool");
         assertLt(U.balanceOf(address(alex)), alexHotBeforeCool, "alex liquid should decrease after cool");
     }
 
@@ -109,7 +109,7 @@ contract LiquidTest is BaseTest {
         uint256 alexInitialHot = U.balanceOf(address(alex));
 
         // Alex attempts arbitrage cycle: heat → sell → cool
-        // Step 1: Heat cold → liquid
+        // Step 1: Heat solid → liquid
         alex.heat(U, heatAmount);
 
         // Step 2: Sell all liquid for water
@@ -122,7 +122,7 @@ contract LiquidTest is BaseTest {
             alex.buy(U, waterGained);
         }
 
-        // Step 4: Cool all liquid back to cold
+        // Step 4: Cool all liquid back to solid
         uint256 finalHot = U.balanceOf(address(alex)) - alexInitialHot;
         if (finalHot > 0) {
             alex.cool(U, finalHot);
@@ -134,7 +134,7 @@ contract LiquidTest is BaseTest {
         uint256 alexFinalHot = U.balanceOf(address(alex));
 
         // Verify no profit: final balances should be ≤ initial balances
-        assertLe(alexFinalCold, alexInitialCold, "alex should not gain cold from arbitrage");
+        assertLe(alexFinalCold, alexInitialCold, "alex should not gain solid from arbitrage");
         assertEq(alexFinalWater, alexInitialWater, "alex water should return to initial");
         assertEq(alexFinalHot, alexInitialHot, "alex liquid should return to initial");
 

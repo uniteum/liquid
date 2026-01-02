@@ -38,14 +38,14 @@ contract LiquidUser is User {
         console.log(string.concat(name, " ", method, " ", amount.toString(), " ", U.name(), " ", water.toString()));
     }
 
-    function heat(Liquid U, uint256 cold) public logging("heat", U, cold) {
-        U.substance().approve(address(U), cold);
-        U.heat(cold);
+    function heat(Liquid U, uint256 solid) public logging("heat", U, solid) {
+        U.substance().approve(address(U), solid);
+        U.heat(solid);
     }
 
-    function cool(Liquid U, uint256 liquid) public logging("cool", U, liquid) returns (uint256 cold) {
-        cold = U.cool(liquid);
-        console.log("cold:", cold);
+    function cool(Liquid U, uint256 liquid) public logging("cool", U, liquid) returns (uint256 solid) {
+        solid = U.cool(liquid);
+        console.log("solid:", solid);
     }
 
     function sell(Liquid U, uint256 liquid) public logging("sell", U, liquid) returns (uint256 water) {
@@ -78,9 +78,9 @@ contract LiquidUser is User {
         console.log("liquid:", liquid);
     }
 
-    function liquidate(Liquid U) public returns (uint256 liquid, uint256 cold) {
+    function liquidate(Liquid U) public returns (uint256 liquid, uint256 solid) {
         liquid = U.balanceOf(address(this));
-        cold = cool(U, liquid);
+        solid = cool(U, liquid);
         assertHasNo(U);
     }
 
