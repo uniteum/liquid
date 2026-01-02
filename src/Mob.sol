@@ -30,6 +30,9 @@ contract Mob {
         view
         returns (address location, bytes32 salt)
     {
+        if (_threshold == 0) {
+            revert ThresholdZero();
+        }
         if (members.length != weights.length) {
             revert LengthMismatch();
         }
@@ -44,9 +47,6 @@ contract Mob {
                 revert DuplicateMember();
             }
             sum += w;
-        }
-        if (_threshold == 0) {
-            revert ThresholdZero();
         }
         if (_threshold > sum) {
             revert ThresholdNotMet();
