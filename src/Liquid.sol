@@ -169,7 +169,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _;
     }
 
-    function _onlyLiquid() internal view {
+    function _onlyLiquid() private view {
         Liquid fluid = Liquid(msg.sender);
         (address predicted,) = WATER.liquified(fluid.substance());
         if (msg.sender != predicted) {
