@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import "forge-std/Test.sol";
 
 import {Mob} from "../src/Mob.sol";
-import {MobTokenMessageBuilder} from "../src/MobTokenMessageBuilder.sol";
+import {MobScribe} from "../src/MobScribe.sol";
 
 contract MockERC20 {
     string public name = "Mock";
@@ -35,7 +35,7 @@ contract MockERC20 {
 contract MobTokenMessageBuilderTest is Test {
     Mob private mobProto;
     Mob private mob;
-    MobTokenMessageBuilder private builder;
+    MobScribe private builder;
     MockERC20 private token;
 
     address private alice = address(0xA11CE);
@@ -55,7 +55,7 @@ contract MobTokenMessageBuilderTest is Test {
 
         mobProto = new Mob();
         mob = mobProto.make(members, weights, 3);
-        builder = new MobTokenMessageBuilder();
+        builder = new MobScribe();
         token = new MockERC20();
 
         token.mint(address(mob), 1_000e18);
@@ -64,7 +64,7 @@ contract MobTokenMessageBuilderTest is Test {
     function test_MessageBuildsAndExecutesOnce_WhenThresholdReached() public {
         uint256 amount = 123e18;
 
-        bytes memory message = builder.tokenTransferMessage(address(token), recipient, amount);
+        bytes memory message = builder.transfer(address(token), recipient, amount);
 
         assertEq(token.balanceOf(address(mob)), 1_000e18);
         assertEq(token.balanceOf(recipient), 0);
@@ -93,7 +93,7 @@ contract MobTokenMessageBuilderTest is Test {
     }
 
     function test_RevertsForNonMember() public {
-        bytes memory message = builder.tokenTransferMessage(address(token), recipient, 1);
+        bytes memory message = builder.transfer(address(token), recipient, 1);
 
         vm.prank(carol);
         vm.expectRevert(Mob.NotMember.selector);

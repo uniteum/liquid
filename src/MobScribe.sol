@@ -5,7 +5,7 @@ interface IERC20 {
     function transfer(address to, uint256 amount) external returns (bool);
 }
 
-contract MobTokenMessageBuilder {
+contract MobScribe {
     error ZeroToken();
     error ZeroRecipient();
 
@@ -14,7 +14,7 @@ contract MobTokenMessageBuilder {
      * @dev Message format: abi.encode(token, value, calldata)
      *      where `token` is the ERC-20 address, `value` is 0, and calldata is token.transfer(to, amount).
      */
-    function tokenTransferMessage(address token, address to, uint256 amount) external pure returns (bytes memory) {
+    function transfer(address token, address to, uint256 amount) external pure returns (bytes memory) {
         if (token == address(0)) revert ZeroToken();
         if (to == address(0)) revert ZeroRecipient();
 
