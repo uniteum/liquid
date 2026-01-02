@@ -99,15 +99,15 @@ contract LiquidTest is BaseTest {
         _testNoArbitrage(1000);
     }
 
-    function _testNoArbitrage(uint256 heatAmount) internal {
+    function _testNoArbitrage(uint256 liquid) internal {
         // Record alex's initial balances
-        uint256 alexInitialCold = U.substance().balanceOf(address(alex));
-        uint256 alexInitialWater = W.balanceOf(address(alex));
-        uint256 alexInitialHot = U.balanceOf(address(alex));
+        uint256 alexInitialCold = alex.balance(U.substance());
+        uint256 alexInitialWater = alex.balance(W);
+        uint256 alexInitialHot = alex.balance(U);
 
         // Alex attempts arbitrage cycle: heat → sell → cool
         // Step 1: Heat solid → liquid
-        alex.heat(U, heatAmount);
+        alex.heat(U, liquid);
 
         // Step 2: Sell all liquid for water
         uint256 hotBalance = U.balanceOf(address(alex)) - alexInitialHot;
