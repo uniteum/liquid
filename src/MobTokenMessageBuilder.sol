@@ -6,7 +6,6 @@ interface IERC20 {
 }
 
 contract MobTokenMessageBuilder {
-    error ZeroMob();
     error ZeroToken();
     error ZeroRecipient();
 
