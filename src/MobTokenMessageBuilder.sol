@@ -10,13 +10,6 @@ contract MobTokenMessageBuilder {
     error ZeroToken();
     error ZeroRecipient();
 
-    address public immutable mob;
-
-    constructor(address mob_) {
-        if (mob_ == address(0)) revert ZeroMob();
-        mob = mob_;
-    }
-
     /// @notice Build the exact msg.data bytes to send to Mob (CALL-only format):
     ///         [20 bytes to][32 bytes value][calldata...]
     ///         where `to` is the ERC-20 token address, `value` is 0, and calldata is token.transfer(recipient, amount).

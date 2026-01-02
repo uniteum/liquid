@@ -53,7 +53,7 @@ contract MobTokenMessageBuilderTest is Test {
         weights[1] = 1;
 
         mob = new Mob(members, weights, 3);
-        builder = new MobTokenMessageBuilder(address(mob));
+        builder = new MobTokenMessageBuilder();
         token = new MockERC20();
 
         token.mint(address(mob), 1_000e18);
