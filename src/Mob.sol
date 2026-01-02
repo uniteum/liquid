@@ -27,6 +27,15 @@ contract Mob {
         returns (address location, bytes32 salt)
     {
         require(members.length == weights.length, "len");
+        uint256 sum;
+        for (uint256 i = 0; i < members.length; i++) {
+            address m = members[i];
+            uint256 w = weights[i];
+            require(m != address(0) && w != 0, "member");
+            require(weight[m] == 0, "dup");
+            sum += w;
+        }
+        require(_threshold != 0 && _threshold <= sum, "threshold");
         salt = keccak256(abi.encode(members, weights, _threshold));
         location = Clones.predictDeterministicAddress(address(MOB), salt, address(MOB));
     }
@@ -49,16 +58,9 @@ contract Mob {
         if (threshold != 0) {
             revert AlreadyInitialized();
         }
-        uint256 sum;
         for (uint256 i = 0; i < members.length; i++) {
-            address m = members[i];
-            uint256 w = weights[i];
-            require(m != address(0) && w != 0, "member");
-            require(weight[m] == 0, "dup");
-            weight[m] = w;
-            sum += w;
+            weight[members[i]] = weights[i];
         }
-        require(_threshold != 0 && _threshold <= sum, "threshold");
         threshold = _threshold;
     }
 
