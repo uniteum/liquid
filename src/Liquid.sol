@@ -158,7 +158,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         }
     }
 
-    function __initialize(IERC20Metadata substance_) public {
+    function __initialize(IERC20Metadata substance_) external {
         if (address(substance) == address(0)) {
             substance = substance_;
         }
