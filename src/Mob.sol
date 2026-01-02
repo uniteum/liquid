@@ -4,13 +4,13 @@ pragma solidity ^0.8.30;
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 contract Mob {
+    error AlreadyInitialized();
     error NotMember();
     error LengthMismatch();
     error RiotImpossible();
     error RiotAlways();
-    error AlreadyInitialized();
-    error AlreadyRioted(bytes32 h);
     error BadMessage();
+    error AlreadyRioted(bytes32 h);
     error CallFailed(bytes32 h);
 
     event Make(Mob mob, address[] members, uint256[] rage_, uint256 boil);
