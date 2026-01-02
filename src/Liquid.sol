@@ -81,8 +81,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         emit Cool(this, liquids, solids);
     }
 
-    function aways(uint256 liquids, uint256 pooled, uint256 lake_) public pure returns (uint256 water) {
-        water = lake_ - pooled * lake_ / (pooled + liquids);
+    function aways(uint256 here, uint256 near, uint256 far) public pure returns (uint256 there) {
+        there = far - near * far / (near + here);
     }
 
     function aways(uint256 liquids) public view returns (uint256 water) {
