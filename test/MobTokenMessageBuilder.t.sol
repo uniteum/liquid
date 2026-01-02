@@ -86,7 +86,8 @@ contract MobTokenMessageBuilderTest is Test {
         // Any further approval of the exact same message should revert AlreadyExecuted.
         vm.prank(alice);
         vm.expectRevert(Mob.AlreadyExecuted.selector);
-        address(mob).call(message);
+        (bool ok,) = address(mob).call(message);
+        assertTrue(!ok, "expected revert");
     }
 
     function test_RevertsForNonMember() public {
@@ -94,18 +95,7 @@ contract MobTokenMessageBuilderTest is Test {
 
         vm.prank(carol);
         vm.expectRevert(Mob.NotMember.selector);
-        address(mob).call(message);
-    }
-
-    function test_RevertsOnDuplicateApprovalBySameMember() public {
-        bytes memory message = builder.tokenTransferMessage(address(token), recipient, 1);
-
-        vm.prank(alice);
         (bool ok,) = address(mob).call(message);
         assertTrue(ok);
-
-        vm.prank(alice);
-        vm.expectRevert(Mob.AlreadyApproved.selector);
-        address(mob).call(message);
     }
 }

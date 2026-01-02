@@ -3,7 +3,6 @@ pragma solidity ^0.8.30;
 
 contract Mob {
     error NotMember();
-    error AlreadyApproved(bytes32 h);
     error AlreadyExecuted(bytes32 h);
     error BadMessage();
     error CallFailed(bytes32 h);
@@ -43,11 +42,12 @@ contract Mob {
         bytes32 h = keccak256(abi.encodePacked(address(this), block.chainid, m));
 
         if (executed[h]) revert AlreadyExecuted(h);
-        if (approvedBy[h][msg.sender]) revert AlreadyApproved(h);
-
-        approvedBy[h][msg.sender] = true;
-        uint256 total = approvedWeight[h] + w;
-        approvedWeight[h] = total;
+        uint256 total = approvedWeight[h];
+        if (!approvedBy[h][msg.sender]) {
+            approvedBy[h][msg.sender] = true;
+            total += w;
+            approvedWeight[h] = total;
+        }
 
         if (total >= threshold) {
             _exec(h, m);
@@ -64,11 +64,11 @@ contract Mob {
             value := calldataload(add(m.offset, 20))
         }
 
-        executed[h] = true;
-
         bytes calldata data = m[20 + 32:];
 
         (bool ok,) = to.call{value: value}(data);
         if (!ok) revert CallFailed(h);
+
+        executed[h] = true;
     }
 }
