@@ -9,6 +9,10 @@ contract Mob {
     error BadMessage();
     error CallFailed(bytes32 h);
     error AlreadyInitialized();
+    error LengthMismatch();
+    error ThresholdNotMet();
+    error ThresholdZero();
+    error DuplicateMember();
 
     event Make(Mob mob, address[] members, uint256[] weights, uint256 threshold);
 
@@ -26,16 +30,27 @@ contract Mob {
         view
         returns (address location, bytes32 salt)
     {
-        require(members.length == weights.length, "len");
+        if (members.length != weights.length) {
+            revert LengthMismatch();
+        }
         uint256 sum;
         for (uint256 i = 0; i < members.length; i++) {
             address m = members[i];
             uint256 w = weights[i];
-            require(m != address(0) && w != 0, "member");
-            require(weight[m] == 0, "dup");
+            if (m == address(0) || w == 0) {
+                revert NotMember();
+            }
+            if (weight[m] != 0) {
+                revert DuplicateMember();
+            }
             sum += w;
         }
-        require(_threshold != 0 && _threshold <= sum, "threshold");
+        if (_threshold == 0) {
+            revert ThresholdZero();
+        }
+        if (_threshold > sum) {
+            revert ThresholdNotMet();
+        }
         salt = keccak256(abi.encode(members, weights, _threshold));
         location = Clones.predictDeterministicAddress(address(MOB), salt, address(MOB));
     }
@@ -73,7 +88,6 @@ contract Mob {
         bytes calldata m = msg.data;
         if (m.length < 20 + 32) revert BadMessage();
 
-        // domain-separated: same raw bytes must match, but not across chains/contracts
         bytes32 h = keccak256(m);
 
         if (executed[h]) revert AlreadyExecuted(h);
