@@ -24,6 +24,7 @@ contract LiquidTest is BaseTest {
         owen.heat(W, 1e9);
         U = W.liquify(owen.newToken("U", 1e9));
         V = W.liquify(owen.newToken("V", 1e9));
+        giveaway();
     }
 
     function newUser(string memory name) internal returns (LiquidUser user) {
@@ -44,7 +45,6 @@ contract LiquidTest is BaseTest {
     }
 
     function test_HeatCool() public returns (uint256 liquid, uint256 solid) {
-        giveaway();
         owen.heat(U, 500);
         alex.heat(U, 500);
         beck.heat(U, 500);
@@ -58,8 +58,6 @@ contract LiquidTest is BaseTest {
     }
 
     function test_HeatSellCoolBuy() public returns (uint256 water, uint256 solid) {
-        giveaway();
-
         // Setup: Give U pool some water for trading
         owen.give(address(U), 1000, W);
 
@@ -93,7 +91,6 @@ contract LiquidTest is BaseTest {
      * Parameterized test: Verify trader cannot profit from heat → sell → cool → buy cycle
      */
     function test_NoArbitrage() public {
-        giveaway();
         owen.give(address(U), 10000, W);
         owen.heat(U, 10000);
 
