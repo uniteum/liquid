@@ -91,7 +91,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function away(uint256 liquids) external returns (uint256 water) {
         water = aways(liquids);
-        _sold(liquids, water);
+        _went(liquids, water);
     }
 
     function aways(uint256 liquids, Liquid fluid) public view returns (uint256 water, uint256 fluids) {
@@ -101,8 +101,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function away(uint256 liquids, Liquid fluid) external returns (uint256 water, uint256 fluids) {
         (water, fluids) = aways(liquids, fluid);
-        _sold(liquids, water);
-        fluid.bought(fluids, water);
+        _went(liquids, water);
+        fluid.came(fluids, water);
     }
 
     function backs(uint256 water) public view returns (uint256 liquids) {
@@ -111,7 +111,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function back(uint256 water) external returns (uint256 liquids) {
         liquids = backs(water);
-        _bought(liquids, water);
+        _came(liquids, water);
     }
 
     function backs(uint256 fluids, Liquid fluid) public view returns (uint256 water, uint256 liquids) {
@@ -121,25 +121,25 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function back(uint256 liquids, Liquid fluid) external returns (uint256 water, uint256 fluids) {
         (water, fluids) = backs(liquids, fluid);
-        fluid.sold(liquids, water);
-        _bought(fluids, water);
+        fluid.went(liquids, water);
+        _came(fluids, water);
     }
 
-    function bought(uint256 liquids, uint256 water) external onlyLiquid {
-        _bought(liquids, water);
+    function came(uint256 liquids, uint256 water) external onlyLiquid {
+        _came(liquids, water);
     }
 
-    function _bought(uint256 liquids, uint256 water) private {
+    function _came(uint256 liquids, uint256 water) private {
         WATER.update(msg.sender, address(this), water);
         _update(address(this), msg.sender, liquids);
         emit Back(this, liquids, water);
     }
 
-    function sold(uint256 liquids, uint256 water) external onlyLiquid {
-        _sold(liquids, water);
+    function went(uint256 liquids, uint256 water) external onlyLiquid {
+        _went(liquids, water);
     }
 
-    function _sold(uint256 liquids, uint256 water) private {
+    function _went(uint256 liquids, uint256 water) private {
         WATER.update(address(this), msg.sender, water);
         _update(msg.sender, address(this), liquids);
         emit Away(this, liquids, water);
