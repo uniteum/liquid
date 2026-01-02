@@ -73,23 +73,6 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _sold(liquid, water);
     }
 
-    function sell(uint256 liquid, Liquid fluid) external returns (uint256 water, uint256 fluids) {
-        (water, fluids) = sells(liquid, fluid);
-        _sold(liquid, water);
-        fluid.bought(fluids, water);
-    }
-
-    function buy(uint256 water) external returns (uint256 liquid) {
-        liquid = buys(water);
-        _bought(liquid, water);
-    }
-
-    function buy(uint256 liquid, Liquid fluid) external returns (uint256 water, uint256 fluids) {
-        (water, fluids) = buys(liquid, fluid);
-        fluid.sold(liquid, water);
-        _bought(fluids, water);
-    }
-
     function sells(uint256 liquid, uint256 pooled, uint256 lake_) public pure returns (uint256 water) {
         water = lake_ - pooled * lake_ / (pooled + liquid);
     }
@@ -107,9 +90,26 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         liquid = sells(water, lake(), pool());
     }
 
+    function sell(uint256 liquid, Liquid fluid) external returns (uint256 water, uint256 fluids) {
+        (water, fluids) = sells(liquid, fluid);
+        _sold(liquid, water);
+        fluid.bought(fluids, water);
+    }
+
+    function buy(uint256 water) external returns (uint256 liquid) {
+        liquid = buys(water);
+        _bought(liquid, water);
+    }
+
     function buys(uint256 fluids, Liquid fluid) public view returns (uint256 water, uint256 liquid) {
         water = buys(fluids);
         liquid = fluid.buys(water);
+    }
+
+    function buy(uint256 liquid, Liquid fluid) external returns (uint256 water, uint256 fluids) {
+        (water, fluids) = buys(liquid, fluid);
+        fluid.sold(liquid, water);
+        _bought(fluids, water);
     }
 
     function bought(uint256 liquid, uint256 water) external onlyLiquid {
