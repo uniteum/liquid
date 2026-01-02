@@ -56,11 +56,11 @@ contract LiquidUser is User {
     function sell(Liquid U, uint256 liquid, Liquid V)
         public
         waterlog("sell", U, liquid, 0)
-        returns (uint256 water, uint256 hotter)
+        returns (uint256 water, uint256 fluid)
     {
-        (water, hotter) = U.sell(liquid, V);
+        (water, fluid) = U.sell(liquid, V);
         console.log("water:", water);
-        console.log("hotter:", hotter);
+        console.log("fluid:", fluid);
     }
 
     function buy(Liquid U, uint256 water) public waterlog("buy", U, 0, water) returns (uint256 liquid) {
@@ -68,12 +68,12 @@ contract LiquidUser is User {
         console.log("liquid:", liquid);
     }
 
-    function buy(Liquid U, uint256 hotter, Liquid V)
+    function buy(Liquid U, uint256 fluid, Liquid V)
         public
-        waterlog("buy", U, hotter, 0)
+        waterlog("buy", U, fluid, 0)
         returns (uint256 water, uint256 liquid)
     {
-        (water, liquid) = U.buy(hotter, V);
+        (water, liquid) = U.buy(fluid, V);
         console.log("water:", water);
         console.log("liquid:", liquid);
     }
