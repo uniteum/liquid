@@ -22,7 +22,7 @@ contract Mob {
 
     mapping(bytes32 => uint256) public fury;
     mapping(bytes32 => mapping(address => bool)) public yelled;
-    mapping(bytes32 => bool) public boiled;
+    mapping(bytes32 => bool) public rioted;
 
     function made(address[] memory members, uint256[] memory rage_, uint256 boil_)
         public
@@ -86,7 +86,7 @@ contract Mob {
 
         bytes32 h = keccak256(yell);
 
-        if (boiled[h]) revert AlreadyRioted(h);
+        if (rioted[h]) revert AlreadyRioted(h);
         uint256 total = fury[h];
         if (!yelled[h][msg.sender]) {
             yelled[h][msg.sender] = true;
@@ -95,11 +95,11 @@ contract Mob {
         }
 
         if (total >= boil) {
-            _boil(h, yell);
+            riot(h, yell);
         }
     }
 
-    function _boil(bytes32 h, bytes calldata yell) private {
+    function riot(bytes32 h, bytes calldata yell) private {
         address to;
         uint256 value;
 
@@ -113,6 +113,6 @@ contract Mob {
         (bool ok,) = to.call{value: value}(data);
         if (!ok) revert CallFailed(h);
 
-        boiled[h] = true;
+        rioted[h] = true;
     }
 }
