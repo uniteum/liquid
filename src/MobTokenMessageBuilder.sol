@@ -33,20 +33,4 @@ contract MobTokenMessageBuilder {
         // Mob message format: to (20) || value (32) || calldata (N)
         return abi.encodePacked(token, uint256(0), callData);
     }
-
-    /// @notice The action hash Mob will use for this message (matches Mob’s domain separation).
-    ///         Useful for UIs / sanity checks that everyone is approving the same message.
-    function actionHash(bytes calldata message) external view returns (bytes32) {
-        return keccak256(abi.encodePacked(mob, block.chainid, message));
-    }
-
-    /// @notice Convenience: build message + compute Mob action hash in one call.
-    function tokenTransferMessageAndHash(address token, address recipient, uint256 amount)
-        external
-        view
-        returns (bytes memory message, bytes32 hash)
-    {
-        message = this.tokenTransferMessage(token, recipient, amount);
-        hash = keccak256(abi.encodePacked(mob, block.chainid, message));
-    }
 }
