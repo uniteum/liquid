@@ -26,6 +26,9 @@ contract LiquidTest is BaseTest {
         U = W.liquify(owen.newToken("U", 1e9));
         V = W.liquify(owen.newToken("V", 1e9));
         S = U.substance();
+        alex.addToken(U);
+        alex.addToken(V);
+        alex.addToken(W);
         giveaway();
     }
 
