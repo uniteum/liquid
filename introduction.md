@@ -311,7 +311,7 @@ Liquid improves on traditional AMM designs in several key ways:
 ### Universal Token Connectivity
 - **n pools instead of n²**: Traditional AMMs need separate pools for every token pair (USDC/DAI, USDC/WETH, DAI/WETH, etc.)
 - **Single intermediary**: Water connects all liquid tokens, so you only need one pool per token
-- **Cross-liquid swaps**: Trade any hot token for any other in a single transaction
+- **Cross-liquid swaps**: Trade any liquid token for any other in a single transaction
 - **Example**: With 100 tokens, Uniswap needs ~5,000 pairs; Liquid needs 100 pools
 
 ### No Governance Risk
@@ -320,7 +320,7 @@ Liquid improves on traditional AMM designs in several key ways:
 - **No protocol updates**: Cannot change fee structure, formulas, or access control
 - **Immutable**: What you see is what you get forever
 
-**Note**: Backing token risk still exists. If your cold token (USDC, DAI, etc.) has governance issues or fails, the liquid token inherits that risk.
+**Note**: Backing token risk still exists. If your solid token (USDC, DAI, etc.) has governance issues or fails, the liquid token inherits that risk.
 
 ### Automatic Liquidity Creation
 - **2x mint pattern**: When you heat 1,000 solid, you get 1,000 liquid AND the pool gets 1,000 liquid

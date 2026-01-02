@@ -67,7 +67,7 @@ When a user unwraps `n` wrapped tokens from their balance `held`:
 2. Calculate protocol's share: `p = pool / total_supply`
 3. Burn `2n × s` from user
 4. Burn `2n × p` from pool
-5. Return `cold = n × (backing_balance / held)` backing tokens
+5. Return `solid = n × (backing_balance / held)` backing tokens
 
 **Invariant**: Total burned equals `2n`, maintaining symmetry with wrapping.
 
@@ -284,7 +284,7 @@ Initial wrap of n tokens:
 
 **Comparison to traditional AMMs**:
 - Traditional: User must deposit both sides of pair (e.g., 50 A + 50 B)
-- Liquid: User deposits only backing token (e.g., 100 cold) and automatically creates 50/50 pool
+- Liquid: User deposits only backing token (e.g., 100 solid) and automatically creates 50/50 pool
 
 This eliminates the bootstrapping problem where new tokens cannot trade until someone provides initial liquidity.
 
@@ -349,7 +349,7 @@ The constant-product formula `x × y = k` provides:
 
 The symmetric mint mechanism (1x to user, 1x to pool) provides:
 
-1. **Automatic liquidity**: No cold-start problem for new tokens
+1. **Automatic liquidity**: No solid-start problem for new tokens
 2. **Proportional depth**: Liquidity scales with wrapping activity
 3. **Symmetric unwrap**: Burn mechanics mirror mint mechanics
 4. **Elegant mathematics**: Total minted = Total burned over time
@@ -586,10 +586,10 @@ Unwrap n (immediately):
                 = B + n
 
 But user's proportional share is:
-  cold = n × (pool_share + user_share)
+  solid = n × (pool_share + user_share)
 
 Since user_share < 1 and pool_share < 1:
-  cold < n (except in edge case where T = 0 initially)
+  solid < n (except in edge case where T = 0 initially)
 
 Therefore: cold_received ≤ n ✓
 ```

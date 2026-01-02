@@ -73,9 +73,9 @@ Uniswap requires manual liquidity provision. Someone must deposit both tokens in
 
 **Liquid solves this automatically.**
 
-When you heat 1,000 cold tokens:
-- You receive 1,000 hot tokens (to hold/trade)
-- The pool receives 1,000 hot tokens (instant liquidity)
+When you heat 1,000 solid tokens:
+- You receive 1,000 liquid tokens (to hold/trade)
+- The pool receives 1,000 liquid tokens (instant liquidity)
 
 Every deposit creates tradeable liquidity. No separate LP positions. No impermanent loss calculations. No waiting for market makers.
 
@@ -120,7 +120,7 @@ Carbon credits from a reforestation project in Indonesia? Tradeable immediately.
 **Assumptions:**
 - Tokenized asset market reaches $10T (below BCG's $16T forecast)
 - Liquid captures 5% of tokenized asset liquidity (conservative given zero fees)
-- Average 50% of hot tokens circulate in pools (conservative)
+- Average 50% of liquid tokens circulate in pools (conservative)
 
 **Calculation:**
 - $10T tokenized assets × 5% Liquid adoption = **$500B in Liquid ecosystem**
@@ -160,7 +160,7 @@ All cross-asset swaps route through Water. Like SWIFT for tokenized assets, but:
 - Permissionless (not gated)
 
 ### 2. Neutral Reserve Asset
-Because Water is backed by a cold token (the original Ice) but also serves as universal intermediary:
+Because Water is backed by a solid token (the original Ice) but also serves as universal intermediary:
 - Central banks could hold Water for CBDC interoperability
 - Institutions could denominate cross-border contracts in Water
 - DeFi protocols could use Water as neutral collateral
