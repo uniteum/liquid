@@ -12,7 +12,6 @@ contract Mob {
     error LengthMismatch();
     error ThresholdNotMet();
     error ThresholdZero();
-    error DuplicateMember();
 
     event Make(Mob mob, address[] members, uint256[] weights, uint256 threshold);
 
@@ -42,9 +41,6 @@ contract Mob {
             uint256 w = weights[i];
             if (m == address(0) || w == 0) {
                 revert NotMember();
-            }
-            if (weight[m] != 0) {
-                revert DuplicateMember();
             }
             sum += w;
         }
