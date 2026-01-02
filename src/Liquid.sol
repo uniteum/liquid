@@ -166,7 +166,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
             if (location.code.length == 0) {
                 location = Clones.cloneDeterministic(address(WATER), salt);
                 liquids.__initialize(solid_);
-                emit Wrap(solid_, liquids);
+                emit Wrap(liquids, solid_);
             }
         }
     }
@@ -194,7 +194,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     event Cool(Liquid indexed liquid, uint256 liquids, uint256 solids);
     event Back(Liquid indexed liquid, uint256 liquids, uint256 water);
     event Away(Liquid indexed liquid, uint256 liquids, uint256 water);
-    event Wrap(IERC20Metadata indexed solid, Liquid indexed liquid);
+    event Wrap(Liquid indexed liquid, IERC20Metadata indexed solid);
 
     error Nothing();
     error Unauthorized();
