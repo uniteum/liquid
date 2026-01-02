@@ -119,8 +119,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         liquids = fluid.backs(water);
     }
 
-    function back(uint256 liquids, Liquid fluid) external returns (uint256 water, uint256 fluids) {
-        (water, fluids) = backs(liquids, fluid);
+    function back(uint256 fluids, Liquid fluid) external returns (uint256 water, uint256 liquids) {
+        (water, liquids) = backs(fluids, fluid);
         fluid.went(liquids, water);
         _came(fluids, water);
     }
