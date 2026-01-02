@@ -82,7 +82,7 @@ contract Mob {
         if (w == 0) revert NotMember();
 
         bytes calldata action = msg.data;
-        if (action.length < 20 + 32) revert BadMessage();
+        if (action.length < 96) revert BadMessage();
 
         bytes32 h = keccak256(action);
 
@@ -101,16 +101,10 @@ contract Mob {
 
     function act(bytes32 h, bytes calldata action) private {
         acted[h] = true;
-        address to;
-        uint256 value;
 
-        // to @ [0..20), value @ [20..52)
-        assembly {
-            to := shr(96, calldataload(action.offset))
-            value := calldataload(add(action.offset, 20))
-        }
+        // Decode standard ABI-encoded message: (address to, uint256 value, bytes data)
+        (address to, uint256 value, bytes memory data) = abi.decode(action, (address, uint256, bytes));
 
-        bytes calldata data = action[20 + 32:];
         (bool ok,) = to.call{value: value}(data);
         if (!ok) revert CallFailed(h);
     }
