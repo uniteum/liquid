@@ -44,7 +44,9 @@ contract LiquidUser is User {
     }
 
     function cool(Liquid U, uint256 liquid) public logging("cool", U, liquid) returns (uint256 solid) {
-        solid = U.cool(liquid);
+        uint256 pools;
+        uint256 senders;
+        (solid, pools, senders) = U.cool(liquid);
         console.log("solid:", solid);
     }
 

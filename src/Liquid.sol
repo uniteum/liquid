@@ -48,20 +48,31 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         liquid.transfer(msg.sender, solid);
     }
 
-    function heat(uint256 solid) external nonReentrant {
+    function heats(uint256 solid) public pure returns (uint256 liquid, uint256 pools, uint256 senders) {
+        liquid = solid;
+        pools = solid;
+        senders = solid;
+    }
+
+    function heat(uint256 solid) external nonReentrant returns (uint256 liquid, uint256 pools, uint256 senders) {
         substance.safeTransferFrom(msg.sender, address(this), solid);
-        _mint(address(this), solid);
-        _mint(msg.sender, solid);
+        (liquid, pools, senders) = heats(solid);
+        _mint(address(this), pools);
+        _mint(msg.sender, senders);
         emit Heat(this, solid);
     }
 
-    function cool(uint256 liquid) external nonReentrant returns (uint256 solid) {
+    function cools(uint256 liquid) public view returns (uint256 solid, uint256 pools, uint256 senders) {
         uint256 total = totalSupply();
         uint256 pooled = pool();
         uint256 unpooled = total - pooled;
-        uint256 pools = 2 * liquid * pooled / total;
-        uint256 senders = 2 * liquid * unpooled / total;
+        pools = 2 * liquid * pooled / total;
+        senders = 2 * liquid * unpooled / total;
         solid = liquid * mass() / unpooled;
+    }
+
+    function cool(uint256 liquid) external nonReentrant returns (uint256 solid, uint256 pools, uint256 senders) {
+        (solid, pools, senders) = cools(liquid);
         _burn(address(this), pools);
         _burn(msg.sender, senders);
         substance.safeTransfer(msg.sender, solid);
