@@ -43,64 +43,64 @@ contract LiquidUser is User {
         U.heat(cold);
     }
 
-    function cool(Liquid U, uint256 hot) public logging("cool", U, hot) returns (uint256 cold) {
-        cold = U.cool(hot);
+    function cool(Liquid U, uint256 liquid) public logging("cool", U, liquid) returns (uint256 cold) {
+        cold = U.cool(liquid);
         console.log("cold:", cold);
     }
 
-    function sell(Liquid U, uint256 hot) public logging("sell", U, hot) returns (uint256 water) {
-        water = U.sell(hot);
+    function sell(Liquid U, uint256 liquid) public logging("sell", U, liquid) returns (uint256 water) {
+        water = U.sell(liquid);
         console.log("water:", water);
     }
 
-    function sell(Liquid U, uint256 hot, Liquid V)
+    function sell(Liquid U, uint256 liquid, Liquid V)
         public
-        waterlog("sell", U, hot, 0)
+        waterlog("sell", U, liquid, 0)
         returns (uint256 water, uint256 hotter)
     {
-        (water, hotter) = U.sell(hot, V);
+        (water, hotter) = U.sell(liquid, V);
         console.log("water:", water);
         console.log("hotter:", hotter);
     }
 
-    function buy(Liquid U, uint256 water) public waterlog("buy", U, 0, water) returns (uint256 hot) {
-        hot = U.buy(water);
-        console.log("hot:", hot);
+    function buy(Liquid U, uint256 water) public waterlog("buy", U, 0, water) returns (uint256 liquid) {
+        liquid = U.buy(water);
+        console.log("liquid:", liquid);
     }
 
     function buy(Liquid U, uint256 hotter, Liquid V)
         public
         waterlog("buy", U, hotter, 0)
-        returns (uint256 water, uint256 hot)
+        returns (uint256 water, uint256 liquid)
     {
-        (water, hot) = U.buy(hotter, V);
+        (water, liquid) = U.buy(hotter, V);
         console.log("water:", water);
-        console.log("hot:", hot);
+        console.log("liquid:", liquid);
     }
 
-    function liquidate(Liquid U) public returns (uint256 hot, uint256 cold) {
-        hot = U.balanceOf(address(this));
-        cold = cool(U, hot);
+    function liquidate(Liquid U) public returns (uint256 liquid, uint256 cold) {
+        liquid = U.balanceOf(address(this));
+        cold = cool(U, liquid);
         assertHasNo(U);
     }
 
-    function rndUnits(Liquid U) public returns (int256 hot) {
+    function rndUnits(Liquid U) public returns (int256 liquid) {
         int256 min = -int256(U.balanceOf(address(this)));
         // forge-lint: disable-next-line(unsafe-typecast)
         int256 max = int256(WATER.balanceOf(address(this)));
-        hot = rnd(min, max);
+        liquid = rnd(min, max);
     }
 
-    function rndForge(Liquid U) public returns (int256 hot) {
-        hot = rndUnits(U);
-        if (hot < -int256(WATER.balanceOf(address(this)))) {
+    function rndForge(Liquid U) public returns (int256 liquid) {
+        liquid = rndUnits(U);
+        if (liquid < -int256(WATER.balanceOf(address(this)))) {
             console.log("forge not called because insufficient balance");
-        } else if (hot < 0) {
+        } else if (liquid < 0) {
             // forge-lint: disable-next-line(unsafe-typecast)
-            cool(U, uint256(-hot));
+            cool(U, uint256(-liquid));
         } else {
             // forge-lint: disable-next-line(unsafe-typecast)
-            heat(U, uint256(hot));
+            heat(U, uint256(liquid));
         }
     }
 }
