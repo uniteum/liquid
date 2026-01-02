@@ -7,78 +7,78 @@ contract Mob {
     error AlreadyInitialized();
     error NotMember();
     error LengthMismatch();
-    error RiotImpossible();
-    error RiotAlways();
+    error ActionImpossible();
+    error QuorumZero();
     error BadMessage();
-    error AlreadyRioted(bytes32 h);
+    error ActedAlready(bytes32 h);
     error CallFailed(bytes32 h);
 
-    event Make(Mob mob, address[] members, uint256[] rage_, uint256 boil);
+    event Make(Mob mob, address[] members, uint256[] influence_, uint256 quorum);
 
     Mob public immutable MOB = this;
 
-    mapping(address => uint256) public rage;
-    uint256 public boil;
+    mapping(address => uint256) public influence;
+    uint256 public quorum;
 
-    mapping(bytes32 => uint256) public fury;
-    mapping(bytes32 => mapping(address => bool)) public yelled;
-    mapping(bytes32 => bool) public rioted;
+    mapping(bytes32 => uint256) public support;
+    mapping(bytes32 => mapping(address => bool)) public spoke;
+    mapping(bytes32 => bool) public acted;
 
-    function made(address[] memory members, uint256[] memory rage_, uint256 boil_)
+    function made(address[] memory members, uint256[] memory influence_, uint256 quorum_)
         public
         view
         returns (address location, bytes32 salt)
     {
-        if (boil_ == 0) {
-            revert RiotAlways();
+        if (quorum_ == 0) {
+            revert QuorumZero();
         }
-        if (members.length != rage_.length) {
+        if (members.length != influence_.length) {
             revert LengthMismatch();
         }
         uint256 sum;
         for (uint256 i = 0; i < members.length; i++) {
             address m = members[i];
-            uint256 w = rage_[i];
+            uint256 w = influence_[i];
             if (m == address(0) || w == 0) {
                 revert NotMember();
             }
             sum += w;
         }
-        if (boil_ > sum) {
-            revert RiotImpossible();
+        if (quorum_ > sum) {
+            revert ActionImpossible();
         }
-        salt = keccak256(abi.encode(members, rage_, boil_));
+        salt = keccak256(abi.encode(members, influence_, quorum_));
         location = Clones.predictDeterministicAddress(address(MOB), salt, address(MOB));
     }
 
-    function make(address[] memory members, uint256[] memory rage_, uint256 boil_) public returns (Mob mob) {
+    function make(address[] memory members, uint256[] memory influence_, uint256 quorum_) public returns (Mob mob) {
         if (this != MOB) {
-            mob = MOB.make(members, rage_, boil_);
+            mob = MOB.make(members, influence_, quorum_);
         } else {
-            (address location, bytes32 salt) = made(members, rage_, boil_);
+            (address location, bytes32 salt) = made(members, influence_, quorum_);
             mob = Mob(payable(location));
             if (location.code.length == 0) {
                 location = Clones.cloneDeterministic(address(MOB), salt);
-                mob.__initialize(members, rage_, boil_);
-                emit Make(mob, members, rage_, boil_);
+                mob.__initialize(members, influence_, quorum_);
+                emit Make(mob, members, influence_, quorum_);
             }
         }
     }
 
-    function __initialize(address[] memory members, uint256[] memory rage_, uint256 boil_) external {
-        if (boil != 0) {
+    function __initialize(address[] memory members, uint256[] memory influence_, uint256 quorum_) external {
+        if (quorum != 0) {
             revert AlreadyInitialized();
         }
         for (uint256 i = 0; i < members.length; i++) {
-            rage[members[i]] = rage_[i];
+            influence[members[i]] = influence_[i];
         }
-        boil = boil_;
+        quorum = quorum_;
     }
 
     receive() external payable {}
 
     fallback() external payable {
-        uint256 w = rage[msg.sender];
+        uint256 w = influence[msg.sender];
         if (w == 0) revert NotMember();
 
         bytes calldata yell = msg.data;
@@ -86,20 +86,20 @@ contract Mob {
 
         bytes32 h = keccak256(yell);
 
-        if (rioted[h]) revert AlreadyRioted(h);
-        uint256 total = fury[h];
-        if (!yelled[h][msg.sender]) {
-            yelled[h][msg.sender] = true;
+        if (acted[h]) revert ActedAlready(h);
+        uint256 total = support[h];
+        if (!spoke[h][msg.sender]) {
+            spoke[h][msg.sender] = true;
             total += w;
-            fury[h] = total;
+            support[h] = total;
         }
 
-        if (total >= boil) {
-            riot(h, yell);
+        if (total >= quorum) {
+            act(h, yell);
         }
     }
 
-    function riot(bytes32 h, bytes calldata yell) private {
+    function act(bytes32 h, bytes calldata yell) private {
         address to;
         uint256 value;
 
@@ -113,6 +113,6 @@ contract Mob {
         (bool ok,) = to.call{value: value}(data);
         if (!ok) revert CallFailed(h);
 
-        rioted[h] = true;
+        acted[h] = true;
     }
 }

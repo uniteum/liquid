@@ -87,7 +87,7 @@ contract MobTokenMessageBuilderTest is Test {
 
         // Any further approval of the exact same message should revert AlreadyRioted.
         vm.prank(alice);
-        vm.expectRevert(Mob.AlreadyRioted.selector);
+        vm.expectRevert(Mob.ActedAlready.selector);
         (bool ok,) = address(mob).call(message);
         assertTrue(!ok, "expected revert");
     }
