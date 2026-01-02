@@ -42,10 +42,10 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         return substance.balanceOf(address(this));
     }
 
-    function liquify(uint256 solid, IERC20Metadata stuff) external {
-        Liquid fluid = liquify(stuff);
-        fluid.heat(solid);
-        fluid.transfer(msg.sender, solid);
+    function liquify(uint256 solid, IERC20Metadata substance_) external {
+        Liquid liquid = liquify(substance_);
+        liquid.heat(solid);
+        liquid.transfer(msg.sender, solid);
     }
 
     function heat(uint256 solid) external nonReentrant {
@@ -136,31 +136,31 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _update(from, to, amount);
     }
 
-    function liquified(IERC20Metadata stuff) public view returns (address future, bytes32 salt) {
-        if (address(stuff) == address(0)) {
+    function liquified(IERC20Metadata substance_) public view returns (address future, bytes32 salt) {
+        if (address(substance_) == address(0)) {
             revert Nothing();
         }
-        salt = bytes32(uint256(uint160(address(stuff))));
+        salt = bytes32(uint256(uint160(address(substance_))));
         future = Clones.predictDeterministicAddress(address(WATER), salt, address(WATER));
     }
 
-    function liquify(IERC20Metadata stuff) public returns (Liquid fluid) {
+    function liquify(IERC20Metadata substance_) public returns (Liquid fluid) {
         if (this != WATER) {
-            fluid = WATER.liquify(stuff);
+            fluid = WATER.liquify(substance_);
         } else {
-            (address future, bytes32 salt) = liquified(stuff);
+            (address future, bytes32 salt) = liquified(substance_);
             fluid = Liquid(future);
             if (future.code.length == 0) {
                 future = Clones.cloneDeterministic(address(WATER), salt);
-                fluid.__initialize(stuff);
-                emit Liquify(stuff, fluid);
+                fluid.__initialize(substance_);
+                emit Liquify(substance_, fluid);
             }
         }
     }
 
-    function __initialize(IERC20Metadata stuff) public {
+    function __initialize(IERC20Metadata substance_) public {
         if (address(substance) == address(0)) {
-            substance = stuff;
+            substance = substance_;
         }
     }
 
