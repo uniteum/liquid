@@ -144,16 +144,16 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         future = Clones.predictDeterministicAddress(address(WATER), salt, address(WATER));
     }
 
-    function liquify(IERC20Metadata substance_) public returns (Liquid fluid) {
+    function liquify(IERC20Metadata substance_) public returns (Liquid liquid) {
         if (this != WATER) {
-            fluid = WATER.liquify(substance_);
+            liquid = WATER.liquify(substance_);
         } else {
             (address future, bytes32 salt) = liquified(substance_);
-            fluid = Liquid(future);
+            liquid = Liquid(future);
             if (future.code.length == 0) {
                 future = Clones.cloneDeterministic(address(WATER), salt);
-                fluid.__initialize(substance_);
-                emit Liquify(substance_, fluid);
+                liquid.__initialize(substance_);
+                emit Liquify(substance_, liquid);
             }
         }
     }
@@ -170,8 +170,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function _onlyLiquid() private view {
-        Liquid fluid = Liquid(msg.sender);
-        (address predicted,) = WATER.liquified(fluid.substance());
+        Liquid liquid = Liquid(msg.sender);
+        (address predicted,) = WATER.liquified(liquid.substance());
         if (msg.sender != predicted) {
             revert Unauthorized();
         }
