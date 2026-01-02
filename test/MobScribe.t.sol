@@ -32,7 +32,7 @@ contract MockERC20 {
     }
 }
 
-contract MobTokenMessageBuilderTest is Test {
+contract MobScribeTest is Test {
     Mob private mobProto;
     Mob private mob;
     MobScribe private builder;
