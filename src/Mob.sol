@@ -20,8 +20,8 @@ contract Mob {
     mapping(address => uint256) public influence;
     uint256 public quorum;
 
-    mapping(bytes32 => uint256) public support;
-    mapping(bytes32 => mapping(address => bool)) public spoke;
+    mapping(bytes32 => uint256) public tally;
+    mapping(bytes32 => mapping(address => bool)) public voted;
     mapping(bytes32 => bool) public acted;
 
     function made(address[] memory members, uint256[] memory influence_, uint256 quorum_)
@@ -81,38 +81,37 @@ contract Mob {
         uint256 w = influence[msg.sender];
         if (w == 0) revert NotMember();
 
-        bytes calldata yell = msg.data;
-        if (yell.length < 20 + 32) revert BadMessage();
+        bytes calldata action = msg.data;
+        if (action.length < 20 + 32) revert BadMessage();
 
-        bytes32 h = keccak256(yell);
+        bytes32 h = keccak256(action);
 
         if (acted[h]) revert ActedAlready(h);
-        uint256 total = support[h];
-        if (!spoke[h][msg.sender]) {
-            spoke[h][msg.sender] = true;
+        uint256 total = tally[h];
+        if (!voted[h][msg.sender]) {
+            voted[h][msg.sender] = true;
             total += w;
-            support[h] = total;
+            tally[h] = total;
         }
 
         if (total >= quorum) {
-            act(h, yell);
+            act(h, action);
         }
     }
 
-    function act(bytes32 h, bytes calldata yell) private {
+    function act(bytes32 h, bytes calldata action) private {
+        acted[h] = true;
         address to;
         uint256 value;
 
         // to @ [0..20), value @ [20..52)
         assembly {
-            to := shr(96, calldataload(yell.offset))
-            value := calldataload(add(yell.offset, 20))
+            to := shr(96, calldataload(action.offset))
+            value := calldataload(add(action.offset, 20))
         }
 
-        bytes calldata data = yell[20 + 32:];
+        bytes calldata data = action[20 + 32:];
         (bool ok,) = to.call{value: value}(data);
         if (!ok) revert CallFailed(h);
-
-        acted[h] = true;
     }
 }
