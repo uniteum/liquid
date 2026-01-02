@@ -18,6 +18,18 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         substance = ice;
     }
 
+    function name() public view virtual override returns (string memory) {
+        return substance.name();
+    }
+
+    function symbol() public view virtual override returns (string memory) {
+        return substance.symbol();
+    }
+
+    function decimals() public view virtual override returns (uint8) {
+        return substance.decimals();
+    }
+
     function pool() public view returns (uint256) {
         return balanceOf(address(this));
     }
@@ -122,18 +134,6 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function update(address from, address to, uint256 amount) external onlyLiquid {
         _update(from, to, amount);
-    }
-
-    function name() public view virtual override returns (string memory) {
-        return substance.name();
-    }
-
-    function symbol() public view virtual override returns (string memory) {
-        return substance.symbol();
-    }
-
-    function decimals() public view virtual override returns (uint8) {
-        return substance.decimals();
     }
 
     function liquified(IERC20Metadata stuff) public view returns (address future, bytes32 salt) {
