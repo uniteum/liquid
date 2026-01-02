@@ -1,21 +1,54 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
+import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+
 contract Mob {
     error NotMember();
     error AlreadyExecuted(bytes32 h);
     error BadMessage();
     error CallFailed(bytes32 h);
+    error AlreadyInitialized();
+
+    event Make(Mob mob, address[] members, uint256[] weights, uint256 threshold);
+
+    Mob public immutable MOB = this;
 
     mapping(address => uint256) public weight;
-    uint256 public immutable threshold;
+    uint256 public threshold;
 
     mapping(bytes32 => uint256) public approvedWeight;
     mapping(bytes32 => mapping(address => bool)) public approvedBy;
     mapping(bytes32 => bool) public executed;
 
-    constructor(address[] memory members, uint256[] memory weights, uint256 _threshold) payable {
+    function made(address[] memory members, uint256[] memory weights, uint256 _threshold)
+        public
+        view
+        returns (address location, bytes32 salt)
+    {
         require(members.length == weights.length, "len");
+        salt = keccak256(abi.encode(members, weights, _threshold));
+        location = Clones.predictDeterministicAddress(address(MOB), salt, address(MOB));
+    }
+
+    function make(address[] memory members, uint256[] memory weights, uint256 _threshold) public returns (Mob mob) {
+        if (this != MOB) {
+            mob = MOB.make(members, weights, _threshold);
+        } else {
+            (address location, bytes32 salt) = made(members, weights, _threshold);
+            mob = Mob(payable(location));
+            if (location.code.length == 0) {
+                location = Clones.cloneDeterministic(address(MOB), salt);
+                mob.__initialize(members, weights, _threshold);
+                emit Make(mob, members, weights, _threshold);
+            }
+        }
+    }
+
+    function __initialize(address[] memory members, uint256[] memory weights, uint256 _threshold) external {
+        if (threshold != 0) {
+            revert AlreadyInitialized();
+        }
         uint256 sum;
         for (uint256 i = 0; i < members.length; i++) {
             address m = members[i];

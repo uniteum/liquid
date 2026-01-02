@@ -33,6 +33,7 @@ contract MockERC20 {
 }
 
 contract MobTokenMessageBuilderTest is Test {
+    Mob private mobProto;
     Mob private mob;
     MobTokenMessageBuilder private builder;
     MockERC20 private token;
@@ -52,7 +53,8 @@ contract MobTokenMessageBuilderTest is Test {
         members[1] = bob;
         weights[1] = 1;
 
-        mob = new Mob(members, weights, 3);
+        mobProto = new Mob();
+        mob = mobProto.make(members, weights, 3);
         builder = new MobTokenMessageBuilder();
         token = new MockERC20();
 
