@@ -85,9 +85,9 @@ contract MobTokenMessageBuilderTest is Test {
         assertEq(token.balanceOf(address(mob)), 1_000e18 - amount);
         assertEq(token.balanceOf(recipient), amount);
 
-        // Any further approval of the exact same message should revert AlreadyExecuted.
+        // Any further approval of the exact same message should revert AlreadyRioted.
         vm.prank(alice);
-        vm.expectRevert(Mob.AlreadyExecuted.selector);
+        vm.expectRevert(Mob.AlreadyRioted.selector);
         (bool ok,) = address(mob).call(message);
         assertTrue(!ok, "expected revert");
     }
