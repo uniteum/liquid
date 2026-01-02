@@ -177,11 +177,11 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         }
     }
 
-    event Heat(Liquid indexed fluid, uint256 solid);
-    event Cool(Liquid indexed fluid, uint256 liquid, uint256 solid);
-    event Buy(Liquid indexed fluid, uint256 liquid, uint256 water);
-    event Sell(Liquid indexed fluid, uint256 liquid, uint256 water);
-    event Liquify(IERC20Metadata indexed substance, Liquid indexed fluid);
+    event Heat(Liquid indexed liquid, uint256 solid);
+    event Cool(Liquid indexed liquid, uint256 liquids, uint256 solid);
+    event Buy(Liquid indexed liquid, uint256 liquids, uint256 water);
+    event Sell(Liquid indexed liquid, uint256 liquids, uint256 water);
+    event Liquify(IERC20Metadata indexed substance, Liquid indexed liquid);
 
     error Nothing();
     error Unauthorized();
