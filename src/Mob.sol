@@ -39,7 +39,7 @@ contract Mob {
         if (m.length < 20 + 32) revert BadMessage();
 
         // domain-separated: same raw bytes must match, but not across chains/contracts
-        bytes32 h = keccak256(abi.encodePacked(address(this), block.chainid, m));
+        bytes32 h = keccak256(m);
 
         if (executed[h]) revert AlreadyExecuted(h);
         uint256 total = approvedWeight[h];
