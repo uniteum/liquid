@@ -1,0 +1,111 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import "forge-std/Test.sol";
+
+import {Mob} from "../src/Mob.sol";
+import {MobTokenMessageBuilder} from "../src/MobTokenMessageBuilder.sol";
+
+contract MockERC20 {
+    string public name = "Mock";
+    string public symbol = "MOCK";
+    uint8 public decimals = 18;
+
+    mapping(address => uint256) public balanceOf;
+
+    event Transfer(address indexed from, address indexed to, uint256 amount);
+
+    function mint(address to, uint256 amount) external {
+        balanceOf[to] += amount;
+        emit Transfer(address(0), to, amount);
+    }
+
+    function transfer(address to, uint256 amount) external returns (bool) {
+        uint256 bal = balanceOf[msg.sender];
+        require(bal >= amount, "insufficient");
+        unchecked {
+            balanceOf[msg.sender] = bal - amount;
+        }
+        balanceOf[to] += amount;
+        emit Transfer(msg.sender, to, amount);
+        return true;
+    }
+}
+
+contract MobTokenMessageBuilderTest is Test {
+    Mob private mob;
+    MobTokenMessageBuilder private builder;
+    MockERC20 private token;
+
+    address private alice = address(0xA11CE);
+    address private bob = address(0xB0B);
+    address private carol = address(0xCA301);
+    address private recipient = address(0xBEEF);
+
+    function setUp() public {
+        address[] memory members = new address[](2);
+        uint96[] memory weights = new uint96[](2);
+
+        members[0] = alice;
+        weights[0] = 2;
+
+        members[1] = bob;
+        weights[1] = 1;
+
+        mob = new Mob(members, weights, 3);
+        builder = new MobTokenMessageBuilder(address(mob));
+        token = new MockERC20();
+
+        token.mint(address(mob), 1_000e18);
+    }
+
+    function test_MessageBuildsAndExecutesOnce_WhenThresholdReached() public {
+        uint256 amount = 123e18;
+
+        bytes memory message = builder.tokenTransferMessage(address(token), recipient, amount);
+
+        assertEq(token.balanceOf(address(mob)), 1_000e18);
+        assertEq(token.balanceOf(recipient), 0);
+
+        // Alice approves (weight 2) => not enough to execute yet.
+        vm.prank(alice);
+        (bool ok1,) = address(mob).call(message);
+        assertTrue(ok1);
+
+        assertEq(token.balanceOf(address(mob)), 1_000e18);
+        assertEq(token.balanceOf(recipient), 0);
+
+        // Bob approves (weight 1) => total 3, executes.
+        vm.prank(bob);
+        (bool ok2,) = address(mob).call(message);
+        assertTrue(ok2);
+
+        assertEq(token.balanceOf(address(mob)), 1_000e18 - amount);
+        assertEq(token.balanceOf(recipient), amount);
+
+        // Any further approval of the exact same message should revert AlreadyExecuted.
+        vm.prank(alice);
+        vm.expectRevert(Mob.AlreadyExecuted.selector);
+        address(mob).call(message);
+    }
+
+    function test_RevertsForNonMember() public {
+        bytes memory message = builder.tokenTransferMessage(address(token), recipient, 1);
+
+        vm.prank(carol);
+        vm.expectRevert(Mob.NotMember.selector);
+        address(mob).call(message);
+    }
+
+    function test_RevertsOnDuplicateApprovalBySameMember() public {
+        bytes memory message = builder.tokenTransferMessage(address(token), recipient, 1);
+
+        vm.prank(alice);
+        (bool ok,) = address(mob).call(message);
+        assertTrue(ok);
+
+        vm.prank(alice);
+        vm.expectRevert(Mob.AlreadyApproved.selector);
+        address(mob).call(message);
+    }
+}
