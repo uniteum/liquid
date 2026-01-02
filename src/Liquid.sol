@@ -68,11 +68,6 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         emit Cool(this, liquid, solid);
     }
 
-    function sell(uint256 liquid) external returns (uint256 water) {
-        water = sells(liquid);
-        _sold(liquid, water);
-    }
-
     function sells(uint256 liquid, uint256 pooled, uint256 lake_) public pure returns (uint256 water) {
         water = lake_ - pooled * lake_ / (pooled + liquid);
     }
@@ -81,19 +76,24 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         water = sells(liquid, pool(), lake());
     }
 
+    function sell(uint256 liquid) external returns (uint256 water) {
+        water = sells(liquid);
+        _sold(liquid, water);
+    }
+
     function sells(uint256 liquid, Liquid fluid) public view returns (uint256 water, uint256 fluids) {
         water = sells(liquid);
         fluids = fluid.buys(water);
-    }
-
-    function buys(uint256 water) public view returns (uint256 liquid) {
-        liquid = sells(water, lake(), pool());
     }
 
     function sell(uint256 liquid, Liquid fluid) external returns (uint256 water, uint256 fluids) {
         (water, fluids) = sells(liquid, fluid);
         _sold(liquid, water);
         fluid.bought(fluids, water);
+    }
+
+    function buys(uint256 water) public view returns (uint256 liquid) {
+        liquid = sells(water, lake(), pool());
     }
 
     function buy(uint256 water) external returns (uint256 liquid) {
