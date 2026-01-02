@@ -42,8 +42,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         return solid.balanceOf(address(this));
     }
 
-    function wrap(uint256 solids, IERC20Metadata substance_) external {
-        Liquid liquid = wrap(substance_);
+    function wrap(uint256 solids, IERC20Metadata solid_) external {
+        Liquid liquid = wrap(solid_);
         liquid.heat(solids);
         liquid.transfer(msg.sender, solids);
     }
@@ -149,31 +149,31 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _update(from, to, amount);
     }
 
-    function wrapped(IERC20Metadata substance_) public view returns (address location, bytes32 salt) {
-        if (address(substance_) == address(0)) {
+    function wrapped(IERC20Metadata solid_) public view returns (address location, bytes32 salt) {
+        if (address(solid_) == address(0)) {
             revert Nothing();
         }
-        salt = bytes32(uint256(uint160(address(substance_))));
+        salt = bytes32(uint256(uint160(address(solid_))));
         location = Clones.predictDeterministicAddress(address(WATER), salt, address(WATER));
     }
 
-    function wrap(IERC20Metadata substance_) public returns (Liquid liquids) {
+    function wrap(IERC20Metadata solid_) public returns (Liquid liquids) {
         if (this != WATER) {
-            liquids = WATER.wrap(substance_);
+            liquids = WATER.wrap(solid_);
         } else {
-            (address location, bytes32 salt) = wrapped(substance_);
+            (address location, bytes32 salt) = wrapped(solid_);
             liquids = Liquid(location);
             if (location.code.length == 0) {
                 location = Clones.cloneDeterministic(address(WATER), salt);
-                liquids.__initialize(substance_);
-                emit Wrap(substance_, liquids);
+                liquids.__initialize(solid_);
+                emit Wrap(solid_, liquids);
             }
         }
     }
 
-    function __initialize(IERC20Metadata substance_) external {
+    function __initialize(IERC20Metadata solid_) external {
         if (address(solid) == address(0)) {
-            solid = substance_;
+            solid = solid_;
         }
     }
 
