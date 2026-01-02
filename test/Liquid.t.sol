@@ -117,20 +117,16 @@ contract LiquidTest is BaseTest {
 
         // Step 3: Buy back liquid with the water gained (if any)
         uint256 waterGained = W.balanceOf(address(alex)) - alexW0;
-        if (waterGained > 0) {
-            alex.buy(U, waterGained);
-        }
+        alex.buy(U, waterGained);
 
         // Step 4: Cool all liquid back to solid
-        uint256 finalHot = U.balanceOf(address(alex)) - alexU0;
-        if (finalHot > 0) {
-            alex.cool(U, finalHot);
-        }
+        uint256 finalHot = alex.balance(U) - alexU0;
+        alex.cool(U, finalHot);
 
         // Final balances
-        uint256 alexFinalCold = S.balanceOf(address(alex));
-        uint256 alexFinalWater = W.balanceOf(address(alex));
-        uint256 alexFinalHot = U.balanceOf(address(alex));
+        uint256 alexFinalCold = alex.balance(S);
+        uint256 alexFinalWater = alex.balance(W);
+        uint256 alexFinalHot = alex.balance(U);
 
         // Verify no profit: final balances should be ≤ initial balances
         assertLe(alexFinalCold, alexS0, "alex should not gain solid from arbitrage");
