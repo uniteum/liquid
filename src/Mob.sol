@@ -8,19 +8,19 @@ contract Mob {
     error BadMessage();
     error CallFailed();
 
-    mapping(address => uint96) public weight;
-    uint96 public immutable threshold;
+    mapping(address => uint256) public weight;
+    uint256 public immutable threshold;
 
-    mapping(bytes32 => uint96) public approvedWeight;
+    mapping(bytes32 => uint256) public approvedWeight;
     mapping(bytes32 => mapping(address => bool)) public approvedBy;
     mapping(bytes32 => bool) public executed;
 
-    constructor(address[] memory members, uint96[] memory weights, uint96 _threshold) payable {
+    constructor(address[] memory members, uint256[] memory weights, uint256 _threshold) payable {
         require(members.length == weights.length, "len");
-        uint96 sum;
+        uint256 sum;
         for (uint256 i = 0; i < members.length; i++) {
             address m = members[i];
-            uint96 w = weights[i];
+            uint256 w = weights[i];
             require(m != address(0) && w != 0, "member");
             require(weight[m] == 0, "dup");
             weight[m] = w;
@@ -33,7 +33,7 @@ contract Mob {
     receive() external payable {}
 
     fallback() external payable {
-        uint96 w = weight[msg.sender];
+        uint256 w = weight[msg.sender];
         if (w == 0) revert NotMember();
 
         bytes calldata m = msg.data;
@@ -46,7 +46,7 @@ contract Mob {
         if (approvedBy[h][msg.sender]) revert AlreadyApproved();
 
         approvedBy[h][msg.sender] = true;
-        uint96 total = approvedWeight[h] + w;
+        uint256 total = approvedWeight[h] + w;
         approvedWeight[h] = total;
 
         if (total >= threshold) {

@@ -44,7 +44,7 @@ contract MobTokenMessageBuilderTest is Test {
 
     function setUp() public {
         address[] memory members = new address[](2);
-        uint96[] memory weights = new uint96[](2);
+        uint256[] memory weights = new uint256[](2);
 
         members[0] = alice;
         weights[0] = 2;
