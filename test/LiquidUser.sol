@@ -39,7 +39,7 @@ contract LiquidUser is User {
     }
 
     function heat(Liquid U, uint256 solid) public logging("heat", U, solid) {
-        U.substance().approve(address(U), solid);
+        U.solid().approve(address(U), solid);
         U.heat(solid);
     }
 

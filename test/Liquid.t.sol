@@ -26,8 +26,8 @@ contract LiquidTest is BaseTest {
         U = W.wrap(owen.newToken("U", 1e9));
         owen.give(address(U), 1e6, W);
         V = W.wrap(owen.newToken("V", 1e9));
-        S = U.substance();
-        alex.addToken(U.substance());
+        S = U.solid();
+        alex.addToken(U.solid());
         alex.addToken(U);
         alex.addToken(V);
         alex.addToken(W);
@@ -44,11 +44,11 @@ contract LiquidTest is BaseTest {
 
     function giveaway() internal {
         give(alex, 1e3, W);
-        give(alex, 1e3, U.substance());
-        give(alex, 1e3, V.substance());
+        give(alex, 1e3, U.solid());
+        give(alex, 1e3, V.solid());
         give(beck, 1e7, W);
-        give(beck, 1e3, U.substance());
-        give(beck, 1e3, V.substance());
+        give(beck, 1e3, U.solid());
+        give(beck, 1e3, V.solid());
     }
 
     function test_HeatCool() public returns (uint256 liquid, uint256 solid) {
