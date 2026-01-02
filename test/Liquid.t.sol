@@ -23,9 +23,9 @@ contract LiquidTest is BaseTest {
         beck = newUser("beck");
         W = new Liquid(owen.newToken("W", 1e9));
         owen.heat(W, 1e9);
-        U = W.liquify(owen.newToken("U", 1e9));
+        U = W.wrap(owen.newToken("U", 1e9));
         owen.give(address(U), 1e6, W);
-        V = W.liquify(owen.newToken("V", 1e9));
+        V = W.wrap(owen.newToken("V", 1e9));
         S = U.substance();
         alex.addToken(U.substance());
         alex.addToken(U);

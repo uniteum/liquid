@@ -42,8 +42,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         return substance.balanceOf(address(this));
     }
 
-    function liquify(uint256 solids, IERC20Metadata substance_) external {
-        Liquid liquid = liquify(substance_);
+    function wrap(uint256 solids, IERC20Metadata substance_) external {
+        Liquid liquid = wrap(substance_);
         liquid.heat(solids);
         liquid.transfer(msg.sender, solids);
     }
@@ -149,7 +149,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _update(from, to, amount);
     }
 
-    function liquified(IERC20Metadata substance_) public view returns (address location, bytes32 salt) {
+    function wrapped(IERC20Metadata substance_) public view returns (address location, bytes32 salt) {
         if (address(substance_) == address(0)) {
             revert Nothing();
         }
@@ -157,16 +157,16 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         location = Clones.predictDeterministicAddress(address(WATER), salt, address(WATER));
     }
 
-    function liquify(IERC20Metadata substance_) public returns (Liquid liquids) {
+    function wrap(IERC20Metadata substance_) public returns (Liquid liquids) {
         if (this != WATER) {
-            liquids = WATER.liquify(substance_);
+            liquids = WATER.wrap(substance_);
         } else {
-            (address location, bytes32 salt) = liquified(substance_);
+            (address location, bytes32 salt) = wrapped(substance_);
             liquids = Liquid(location);
             if (location.code.length == 0) {
                 location = Clones.cloneDeterministic(address(WATER), salt);
                 liquids.__initialize(substance_);
-                emit Liquify(substance_, liquids);
+                emit Wrap(substance_, liquids);
             }
         }
     }
@@ -184,8 +184,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function _onlyLiquid() private view {
         Liquid liquids = Liquid(msg.sender);
-        (address predicted,) = WATER.liquified(liquids.substance());
-        if (msg.sender != predicted) {
+        (address location,) = WATER.wrapped(liquids.substance());
+        if (msg.sender != location) {
             revert Unauthorized();
         }
     }
@@ -194,7 +194,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     event Cool(Liquid indexed liquid, uint256 liquids, uint256 solids);
     event Back(Liquid indexed liquid, uint256 liquids, uint256 water);
     event Away(Liquid indexed liquid, uint256 liquids, uint256 water);
-    event Liquify(IERC20Metadata indexed substance, Liquid indexed liquid);
+    event Wrap(IERC20Metadata indexed substance, Liquid indexed liquid);
 
     error Nothing();
     error Unauthorized();
