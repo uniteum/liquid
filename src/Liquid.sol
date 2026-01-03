@@ -42,8 +42,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         return solid.balanceOf(address(this));
     }
 
-    function wrap(uint256 solids, IERC20Metadata solid_) external {
-        Liquid liquid = wrap(solid_);
+    function make(uint256 solids, IERC20Metadata solid_) external {
+        Liquid liquid = make(solid_);
         liquid.heat(solids);
         liquid.transfer(msg.sender, solids);
     }
@@ -149,7 +149,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _update(from, to, amount);
     }
 
-    function wrapped(IERC20Metadata solid_) public view returns (address location, bytes32 salt) {
+    function made(IERC20Metadata solid_) public view returns (address location, bytes32 salt) {
         if (address(solid_) == address(0)) {
             revert Nothing();
         }
@@ -157,11 +157,11 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         location = Clones.predictDeterministicAddress(address(WATER), salt, address(WATER));
     }
 
-    function wrap(IERC20Metadata solid_) public returns (Liquid liquids) {
+    function make(IERC20Metadata solid_) public returns (Liquid liquids) {
         if (this != WATER) {
-            liquids = WATER.wrap(solid_);
+            liquids = WATER.make(solid_);
         } else {
-            (address location, bytes32 salt) = wrapped(solid_);
+            (address location, bytes32 salt) = made(solid_);
             liquids = Liquid(location);
             if (location.code.length == 0) {
                 location = Clones.cloneDeterministic(address(WATER), salt);
@@ -184,7 +184,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function _onlyLiquid() private view {
         Liquid liquids = Liquid(msg.sender);
-        (address location,) = WATER.wrapped(liquids.solid());
+        (address location,) = WATER.made(liquids.solid());
         if (msg.sender != location) {
             revert Unauthorized();
         }
