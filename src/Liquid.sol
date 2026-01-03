@@ -42,12 +42,6 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         return solid.balanceOf(address(this));
     }
 
-    function make(uint256 solids, IERC20Metadata solid_) external {
-        Liquid liquid = make(solid_);
-        liquid.heat(solids);
-        liquid.transfer(msg.sender, solids);
-    }
-
     function heats(uint256 solids) public view returns (uint256 pools, uint256 senders) {
         uint256 total = totalSupply() + 2 * solids;
         uint256 pooled = pool() + solids;
