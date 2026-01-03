@@ -64,7 +64,7 @@ contract MobScribeTest is Test {
     function test_MessageBuildsAndExecutesOnce_WhenThresholdReached() public {
         uint256 amount = 123e18;
 
-        bytes memory message = builder.transfer(address(token), recipient, amount);
+        bytes memory message = builder.transfer(address(token), recipient, amount, 0);
 
         assertEq(token.balanceOf(address(mob)), 1_000e18);
         assertEq(token.balanceOf(recipient), 0);
@@ -93,7 +93,7 @@ contract MobScribeTest is Test {
     }
 
     function test_RevertsForNonMember() public {
-        bytes memory message = builder.transfer(address(token), recipient, 1);
+        bytes memory message = builder.transfer(address(token), recipient, 1, 0);
 
         vm.prank(carol);
         vm.expectRevert(Mob.NotMember.selector);

@@ -102,8 +102,8 @@ contract Mob {
     function act(bytes32 h, bytes calldata action) private {
         acted[h] = true;
 
-        // Decode standard ABI-encoded message: (address to, uint256 value, bytes data)
-        (address to, uint256 value, bytes memory data) = abi.decode(action, (address, uint256, bytes));
+        // Decode standard ABI-encoded message: (address to, uint256 value, uint256 nonce, bytes data)
+        (address to, uint256 value,, bytes memory data) = abi.decode(action, (address, uint256, uint256, bytes));
 
         (bool ok,) = to.call{value: value}(data);
         if (!ok) revert CallFailed(h);
