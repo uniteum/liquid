@@ -4,108 +4,95 @@ pragma solidity ^0.8.30;
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 
 contract Mob {
-    error AlreadyInitialized();
-    error NotMember();
+    error MobClosed();
+    error NoSway();
     error LengthMismatch();
     error ActionImpossible();
-    error QuorumZero();
-    error BadMessage();
-    error ActedAlready(bytes32 h);
-    error CallFailed(bytes32 h);
+    error NoVoters();
+    error ActDone(bytes32 h);
+    error ActFailed(bytes32 h);
 
-    event Make(Mob mob, address[] members, uint256[] influence_, uint256 quorum);
+    event Make(Mob mob, address[] voters, uint256[] sway_, uint256 quorum);
 
     Mob public immutable MOB = this;
 
-    mapping(address => uint256) public influence;
+    mapping(address => uint256) public sway;
     uint256 public quorum;
 
     mapping(bytes32 => uint256) public tally;
     mapping(bytes32 => mapping(address => bool)) public voted;
     mapping(bytes32 => bool) public acted;
 
-    function made(address[] memory members, uint256[] memory influence_, uint256 quorum_)
+    function made(address[] memory voters, uint256[] memory sway_, uint256 quorum_)
         public
         view
         returns (address location, bytes32 salt)
     {
-        if (quorum_ == 0) {
-            revert QuorumZero();
+        if (voters.length == 0) {
+            revert NoVoters();
         }
-        if (members.length != influence_.length) {
+        if (voters.length != sway_.length) {
             revert LengthMismatch();
         }
         uint256 sum;
-        for (uint256 i = 0; i < members.length; i++) {
-            address m = members[i];
-            uint256 w = influence_[i];
-            if (m == address(0) || w == 0) {
-                revert NotMember();
-            }
-            sum += w;
+        for (uint256 i = 0; i < voters.length; i++) {
+            sum += sway_[i];
         }
         if (quorum_ > sum) {
             revert ActionImpossible();
         }
-        salt = keccak256(abi.encode(members, influence_, quorum_));
+        salt = keccak256(abi.encode(voters, sway_, quorum_));
         location = Clones.predictDeterministicAddress(address(MOB), salt, address(MOB));
     }
 
-    function make(address[] memory members, uint256[] memory influence_, uint256 quorum_) public returns (Mob mob) {
+    function make(address[] memory voters, uint256[] memory sway_, uint256 quorum_) public returns (Mob mob) {
         if (this != MOB) {
-            mob = MOB.make(members, influence_, quorum_);
+            mob = MOB.make(voters, sway_, quorum_);
         } else {
-            (address location, bytes32 salt) = made(members, influence_, quorum_);
+            (address location, bytes32 salt) = made(voters, sway_, quorum_);
             mob = Mob(payable(location));
             if (location.code.length == 0) {
                 location = Clones.cloneDeterministic(address(MOB), salt);
-                mob.__initialize(members, influence_, quorum_);
-                emit Make(mob, members, influence_, quorum_);
+                mob.__initialize(voters, sway_, quorum_);
+                emit Make(mob, voters, sway_, quorum_);
             }
         }
     }
 
-    function __initialize(address[] memory members, uint256[] memory influence_, uint256 quorum_) external {
-        if (quorum != 0) {
-            revert AlreadyInitialized();
-        }
-        for (uint256 i = 0; i < members.length; i++) {
-            influence[members[i]] = influence_[i];
+    function __initialize(address[] memory voters, uint256[] memory sway_, uint256 quorum_) external {
+        if (sway[voters[0]] != 0) {
+            revert MobClosed();
         }
         quorum = quorum_;
+        for (uint256 i = 0; i < voters.length; i++) {
+            sway[voters[i]] = sway_[i];
+        }
     }
 
     receive() external payable {}
 
     fallback() external payable {
-        uint256 w = influence[msg.sender];
-        if (w == 0) revert NotMember();
+        uint256 sway_ = sway[msg.sender];
+        if (sway_ == 0) revert NoSway();
 
         bytes calldata action = msg.data;
-        if (action.length < 96) revert BadMessage();
-
-        bytes32 h = keccak256(action);
-
-        if (acted[h]) revert ActedAlready(h);
-        uint256 total = tally[h];
-        if (!voted[h][msg.sender]) {
-            voted[h][msg.sender] = true;
-            total += w;
-            tally[h] = total;
-        }
-
-        if (total >= quorum) {
-            act(h, action);
-        }
-    }
-
-    function act(bytes32 h, bytes calldata action) private {
-        acted[h] = true;
-
         // Decode standard ABI-encoded message: (address to, uint256 value, uint256 nonce, bytes data)
         (address to, uint256 value,, bytes memory data) = abi.decode(action, (address, uint256, uint256, bytes));
 
-        (bool ok,) = to.call{value: value}(data);
-        if (!ok) revert CallFailed(h);
+        bytes32 h = keccak256(action);
+
+        if (acted[h]) revert ActDone(h);
+        uint256 tally_ = tally[h];
+        if (!voted[h][msg.sender]) {
+            voted[h][msg.sender] = true;
+            tally_ += sway_;
+            tally[h] = tally_;
+        }
+
+        if (tally_ >= quorum) {
+            acted[h] = true;
+            (bool ok,) = to.call{value: value}(data);
+            if (!ok) revert ActFailed(h);
+        }
     }
 }

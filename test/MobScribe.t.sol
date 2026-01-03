@@ -87,7 +87,7 @@ contract MobScribeTest is Test {
 
         // Any further approval of the exact same message should revert AlreadyRioted.
         vm.prank(alice);
-        vm.expectRevert(Mob.ActedAlready.selector);
+        vm.expectRevert(Mob.ActFailed.selector);
         (bool ok,) = address(mob).call(message);
         assertTrue(!ok, "expected revert");
     }
@@ -96,7 +96,7 @@ contract MobScribeTest is Test {
         bytes memory message = builder.transfer(address(token), recipient, 1, 0);
 
         vm.prank(carol);
-        vm.expectRevert(Mob.NotMember.selector);
+        vm.expectRevert(Mob.NoSway.selector);
         (bool ok,) = address(mob).call(message);
         assertTrue(ok);
     }
