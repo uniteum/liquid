@@ -8,6 +8,7 @@ contract Mob {
     error NoSway();
     error LengthMismatch();
     error ActionImpossible();
+    error NoQuorum();
     error NoVoters();
     error ActDone(bytes32 h);
     error ActFailed(bytes32 h);
@@ -28,6 +29,9 @@ contract Mob {
         view
         returns (address location, bytes32 salt)
     {
+        if (quorum_ == 0) {
+            revert NoQuorum();
+        }
         if (voters.length == 0) {
             revert NoVoters();
         }
@@ -60,7 +64,7 @@ contract Mob {
     }
 
     function __initialize(address[] memory voters, uint256[] memory sway_, uint256 quorum_) external {
-        if (sway[voters[0]] != 0) {
+        if (quorum != 0) {
             revert MobClosed();
         }
         quorum = quorum_;
