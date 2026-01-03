@@ -10,10 +10,12 @@ contract Mob {
     error ActionImpossible();
     error NoQuorum();
     error NoVoters();
-    error ActDone(bytes32 h);
+    error ActedAlready(bytes32 h);
     error ActFailed(bytes32 h);
 
-    event Make(Mob mob, address[] voters, uint256[] sway_, uint256 quorum);
+    event Make(Mob indexed mob, address[] voters, uint256[] sway_, uint256 quorum);
+    event Voted(bytes32 indexed h, address indexed voter, uint256 sway, uint256 tally);
+    event Acted(bytes32 indexed h, address indexed actor, uint256 sway, uint256 tally);
 
     Mob public immutable MOB = this;
 
@@ -85,18 +87,20 @@ contract Mob {
 
         bytes32 h = keccak256(action);
 
-        if (acted[h]) revert ActDone(h);
+        if (acted[h]) revert ActedAlready(h);
         uint256 tally_ = tally[h];
         if (!voted[h][msg.sender]) {
             voted[h][msg.sender] = true;
             tally_ += sway_;
             tally[h] = tally_;
+            emit Voted(h, msg.sender, sway_, tally_);
         }
 
         if (tally_ >= quorum) {
             acted[h] = true;
             (bool ok,) = to.call{value: value}(data);
             if (!ok) revert ActFailed(h);
+            emit Acted(h, msg.sender, sway_, tally_);
         }
     }
 }
