@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 
 import {Mob} from "../src/Mob.sol";
 import {MobScribe} from "../src/MobScribe.sol";
@@ -64,7 +64,7 @@ contract MobScribeTest is Test {
     function test_MessageBuildsAndExecutesOnce_WhenThresholdReached() public {
         uint256 amount = 123e18;
 
-        bytes memory message = builder.transfer(address(token), recipient, amount, 0);
+        (bytes memory message,) = builder.transfer(address(token), recipient, amount, 0);
 
         assertEq(token.balanceOf(address(mob)), 1_000e18);
         assertEq(token.balanceOf(recipient), 0);
@@ -93,7 +93,7 @@ contract MobScribeTest is Test {
     }
 
     function test_RevertsForNonMember() public {
-        bytes memory message = builder.transfer(address(token), recipient, 1, 0);
+        (bytes memory message,) = builder.transfer(address(token), recipient, 1, 0);
 
         vm.prank(carol);
         vm.expectRevert(Mob.NoSway.selector);

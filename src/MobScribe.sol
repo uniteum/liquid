@@ -14,13 +14,17 @@ contract MobScribe {
      * @dev Message format: abi.encode(token, value, calldata)
      *      where `token` is the ERC-20 address, `value` is 0, and calldata is token.transfer(to, amount).
      */
-    function transfer(address token, address to, uint256 amount, uint256 nonce) external pure returns (bytes memory) {
+    function transfer(address token, address to, uint256 amount, uint256 nonce)
+        external
+        pure
+        returns (bytes memory hexData, bytes32 hash)
+    {
         if (token == address(0)) revert ZeroToken();
         if (to == address(0)) revert ZeroRecipient();
 
         bytes memory callData = abi.encodeWithSelector(IERC20.transfer.selector, to, amount);
-
         // Mob message format: abi.encode(to, value, data)
-        return abi.encode(token, uint256(0), nonce, callData);
+        hexData = abi.encode(token, uint256(0), nonce, callData);
+        hash = keccak256(hexData);
     }
 }
