@@ -80,11 +80,11 @@ contract LiquidTest is BaseTest {
         // Alex sells 50 liquid for water
         uint256 hotToSell = 50;
         uint256 alexHotBeforeSell = U.balanceOf(address(alex));
-        water = alex.sell(U, hotToSell);
-        assertGt(water, 0, "alex should receive water from sell");
-        assertEq(U.balanceOf(address(alex)), alexHotBeforeSell - hotToSell, "alex liquid should decrease after sell");
+        water = alex.away(U, hotToSell);
+        assertGt(water, 0, "alex should receive water from away");
+        assertEq(U.balanceOf(address(alex)), alexHotBeforeSell - hotToSell, "alex liquid should decrease after away");
         uint256 poolAfterSell = U.balanceOf(address(U));
-        assertEq(poolAfterSell, poolAfterOwenHeat + u0 + hotToSell, "pool should grow from sell");
+        assertEq(poolAfterSell, poolAfterOwenHeat + u0 + hotToSell, "pool should grow from away");
 
         // Alex cools some liquid back to solid
         uint256 alexHotBeforeCool = U.balanceOf(address(alex));
@@ -95,7 +95,7 @@ contract LiquidTest is BaseTest {
     }
 
     /**
-     * Parameterized test: Verify trader cannot profit from heat → sell → cool → buy cycle
+     * Parameterized test: Verify trader cannot profit from heat → away → cool → back cycle
      */
     function test_NoArbitrage() public {
         owen.give(address(U), 10000, W);
@@ -112,17 +112,17 @@ contract LiquidTest is BaseTest {
         uint256 w0 = alex.balance(W);
         uint256 u0 = alex.balance(U);
 
-        // Alex attempts arbitrage cycle: heat → sell → cool
+        // Alex attempts arbitrage cycle: heat → away → cool
         // Step 1: Heat solid → liquid
         alex.heat(U, liquid);
 
         // Step 2: Sell all liquid for water
         uint256 du = alex.balance(U) - u0;
-        alex.sell(U, du);
+        alex.away(U, du);
 
         // Step 3: Buy back liquid with the water gained (if any)
         uint256 waterGained = W.balanceOf(address(alex)) - w0;
-        alex.buy(U, waterGained);
+        alex.back(U, waterGained);
 
         // Step 4: Cool all liquid back to solid
         uint256 finalHot = alex.balance(U) - u0;
