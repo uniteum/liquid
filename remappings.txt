@@ -1,6 +1,4 @@
 forge-std/=lib/forge-std/src/
-@openzeppelin/contracts/=lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/
-@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
 clones/=lib/clones/
 ierc20/=lib/ierc20/
 erc20/=lib/erc20/
