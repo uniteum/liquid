@@ -7,6 +7,8 @@ import {BaseTest} from "./Base.t.sol";
 import {LiquidUser, IERC20} from "./LiquidUser.sol";
 
 contract LiquidTest is BaseTest {
+    uint256 constant INITIAL_BALANCE = 1e9;
+    uint256 constant U_WATER = 1e6;
     Liquid public W;
     Liquid public U;
     Liquid public V;
@@ -21,17 +23,16 @@ contract LiquidTest is BaseTest {
         owen = newUser("owen");
         alex = newUser("alex");
         beck = newUser("beck");
-        W = new Liquid(owen.newToken("W", 1e9));
-        owen.heat(W, 1e9);
-        U = W.make(owen.newToken("U", 1e9));
-        owen.give(address(U), 1e6, W);
-        V = W.make(owen.newToken("V", 1e9));
+        W = new Liquid(owen.newToken("W", INITIAL_BALANCE));
+        owen.heat(W, INITIAL_BALANCE);
+        U = W.make(owen.newToken("U", INITIAL_BALANCE));
+        owen.give(address(U), U_WATER, W);
+        V = W.make(owen.newToken("V", INITIAL_BALANCE));
         S = U.solid();
         alex.addToken(U.solid());
         alex.addToken(U);
         alex.addToken(V);
         alex.addToken(W);
-        giveaway();
     }
 
     function newUser(string memory name) internal returns (LiquidUser user) {
@@ -52,6 +53,7 @@ contract LiquidTest is BaseTest {
     }
 
     function test_HeatCool() public returns (uint256 liquid, uint256 solid) {
+        giveaway();
         owen.heat(U, 500);
         alex.heat(U, 500);
         beck.heat(U, 500);
@@ -65,6 +67,7 @@ contract LiquidTest is BaseTest {
     }
 
     function test_HeatSellCoolBuy() public returns (uint256 water, uint256 solid) {
+        giveaway();
         // Setup: Give U pool some water for trading
         owen.give(address(U), 1000, W);
 
@@ -98,6 +101,7 @@ contract LiquidTest is BaseTest {
      * Parameterized test: Verify trader cannot profit from heat → away → cool → back cycle
      */
     function test_NoArbitrage() public {
+        giveaway();
         owen.give(address(U), 10000, W);
         owen.heat(U, 10000);
 
