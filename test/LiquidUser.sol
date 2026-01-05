@@ -4,7 +4,7 @@ pragma solidity ^0.8.30;
 
 import {User, TestToken, IERC20, console} from "./User.sol";
 import {Liquid} from "../src/Liquid.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {SafeERC20} from "erc20/SafeERC20.sol";
 import {Strings} from "strings/Strings.sol";
 
 contract LiquidUser is User {
