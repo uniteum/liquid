@@ -3,7 +3,7 @@
 pragma solidity ^0.8.30;
 
 import {INamed} from "./INamed.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {Strings} from "strings/Strings.sol";
 
 contract Namer {
     using Strings for address;

@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.30;
 
-import {ERC20, IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ERC20, IERC20Metadata} from "erc20/ERC20.sol";
+import {SafeERC20} from "erc20/SafeERC20.sol";
 import {Clones} from "clones/Clones.sol";
 import {ReentrancyGuardTransient} from "reentrancy/ReentrancyGuardTransient.sol";
 
