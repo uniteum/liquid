@@ -4,3 +4,5 @@ forge-std/=lib/forge-std/src/
 clones/=lib/clones/
 ierc20/=lib/ierc20/
 erc20/=lib/erc20/
+math/=lib/math/
+strings/=lib/strings/

@@ -16,3 +16,9 @@
 [submodule "lib/clones"]
 	path = lib/clones
 	url = https://github.com/uniteum/clones.git
+[submodule "lib/math"]
+	path = lib/math
+	url = https://github.com/uniteum/math.git
+[submodule "lib/strings"]
+	path = lib/strings
+	url = https://github.com/uniteum/strings.git
