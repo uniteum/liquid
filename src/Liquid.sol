@@ -4,8 +4,8 @@ pragma solidity ^0.8.30;
 
 import {ERC20, IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
+import {Clones} from "clones/Clones.sol";
+import {ReentrancyGuardTransient} from "reentrancy/ReentrancyGuardTransient.sol";
 
 contract Liquid is ERC20, ReentrancyGuardTransient {
     using SafeERC20 for IERC20Metadata;
@@ -158,7 +158,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
             (address location, bytes32 salt) = made(solid_);
             liquids = Liquid(location);
             if (location.code.length == 0) {
-                location = Clones.cloneDeterministic(address(WATER), salt);
+                location = Clones.cloneDeterministic(address(WATER), salt, 0);
                 liquids.__initialize(solid_);
                 emit Wrap(liquids, solid_);
             }
