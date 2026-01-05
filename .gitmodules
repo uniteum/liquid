@@ -22,3 +22,6 @@
 [submodule "lib/strings"]
 	path = lib/strings
 	url = https://github.com/uniteum/strings.git
+[submodule "lib/panic"]
+	path = lib/panic
+	url = https://github.com/uniteum/panic.git
