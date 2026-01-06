@@ -2,7 +2,7 @@
 pragma solidity ^0.8.30;
 
 import {Solid} from "../src/Solid.sol";
-import {BaseTest, console} from "./Base.t.sol";
+import {BaseTest} from "./Base.t.sol";
 import {SolidUser} from "./SolidUser.sol";
 
 contract SolidTest is BaseTest {
