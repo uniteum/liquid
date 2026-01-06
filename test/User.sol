@@ -20,6 +20,10 @@ contract User is Random, Test {
         console.log("%s born %s", name, address(this));
     }
 
+    receive() external payable {
+        console.log("%s receive %s", name, msg.value);
+    }
+
     function addToken(IERC20Metadata token) public {
         tokens.push(token);
     }
