@@ -156,10 +156,7 @@ contract SolidInvariantTest is StdInvariant, BaseTest {
         selectors[0] = SolidHandler.deposit.selector;
         selectors[1] = SolidHandler.withdraw.selector;
 
-        targetSelector(FuzzSelector({
-            addr: address(handler),
-            selectors: selectors
-        }));
+        targetSelector(FuzzSelector({addr: address(handler), selectors: selectors}));
     }
 
     /**

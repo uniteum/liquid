@@ -91,7 +91,10 @@ contract SolidTest is BaseTest {
         (H, h, e, s) = test_StartingDeposit(2e6, 2e6);
     }
 
-    function test_DepositWithdraw(uint256 seed, uint256 d) public returns (Solid H, uint256 deposited, uint256 withdrawn) {
+    function test_DepositWithdraw(uint256 seed, uint256 d)
+        public
+        returns (Solid H, uint256 deposited, uint256 withdrawn)
+    {
         (H,,) = makeHydrogen(seed);
         d = d % address(owen).balance;
         if (d != 0) {
