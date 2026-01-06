@@ -8,11 +8,9 @@ import {ReentrancyGuardTransient} from "reentrancy/ReentrancyGuardTransient.sol"
 contract Solid is ERC20, ReentrancyGuardTransient {
     uint256 public constant MOLE = 6.02214076e23;
     uint256 public constant SUPPLY = 1e4 * MOLE;
-    Solid public immutable H = this;
+    Solid public immutable NOTHING = this;
 
-    constructor() ERC20("Hydrogen", "H") {
-        _mint(address(this), SUPPLY);
-    }
+    constructor() ERC20("", "") {}
 
     function withdraw(uint256 here) external nonReentrant {
         (uint256 far, uint256 near) = pool();
@@ -52,21 +50,21 @@ contract Solid is ERC20, ReentrancyGuardTransient {
     }
 
     function made(string calldata n, string calldata s) public view returns (address location, bytes32 salt) {
-        if (bytes(s).length == 0) {
+        if (bytes(n).length == 0 || bytes(s).length == 0) {
             revert Nothing();
         }
         salt = keccak256(abi.encode(n, s));
-        location = Clones.predictDeterministicAddress(address(H), salt, address(H));
+        location = Clones.predictDeterministicAddress(address(NOTHING), salt, address(NOTHING));
     }
 
     function make(string calldata n, string calldata s) external returns (Solid solids) {
-        if (this != H) {
-            solids = H.make(n, s);
+        if (this != NOTHING) {
+            solids = NOTHING.make(n, s);
         } else {
             (address location, bytes32 salt) = made(n, s);
             solids = Solid(payable(location));
             if (location.code.length == 0) {
-                location = Clones.cloneDeterministic(address(H), salt, 0);
+                location = Clones.cloneDeterministic(address(NOTHING), salt, 0);
                 solids.zzz_(n, s);
                 emit Make(this, n, s);
             }
