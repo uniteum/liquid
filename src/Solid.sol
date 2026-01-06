@@ -12,6 +12,11 @@ contract Solid is ERC20, ReentrancyGuardTransient {
 
     constructor() ERC20("", "") {}
 
+    function pool() public view returns (uint256 solids, uint256 eth) {
+        solids = balanceOf(address(this));
+        eth = address(this).balance;
+    }
+
     function withdraw(uint256 here) external nonReentrant returns (uint256 there) {
         (uint256 far, uint256 near) = pool();
         there = far - near * far / (near + here);
@@ -42,11 +47,6 @@ contract Solid is ERC20, ReentrancyGuardTransient {
 
     receive() external payable {
         deposit();
-    }
-
-    function pool() public view returns (uint256 solids, uint256 eth) {
-        solids = balanceOf(address(this));
-        eth = address(this).balance;
     }
 
     function made(string calldata n, string calldata s) public view returns (address location, bytes32 salt) {
