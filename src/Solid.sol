@@ -13,16 +13,16 @@ contract Solid is ERC20, ReentrancyGuardTransient {
 
     constructor() ERC20("", "") {}
 
-    function pool() public view returns (uint256 solids, uint256 eth) {
-        solids = balanceOf(address(this));
-        eth = address(this).balance;
+    function pool() public view returns (uint256 solPool, uint256 ethPool) {
+        solPool = balanceOf(address(this));
+        ethPool = address(this).balance;
     }
 
-    function withdraw(uint256 solids) external nonReentrant returns (uint256 eth) {
-        (uint256 far, uint256 near) = pool();
-        eth = near - far * near / (far + solids);
-        _update(msg.sender, address(this), solids);
-        emit Withdraw(this, solids, eth);
+    function withdraw(uint256 sol) external nonReentrant returns (uint256 eth) {
+        (uint256 solPool, uint256 ethPool) = pool();
+        eth = ethPool - solPool * ethPool / (solPool + sol);
+        _update(msg.sender, address(this), sol);
+        emit Withdraw(this, sol, eth);
         (bool ok, bytes memory returnData) = msg.sender.call{value: eth}("");
         if (!ok) {
             if (returnData.length > 0) {
@@ -35,12 +35,12 @@ contract Solid is ERC20, ReentrancyGuardTransient {
         }
     }
 
-    function deposit() public payable returns (uint256 solids) {
-        (uint256 far, uint256 near) = pool();
+    function deposit() public payable returns (uint256 sol) {
+        (uint256 solPool, uint256 ethPool) = pool();
         uint256 eth = msg.value;
-        solids = far - (near - eth) * far / near;
-        _update(address(this), msg.sender, solids);
-        emit Deposit(this, eth, solids);
+        sol = solPool - (ethPool - eth) * solPool / ethPool;
+        _update(address(this), msg.sender, sol);
+        emit Deposit(this, eth, sol);
     }
 
     receive() external payable {
@@ -55,15 +55,15 @@ contract Solid is ERC20, ReentrancyGuardTransient {
         location = Clones.predictDeterministicAddress(address(NOTHING), salt, address(NOTHING));
     }
 
-    function make(string calldata n, string calldata s) external returns (Solid solids) {
+    function make(string calldata n, string calldata s) external returns (Solid sol) {
         if (this != NOTHING) {
-            solids = NOTHING.make(n, s);
+            sol = NOTHING.make(n, s);
         } else {
             (address location, bytes32 salt) = made(n, s);
-            solids = Solid(payable(location));
+            sol = Solid(payable(location));
             if (location.code.length == 0) {
                 location = Clones.cloneDeterministic(address(NOTHING), salt, 0);
-                solids.zzz_(n, s);
+                sol.zzz_(n, s);
                 emit Make(this, n, s);
             }
         }
@@ -78,8 +78,8 @@ contract Solid is ERC20, ReentrancyGuardTransient {
     }
 
     event Make(Solid indexed solid, string indexed name, string indexed symbol);
-    event Deposit(Solid indexed solid, uint256 solids, uint256 eth);
-    event Withdraw(Solid indexed solid, uint256 solids, uint256 eth);
+    event Deposit(Solid indexed solid, uint256 sol, uint256 eth);
+    event Withdraw(Solid indexed solid, uint256 sol, uint256 eth);
 
     error Nothing();
     error WithdrawFailed();
