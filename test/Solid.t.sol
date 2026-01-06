@@ -2,7 +2,7 @@
 pragma solidity ^0.8.30;
 
 import {Solid} from "../src/Solid.sol";
-import {BaseTest} from "./Base.t.sol";
+import {BaseTest, console} from "./Base.t.sol";
 import {SolidUser} from "./SolidUser.sol";
 
 contract SolidTest is BaseTest {
@@ -36,12 +36,35 @@ contract SolidTest is BaseTest {
         assertEq(H.symbol(), "H");
     }
 
-    function test_StartingPrice(uint256 seed) public returns (Solid H) {
+    function makeHydrogen(uint256 seed) public returns (Solid H, uint256 h, uint256 e) {
         seed = seed % ETH;
         H = test_MakeHydrogen();
         vm.deal(address(H), seed);
-        (uint256 solids, uint256 eth) = H.pool();
-        assertEq(solids, SUPPLY);
-        assertEq(eth, seed);
+        (h, e) = H.pool();
+    }
+
+    function test_StartingPrice(uint256 seed) public returns (Solid H, uint256 h, uint256 e) {
+        (H, h, e) = makeHydrogen(seed);
+        assertEq(h, SUPPLY, "h != SUPPLY");
+        assertEq(e, seed % ETH, "e != seed");
+    }
+
+    function test_StartingDeposit(uint256 seed, uint256 deposit)
+        public
+        returns (Solid H, uint256 h, uint256 e, uint256 s)
+    {
+        (H, h, e) = makeHydrogen(seed);
+        deposit = deposit % address(owen).balance;
+        if (e != 0 || deposit != 0) {
+            s = owen.deposit(H, deposit);
+            emit log_named_uint("h", h);
+            emit log_named_uint("e", e);
+            emit log_named_uint("s", s);
+        }
+    }
+
+    function test_StartingDepositDebug() public returns (Solid H, uint256 h, uint256 e, uint256 s) {
+        (H, h, e, s) = test_StartingDeposit(1e6, 1e6);
+        (H, h, e, s) = test_StartingDeposit(1e6, 2e6);
     }
 }
