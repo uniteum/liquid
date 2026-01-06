@@ -35,4 +35,13 @@ contract SolidTest is BaseTest {
         assertEq(H.name(), "Hydrogen");
         assertEq(H.symbol(), "H");
     }
+
+    function test_StartingPrice(uint256 seed) public returns (Solid H) {
+        seed = seed % ETH;
+        H = test_MakeHydrogen();
+        vm.deal(address(H), seed);
+        (uint256 solids, uint256 eth) = H.pool();
+        assertEq(solids, SUPPLY);
+        assertEq(eth, seed);
+    }
 }
