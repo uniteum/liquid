@@ -206,7 +206,7 @@ contract SolidInvariantTest is StdInvariant, BaseTest {
      * NOTE: Temporarily disabled - appears to be a false positive in the handler accounting
      * Unit tests verify this invariant holds correctly
      */
-    function skip_invariant_balanceSum() public view {
+    function skipInvariantBalanceSum() public view {
         uint256 sum = solid.balanceOf(address(solid)); // Pool balance
         sum += solid.balanceOf(address(this)); // Creator balance (1%)
 

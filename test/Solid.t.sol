@@ -98,7 +98,7 @@ contract SolidTest is BaseTest {
         uint256 depositAmt = 78227239616666287245;
         vm.deal(address(owen), depositAmt);
         vm.prank(address(owen));
-        uint256 solids1 = H.deposit{value: depositAmt}();
+        H.deposit{value: depositAmt}();
 
         // Check total balances
         uint256 poolBal = H.balanceOf(address(H));
