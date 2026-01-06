@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: UNLICENSED
-
 pragma solidity ^0.8.30;
 
 import {ERC20} from "erc20/ERC20.sol";
@@ -60,7 +59,7 @@ contract Solid is ERC20, ReentrancyGuardTransient {
         location = Clones.predictDeterministicAddress(address(H), salt, address(H));
     }
 
-    function make(string calldata n, string calldata s) public returns (Solid solids) {
+    function make(string calldata n, string calldata s) external returns (Solid solids) {
         if (this != H) {
             solids = H.make(n, s);
         } else {
