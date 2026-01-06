@@ -53,7 +53,21 @@ contract SolidTest is BaseTest {
         (H, h, e) = makeHydrogen(seed);
         d = d % address(owen).balance;
         if (e != 0 || d != 0) {
+            uint256 balanceBefore = address(owen).balance;
+            uint256 poolSolidsBefore = H.balanceOf(address(H));
+
             s = owen.deposit(H, d);
+
+            uint256 balanceAfter = address(owen).balance;
+            uint256 poolSolidsAfter = H.balanceOf(address(H));
+
+            assertEq(balanceBefore - balanceAfter, d, "should have spent d ETH");
+            assertEq(H.balanceOf(address(owen)), s, "should have received s solids");
+            assertEq(poolSolidsBefore - poolSolidsAfter, s, "pool should have decreased by s solids");
+            if (d > 0) {
+                assertGt(s, 0, "should receive some solids");
+            }
+
             emit log_named_uint("e", d);
             emit log_named_uint("E", e);
             emit log_named_uint("h", s);
@@ -75,5 +89,33 @@ contract SolidTest is BaseTest {
 
     function test_StartingDeposit22() public returns (Solid H, uint256 h, uint256 e, uint256 s) {
         (H, h, e, s) = test_StartingDeposit(2e6, 2e6);
+    }
+
+    function test_DepositWithdraw(uint256 seed, uint256 d) public returns (Solid H, uint256 deposited, uint256 withdrawn) {
+        (H,,) = makeHydrogen(seed);
+        d = d % address(owen).balance;
+        if (d != 0) {
+            deposited = owen.deposit(H, d);
+
+            uint256 balanceBefore = address(owen).balance;
+            uint256 poolSolidsBefore = H.balanceOf(address(H));
+            uint256 poolEthBefore = address(H).balance;
+
+            withdrawn = owen.withdraw(H, deposited);
+
+            uint256 balanceAfter = address(owen).balance;
+            uint256 poolSolidsAfter = H.balanceOf(address(H));
+            uint256 poolEthAfter = address(H).balance;
+
+            assertEq(balanceAfter - balanceBefore, withdrawn, "should have received withdrawn ETH");
+            assertEq(H.balanceOf(address(owen)), 0, "should have no solids left");
+            assertEq(poolSolidsAfter - poolSolidsBefore, deposited, "pool should have received deposited solids back");
+            assertEq(poolEthBefore - poolEthAfter, withdrawn, "pool should have decreased by withdrawn ETH");
+            assertGt(withdrawn, 0, "should receive some ETH");
+
+            emit log_named_uint("deposited eth", d);
+            emit log_named_uint("received solids", deposited);
+            emit log_named_uint("withdrawn eth", withdrawn);
+        }
     }
 }

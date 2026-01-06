@@ -17,12 +17,12 @@ contract Solid is ERC20, ReentrancyGuardTransient {
         eth = address(this).balance;
     }
 
-    function withdraw(uint256 here) external nonReentrant returns (uint256 there) {
+    function withdraw(uint256 solids) external nonReentrant returns (uint256 eth) {
         (uint256 far, uint256 near) = pool();
-        there = far - near * far / (near + here);
-        _update(msg.sender, address(this), there);
-        emit Withdraw(this, here, there);
-        (bool ok, bytes memory returnData) = msg.sender.call{value: there}("");
+        eth = near - far * near / (far + solids);
+        _update(msg.sender, address(this), solids);
+        emit Withdraw(this, solids, eth);
+        (bool ok, bytes memory returnData) = msg.sender.call{value: eth}("");
         if (!ok) {
             if (returnData.length > 0) {
                 assembly {
