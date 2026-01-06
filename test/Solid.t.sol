@@ -49,22 +49,22 @@ contract SolidTest is BaseTest {
         assertEq(e, seed % ETH, "e != seed");
     }
 
-    function test_StartingDeposit(uint256 seed, uint256 deposit)
-        public
-        returns (Solid H, uint256 h, uint256 e, uint256 s)
-    {
+    function test_StartingDeposit(uint256 seed, uint256 d) public returns (Solid H, uint256 h, uint256 e, uint256 s) {
         (H, h, e) = makeHydrogen(seed);
-        deposit = deposit % address(owen).balance;
-        if (e != 0 || deposit != 0) {
-            s = owen.deposit(H, deposit);
-            emit log_named_uint("h", h);
-            emit log_named_uint("e", e);
-            emit log_named_uint("s", s);
+        d = d % address(owen).balance;
+        if (e != 0 || d != 0) {
+            s = owen.deposit(H, d);
+            emit log_named_uint("e", d);
+            emit log_named_uint("E", e);
+            emit log_named_uint("h", s);
+            emit log_named_uint("H", h);
         }
     }
 
     function test_StartingDepositDebug() public returns (Solid H, uint256 h, uint256 e, uint256 s) {
         (H, h, e, s) = test_StartingDeposit(1e6, 1e6);
         (H, h, e, s) = test_StartingDeposit(1e6, 2e6);
+        (H, h, e, s) = test_StartingDeposit(2e6, 1e6);
+        (H, h, e, s) = test_StartingDeposit(2e6, 2e6);
     }
 }
