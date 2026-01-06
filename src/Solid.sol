@@ -7,7 +7,7 @@ import {ReentrancyGuardTransient} from "reentrancy/ReentrancyGuardTransient.sol"
 
 contract Solid is ERC20, ReentrancyGuardTransient {
     uint256 public constant MOLE = 6.02214076e23;
-    uint256 public constant SUPPLY = 1e4 * MOLE;
+    uint256 public constant SUPPLY = 1000 * MOLE;
     Solid public immutable NOTHING = this;
 
     constructor() ERC20("", "") {}
