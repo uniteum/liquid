@@ -61,10 +61,19 @@ contract SolidTest is BaseTest {
         }
     }
 
-    function test_StartingDepositDebug() public returns (Solid H, uint256 h, uint256 e, uint256 s) {
+    function test_StartingDeposit11() public returns (Solid H, uint256 h, uint256 e, uint256 s) {
         (H, h, e, s) = test_StartingDeposit(1e6, 1e6);
+    }
+
+    function test_StartingDeposit12() public returns (Solid H, uint256 h, uint256 e, uint256 s) {
         (H, h, e, s) = test_StartingDeposit(1e6, 2e6);
+    }
+
+    function test_StartingDeposit21() public returns (Solid H, uint256 h, uint256 e, uint256 s) {
         (H, h, e, s) = test_StartingDeposit(2e6, 1e6);
+    }
+
+    function test_StartingDeposit22() public returns (Solid H, uint256 h, uint256 e, uint256 s) {
         (H, h, e, s) = test_StartingDeposit(2e6, 2e6);
     }
 }
