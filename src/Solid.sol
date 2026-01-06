@@ -21,9 +21,7 @@ contract Solid is ERC20, ReentrancyGuardTransient {
         (uint256 far, uint256 near) = pool();
         there = far - near * far / (near + here);
         _update(msg.sender, address(this), there);
-
         emit Withdraw(this, here, there);
-
         (bool ok, bytes memory returnData) = msg.sender.call{value: there}("");
         if (!ok) {
             if (returnData.length > 0) {
