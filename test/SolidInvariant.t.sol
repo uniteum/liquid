@@ -23,10 +23,10 @@ contract SolidHandler is Test {
     mapping(address => bool) public isActor;
 
     // Ghost variables for tracking invariants
-    uint256 public ghost_totalEthDeposited;
-    uint256 public ghost_totalEthWithdrawn;
-    uint256 public ghost_totalSolidsMinted;
-    uint256 public ghost_totalSolidsBurned;
+    uint256 public ghostTotalEthDeposited;
+    uint256 public ghostTotalEthWithdrawn;
+    uint256 public ghostTotalSolidsMinted;
+    uint256 public ghostTotalSolidsBurned;
 
     constructor(Solid _solid) {
         solid = _solid;
@@ -60,8 +60,8 @@ contract SolidHandler is Test {
         // Update tracking
         depositCount++;
         totalDeposited += amount;
-        ghost_totalEthDeposited += amount;
-        ghost_totalSolidsMinted += solidsReceived;
+        ghostTotalEthDeposited += amount;
+        ghostTotalSolidsMinted += solidsReceived;
 
         // Sanity checks
         assertEq(solidsAfter - solidsBefore, solidsReceived, "Solids mismatch");
@@ -98,8 +98,8 @@ contract SolidHandler is Test {
         // Update tracking
         withdrawCount++;
         totalWithdrawn += ethReceived;
-        ghost_totalEthWithdrawn += ethReceived;
-        ghost_totalSolidsBurned += withdrawAmount;
+        ghostTotalEthWithdrawn += ethReceived;
+        ghostTotalSolidsBurned += withdrawAmount;
 
         // Sanity checks
         assertEq(ethAfter - ethBefore, ethReceived, "ETH received mismatch");
@@ -109,7 +109,7 @@ contract SolidHandler is Test {
     /**
      * Get total value locked in the pool
      */
-    function getTVL() public view returns (uint256) {
+    function tvl() public view returns (uint256) {
         return address(solid).balance;
     }
 
@@ -164,7 +164,7 @@ contract SolidInvariantTest is StdInvariant, BaseTest {
      */
     function invariant_ethBalance() public view {
         uint256 poolEth = address(solid).balance;
-        uint256 expectedEth = handler.ghost_totalEthDeposited() - handler.ghost_totalEthWithdrawn();
+        uint256 expectedEth = handler.ghostTotalEthDeposited() - handler.ghostTotalEthWithdrawn();
 
         assertEq(poolEth, expectedEth, "Pool ETH != (deposited - withdrawn)");
     }
@@ -240,7 +240,7 @@ contract SolidInvariantTest is StdInvariant, BaseTest {
      */
     function invariant_ethSolvency() public view {
         uint256 poolEth = address(solid).balance;
-        uint256 totalDeposited = handler.ghost_totalEthDeposited();
+        uint256 totalDeposited = handler.ghostTotalEthDeposited();
 
         assertLe(poolEth, totalDeposited, "Pool ETH > total deposited");
     }
