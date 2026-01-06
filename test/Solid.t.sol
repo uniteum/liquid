@@ -28,4 +28,11 @@ contract SolidTest is BaseTest {
         assertEq(N.name(), "");
         assertEq(N.symbol(), "");
     }
+
+    function test_MakeHydrogen() public returns (Solid H) {
+        H = N.make("Hydrogen", "H");
+        assertEq(H.totalSupply(), SUPPLY);
+        assertEq(H.name(), "Hydrogen");
+        assertEq(H.symbol(), "H");
+    }
 }
