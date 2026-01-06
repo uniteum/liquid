@@ -34,13 +34,13 @@ contract Solid is ERC20, ReentrancyGuardTransient {
         }
     }
 
-    function deposit() public payable returns (uint256 there) {
+    function deposit() public payable returns (uint256 solids) {
         (uint256 far, uint256 near) = pool();
-        uint256 here = msg.value;
-        near -= here;
-        there = far - near * far / (near + here);
-        _update(address(this), msg.sender, there);
-        emit Deposit(this, here, there);
+        uint256 eth = msg.value;
+        near -= eth;
+        solids = far - near * far / (near + eth);
+        _update(address(this), msg.sender, solids);
+        emit Deposit(this, eth, solids);
     }
 
     receive() external payable {
