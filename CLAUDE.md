@@ -25,7 +25,7 @@ This file provides context for AI assistants (primarily Claude) to understand th
 ### How to Update
 
 **Optimization Guidelines:**
-- Keep total length under 600 lines (currently ~575 lines)
+- Keep total length under 650 lines (currently ~616 lines)
 - Prioritize formulas, patterns, and non-obvious mechanics
 - Remove redundant explanations
 - Use concise code examples over prose
@@ -349,6 +349,47 @@ forge test --match-test test_HeatSellCoolBuy
 **Formatting:**
 - Run `forge fmt` before committing
 - Follows Foundry's default style guide
+
+### Code Quality & Linting
+
+**CRITICAL: All generated code MUST be lint-free.**
+
+**Pre-commit checklist:**
+1. Run `forge fmt` on all modified `.sol` files
+2. Verify compilation: `forge build`
+3. Run affected tests: `forge test`
+4. Check for warnings in compiler output
+
+**Solidity Style Rules:**
+- **Function visibility order**: external → public → internal → private
+- **Function declaration formatting**: When parameters don't fit on one line:
+  ```solidity
+  // CORRECT: Multi-line with proper indentation
+  function longFunctionName(uint256 param1, uint256 param2)
+      public
+      returns (uint256 result1, uint256 result2)
+  {
+      // body
+  }
+
+  // WRONG: Single line when too long
+  function longFunctionName(uint256 param1, uint256 param2) public returns (uint256 result1, uint256 result2) {
+  ```
+- **Imports**: One per line, sorted alphabetically
+- **Line length**: Max 120 characters (forge fmt default)
+- **Indentation**: 4 spaces (configured in foundry.toml)
+
+**Common Linting Fixes:**
+- Add blank line before function if missing
+- Remove trailing whitespace
+- Ensure consistent spacing around operators
+- Format multi-line function signatures consistently
+
+**When writing code:**
+1. Write the code
+2. Mentally verify it follows forge fmt rules
+3. If unsure, assume forge fmt will reformat and write cleanly
+4. After file operations, expect forge fmt may auto-format
 
 ## Test Patterns
 
