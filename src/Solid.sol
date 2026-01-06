@@ -20,7 +20,7 @@ contract Solid is ERC20, ReentrancyGuardTransient {
 
     function withdraw(uint256 sol) external nonReentrant returns (uint256 eth) {
         (uint256 solPool, uint256 ethPool) = pool();
-        eth = ethPool - solPool * ethPool / (solPool + sol);
+        eth = ethPool - ethPool * solPool / (solPool + sol);
         _update(msg.sender, address(this), sol);
         emit Withdraw(this, sol, eth);
         (bool ok, bytes memory returnData) = msg.sender.call{value: eth}("");
@@ -38,7 +38,7 @@ contract Solid is ERC20, ReentrancyGuardTransient {
     function deposit() public payable returns (uint256 sol) {
         (uint256 solPool, uint256 ethPool) = pool();
         uint256 eth = msg.value;
-        sol = solPool - (ethPool - eth) * solPool / ethPool;
+        sol = solPool - solPool * (ethPool - eth) / ethPool;
         _update(address(this), msg.sender, sol);
         emit Deposit(this, eth, sol);
     }
