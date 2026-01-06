@@ -25,7 +25,7 @@ This file provides context for AI assistants (primarily Claude) to understand th
 ### How to Update
 
 **Optimization Guidelines:**
-- Keep total length under 650 lines (currently ~616 lines)
+- Keep total length under 650 lines (currently ~641 lines)
 - Prioritize formulas, patterns, and non-obvious mechanics
 - Remove redundant explanations
 - Use concise code examples over prose
@@ -336,7 +336,32 @@ forge fmt            # Format code
 ```bash
 forge test --match-test test_HeatCool
 forge test --match-test test_HeatSellCoolBuy
+forge test --match-contract SolidInvariant  # Run invariant tests
 ```
+
+### Invariant Test Profiles
+
+Invariant tests can be configured for different thoroughness levels:
+
+```bash
+# Quick (64 runs, 128 depth) - ~4 seconds
+FOUNDRY_PROFILE=quick forge test --match-contract SolidInvariant
+
+# Default (256 runs, 500 depth) - ~170 seconds
+forge test --match-contract SolidInvariant
+
+# CI (512 runs, 1000 depth) - thorough testing
+FOUNDRY_PROFILE=ci forge test --match-contract SolidInvariant
+
+# Deep (1024 runs, 2000 depth) - very thorough
+FOUNDRY_PROFILE=deep forge test --match-contract SolidInvariant
+```
+
+**When to use each:**
+- `quick` - During active development (fast feedback)
+- `default` - Before commits (good coverage)
+- `ci` - In CI/CD pipelines
+- `deep` - Before production deploys or major releases
 
 ### Code Style
 
