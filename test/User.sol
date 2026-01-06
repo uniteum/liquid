@@ -6,12 +6,14 @@ import {Random} from "./Random.sol";
 import {TestToken, IERC20, IERC20Metadata} from "./TestToken.sol";
 import {Test, console} from "forge-std/Test.sol";
 import {SafeERC20} from "erc20/SafeERC20.sol";
+import {Namer} from "./Namer.sol";
 
 contract User is Random, Test {
     using SafeERC20 for IERC20;
 
     string public name;
     IERC20Metadata[] public tokens;
+    Namer namer = new Namer();
 
     constructor(string memory name_) {
         name = name_;
@@ -41,8 +43,9 @@ contract User is Random, Test {
         value = token.balanceOf(address(this));
     }
 
-    function give(address recipient, uint256 value, IERC20 token) public {
-        token.safeTransfer(recipient, value);
+    function give(address to, uint256 value, IERC20 token) public {
+        console.log("%s give %s %s", namer.name(address(this)), namer.name(to), value);
+        token.safeTransfer(to, value);
     }
 
     function approve(address recipient, uint256 value, IERC20 token) public {
