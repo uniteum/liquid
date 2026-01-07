@@ -4,17 +4,17 @@
 
 ## What Are Solids?
 
-Solids are ERC-20 tokens with **built-in ETH liquidity**. Every Solid token you create comes with an automated market maker (AMM) baked directly into the token contract itself.
+Solids are ERC-20 tokens with **built-in ETH liquidity**. Every Solid token you make comes with an automated market maker (AMM) baked directly into the token contract itself.
 
 No external DEXs. No liquidity fragmentation. No complicated pool deployments.
 
-**Just create a token, and it's instantly tradeable.**
+**Just make a token, and it's instantly tradeable.**
 
 ## The Problem with Normal Tokens
 
 You've probably been through this before:
 
-1. Create an ERC-20 token
+1. Make an ERC-20 token
 2. Deploy it to mainnet
 3. Now what? It's worthless without liquidity
 4. Set up a Uniswap pool (more gas, more complexity)
@@ -37,12 +37,12 @@ Making a new Solid costs just **0.001 ETH** (the creation fee, ~$3) plus gas. Th
 **Total cost: $3.60-6** depending on network conditions. Here's what happens:
 
 ```solidity
-// Create a new Solid token called "MyToken" with symbol "MTK"
+// Make a new Solid token called "MyToken" with symbol "MTK"
 solid.make{value: 0.001 ether}("MyToken", "MTK");
 ```
 
 **You instantly receive:**
-- **1% of total supply** (~60.2 million tokens) as the creator - exactly **100 mol** worth
+- **1% of total supply** (~60.2 million tokens) as the maker - exactly **100 mol** worth
 - **99% automatically goes to the pool** (9,900 mol) paired with ETH
 - A **deterministic address** (same name+symbol always produces same address)
 - An **instantly tradeable token** with built-in liquidity
@@ -77,7 +77,7 @@ The AMM uses the **constant-product formula** (x × y = k) just like Uniswap, bu
 **Traditional approach:**
 - Deploy token contract: ~2,000,000 gas (~$50+ at 25 gwei)
 - Approve router: ~50,000 gas (~$1)
-- Create Uniswap pool: ~4,000,000 gas (~$100+)
+- Make Uniswap pool: ~4,000,000 gas (~$100+)
 - Add liquidity: ~150,000 gas (~$4)
 - **Total: $155+ and 4 transactions** (at 25 gwei)
 
@@ -95,7 +95,7 @@ With traditional DEX pools, liquidity providers can withdraw at any time, killin
 
 ### 3. Fair Launch by Default
 
-- **1% to creator** (you)
+- **1% to maker** (you)
 - **99% to pool** (everyone else)
 - No presales, no VC allocation, no team vesting
 - The economics are transparent and hardcoded
@@ -105,7 +105,7 @@ This is what fair launches should look like.
 ### 4. Deterministic Addresses
 
 The same name and symbol always produce the same contract address. This means:
-- **No frontrunning** - if someone tries to steal your token name, they create the same address you would have
+- **No frontrunning** - if someone tries to steal your token name, they make the same address you would have
 - **Predictable deployments** - you can calculate addresses off-chain
 - **No name squatting** - first person to make("Bitcoin", "BTC") owns it forever
 
@@ -113,7 +113,7 @@ The same name and symbol always produce the same contract address. This means:
 
 The total supply is **6.02214076 billion** tokens (10,000 mol × Avogadro's number, scaled by 18 decimals).
 
-Why? Because if you're going to create internet money, you might as well make it represent actual physical quantities. The decimal point lands exactly where it appears in Avogadro's number: **6.02214076**. This isn't accidental - it's 10,000 mol worth of tokens.
+Why? Because if you're going to make internet money, you might as well make it represent actual physical quantities. The decimal point lands exactly where it appears in Avogadro's number: **6.02214076**. This isn't accidental - it's 10,000 mol worth of tokens.
 
 It's nerdy. It's fun. It's memorable. And it makes the token supply actually mean something.
 
@@ -205,7 +205,7 @@ Anyone can trade by sending ETH to the contract or calling `deposit()`.
 A: No. The 99% pool liquidity is permanent. This is a feature, not a bug.
 
 **Q: What if someone else makes my token name?**
-A: They can't "steal" it - the same name+symbol always produces the same address. Whoever makes it first owns the creator share.
+A: They can't "steal" it - the same name+symbol always produces the same address. Whoever makes it first owns the maker share.
 
 **Q: Can I make multiple Solids?**
 A: Yes! Pay 0.001 ETH per token. Make as many as you want.
