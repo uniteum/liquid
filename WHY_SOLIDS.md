@@ -28,7 +28,13 @@ You've probably been through this before:
 
 ### Creating a Solid (Making)
 
-Making a new Solid costs just **0.001 ETH** (about $3-4). Here's what happens:
+Making a new Solid costs just **0.001 ETH** (the creation fee, ~$3) plus gas. Thanks to EIP-1167 minimal proxy cloning, the gas cost is incredibly low - only **~198,000 gas**. At typical gas prices, that's:
+
+- **10 gwei** (quiet times): ~$0.60 in gas → **~$3.60 total**
+- **25 gwei** (moderate): ~$1.50 in gas → **~$4.50 total**
+- **50 gwei** (busy): ~$3.00 in gas → **~$6.00 total**
+
+**Total cost: $3.60-6** depending on network conditions. Here's what happens:
 
 ```solidity
 // Create a new Solid token called "MyToken" with symbol "MTK"
@@ -67,17 +73,17 @@ The AMM uses the **constant-product formula** (x × y = k) just like Uniswap, bu
 ### 1. Zero Setup Friction
 
 **Traditional approach:**
-- Deploy token contract: ~$50 gas
-- Approve router: ~$10 gas
-- Create Uniswap pool: ~$100 gas
-- Add liquidity: ~$50 gas
-- **Total: $200+ and 4 transactions**
+- Deploy token contract: ~2,000,000 gas (~$50+ at 25 gwei)
+- Approve router: ~50,000 gas (~$1)
+- Create Uniswap pool: ~4,000,000 gas (~$100+)
+- Add liquidity: ~150,000 gas (~$4)
+- **Total: $155+ and 4 transactions** (at 25 gwei)
 
-**Solids approach:**
-- Make token: ~$20 gas + 0.001 ETH fee
-- **Total: $25 and 1 transaction**
+**Solids approach (using EIP-1167 cloning):**
+- Make token: ~198,000 gas (~$1.50 at 25 gwei) + 0.001 ETH fee (~$3)
+- **Total: ~$4.50 and 1 transaction**
 
-You save time, money, and complexity.
+You save **97%** on total costs plus all the complexity. The gas portion is negligible - most of your cost is the 0.001 ETH creation fee.
 
 ### 2. Liquidity Can't Leave
 
@@ -129,7 +135,7 @@ Already have an NFT project? Launch a Solid as your ecosystem token. The fair la
 
 ### Personal Currency
 
-Make a token representing you. Trade it with friends. Use it as social money. With a $25 entry price, why not?
+Make a token representing you. Trade it with friends. Use it as social money. With a ~$4 entry price (total), why not?
 
 ## Technical Details (For the Curious)
 
@@ -156,11 +162,20 @@ Same formula as Uniswap v2, but gas-optimized and built into the token.
 
 ### Gas Costs
 
-- **Make new Solid**: ~100k-150k gas (~$20 at 50 gwei)
-- **Deposit ETH**: ~50k gas (~$10)
-- **Withdraw tokens**: ~60k gas (~$12)
+Thanks to EIP-1167 minimal proxy cloning, Solids are extremely gas-efficient:
 
-About **3-5x cheaper** than equivalent Uniswap v2 operations because there's no external router or factory.
+- **Make new Solid**: ~198,000 gas
+  - At 10 gwei: **$0.60**
+  - At 25 gwei: **$1.50**
+  - At 50 gwei: **$3.00**
+- **Deposit ETH**: ~50,000 gas ($0.30-$1.50)
+- **Withdraw tokens**: ~60,000 gas ($0.40-$1.80)
+
+**Why so cheap?** EIP-1167 clones don't redeploy the full contract bytecode. They deploy a tiny proxy that delegates to the NOTHING template. This makes the gas portion **10-50x cheaper** than deploying a traditional token contract.
+
+Compare:
+- Traditional ERC-20 + Uniswap setup: ~$155 total (mostly gas)
+- Solids: ~$4.50 total (mostly the 0.001 ETH fee, gas is only ~$1.50)
 
 ## Getting Started
 
