@@ -3,7 +3,7 @@
 pragma solidity ^0.8.30;
 
 import {User, TestToken, IERC20, console} from "./User.sol";
-import {ISolid} from "../src/ISolid.sol";
+import {ISolid} from "isolid/ISolid.sol";
 import {Solid} from "../src/Solid.sol";
 import {SafeERC20} from "erc20/SafeERC20.sol";
 import {Strings} from "strings/Strings.sol";

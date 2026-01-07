@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import {ISolid} from "../src/ISolid.sol";
+import {ISolid} from "isolid/ISolid.sol";
 import {Solid} from "../src/Solid.sol";
 import {SolidFactory} from "../src/SolidFactory.sol";
 import {BaseTest} from "./Base.t.sol";

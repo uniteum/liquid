@@ -1,5 +1,6 @@
 forge-std/=lib/forge-std/src/
 clones/=lib/clones/
+isolid/=lib/isolid/
 ierc20/=lib/ierc20/
 erc20/=lib/erc20/
 math/=lib/math/
