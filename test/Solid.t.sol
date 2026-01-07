@@ -7,9 +7,6 @@ import {BaseTest} from "./Base.t.sol";
 import {SolidUser} from "./SolidUser.sol";
 
 contract SolidTest is BaseTest {
-    uint256 constant MOL = 6.02214076e23;
-    uint256 constant MOLS = 10000;
-    uint256 constant SUPPLY = MOLS * MOL;
     uint256 constant ETH = 1e9;
     Solid public N;
     SolidUser public owen;
@@ -18,6 +15,11 @@ contract SolidTest is BaseTest {
         super.setUp();
         owen = newUser("owen");
         N = new Solid();
+    }
+
+    // Helper to get SUPPLY from a Solid instance
+    function SUPPLY(ISolid solid) internal view returns (uint256) {
+        return solid.totalSupply();
     }
 
     function newUser(string memory name) internal returns (SolidUser user) {
@@ -33,19 +35,21 @@ contract SolidTest is BaseTest {
 
     function test_MakeHydrogen() public returns (ISolid H) {
         H = N.make{value: N.MAKER_PAYMENT()}("Hydrogen", "H");
-        assertEq(H.totalSupply(), SUPPLY);
+        uint256 supply = SUPPLY(H);
+        assertEq(H.totalSupply(), supply);
         assertEq(H.name(), "Hydrogen");
         assertEq(H.symbol(), "H");
-        assertEq(H.balanceOf(address(this)), SUPPLY / 2, "creator should have 50% of supply");
-        assertEq(H.balanceOf(address(H)), SUPPLY / 2, "pool should have 50% of supply");
+        assertEq(H.balanceOf(address(this)), supply / 2, "creator should have 50% of supply");
+        assertEq(H.balanceOf(address(H)), supply / 2, "pool should have 50% of supply");
         assertEq(address(H).balance, N.MAKER_PAYMENT(), "pool should have MAKER_PAYMENT ETH");
     }
 
     function test_MakeWithExtraPayment() public {
         ISolid H = N.make{value: N.MAKER_PAYMENT() * 2}("Helium", "He");
-        assertEq(H.totalSupply(), SUPPLY);
-        assertEq(H.balanceOf(address(this)), SUPPLY / 2, "creator should have 50% of supply");
-        assertEq(H.balanceOf(address(H)), SUPPLY / 2, "pool should have 50% of supply");
+        uint256 supply = SUPPLY(H);
+        assertEq(H.totalSupply(), supply);
+        assertEq(H.balanceOf(address(this)), supply / 2, "creator should have 50% of supply");
+        assertEq(H.balanceOf(address(H)), supply / 2, "pool should have 50% of supply");
         assertEq(address(H).balance, N.MAKER_PAYMENT() * 2, "pool should have double MAKER_PAYMENT ETH");
     }
 
@@ -69,6 +73,7 @@ contract SolidTest is BaseTest {
 
     function test_DepositDoesNotCreateTokens() public {
         ISolid H = N.make{value: N.MAKER_PAYMENT()}("TestToken", "TT");
+        uint256 supply = SUPPLY(H);
 
         uint256 supplyBefore = H.totalSupply();
         uint256 poolBefore = H.balanceOf(address(H));
@@ -88,7 +93,7 @@ contract SolidTest is BaseTest {
 
         // Sum of all balances should equal total supply
         uint256 sum = poolAfter + creatorAfter;
-        assertEq(sum, SUPPLY, "Sum of balances != total supply");
+        assertEq(sum, supply, "Sum of balances != total supply");
 
         // Pool should have decreased by the amount user received
         assertEq(poolBefore - poolAfter, receivedSolids, "Pool decrease != user increase");
@@ -96,6 +101,7 @@ contract SolidTest is BaseTest {
 
     function test_DepositWithdrawBalanceIntegrity() public {
         ISolid H = N.make{value: N.MAKER_PAYMENT()}("Integrity", "INT");
+        uint256 supply = SUPPLY(H);
 
         // Have owen deposit
         uint256 depositAmt = 78227239616666287245;
@@ -109,8 +115,8 @@ contract SolidTest is BaseTest {
         uint256 owenBal = H.balanceOf(address(owen));
         uint256 sum = poolBal + creatorBal + owenBal;
 
-        assertEq(sum, SUPPLY, "Sum != SUPPLY after owen deposit");
-        assertEq(H.totalSupply(), SUPPLY, "Total supply changed!");
+        assertEq(sum, supply, "Sum != SUPPLY after owen deposit");
+        assertEq(H.totalSupply(), supply, "Total supply changed!");
     }
 
     function makeHydrogen(uint256 seed) public returns (ISolid H, uint256 h, uint256 e) {
@@ -123,7 +129,8 @@ contract SolidTest is BaseTest {
 
     function test_StartingPrice(uint256 seed) public returns (ISolid H, uint256 h, uint256 e) {
         (H, h, e) = makeHydrogen(seed);
-        assertEq(h, SUPPLY / 2, "h should be 50% of SUPPLY");
+        uint256 supply = SUPPLY(H);
+        assertEq(h, supply / 2, "h should be 50% of SUPPLY");
         assertEq(e, N.MAKER_PAYMENT() + (seed % ETH), "e should be MAKER_PAYMENT + seed");
     }
 
@@ -251,15 +258,17 @@ contract SolidTest is BaseTest {
     function test_MakeFromNonNothingSendsSharesToCaller() public {
         // Create a first Solid (Hydrogen) from NOTHING
         ISolid H = N.make{value: N.MAKER_PAYMENT()}("Hydrogen", "H");
-        assertEq(H.balanceOf(address(this)), SUPPLY / 2, "creator should have 50% of H");
+        uint256 supplyH = SUPPLY(H);
+        assertEq(H.balanceOf(address(this)), supplyH / 2, "creator should have 50% of H");
 
         // Now call make from H (non-NOTHING) to create Helium
         // The maker shares should still go to msg.sender (this), not to H
         ISolid he = Solid(payable(address(H))).make{value: N.MAKER_PAYMENT()}("Helium", "He");
+        uint256 supplyHe = SUPPLY(he);
 
         // Verify maker shares went to the actual caller (this), not to H
-        assertEq(he.balanceOf(address(this)), SUPPLY / 2, "creator should have 50% of He");
+        assertEq(he.balanceOf(address(this)), supplyHe / 2, "creator should have 50% of He");
         assertEq(he.balanceOf(address(H)), 0, "H should not have any He tokens");
-        assertEq(he.balanceOf(address(he)), SUPPLY / 2, "He pool should have 50% of supply");
+        assertEq(he.balanceOf(address(he)), supplyHe / 2, "He pool should have 50% of supply");
     }
 }

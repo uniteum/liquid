@@ -136,10 +136,7 @@ contract SolidHandler is Test {
 contract SolidInvariantTest is StdInvariant, BaseTest {
     Solid public solid;
     SolidHandler public handler;
-
-    uint256 constant MOL = 6.02214076e23;
-    uint256 constant MOLS = 10000;
-    uint256 constant SUPPLY = MOLS * MOL;
+    uint256 public SUPPLY;
 
     function setUp() public override {
         super.setUp();
@@ -147,6 +144,7 @@ contract SolidInvariantTest is StdInvariant, BaseTest {
         // Create a new solid token
         Solid nothing = new Solid();
         solid = Solid(payable(address(nothing.make{value: nothing.MAKER_PAYMENT()}("Hydrogen", "H"))));
+        SUPPLY = solid.totalSupply();
 
         // Create handler
         handler = new SolidHandler(solid);
