@@ -28,45 +28,60 @@ You've probably been through this before:
 
 ### Creating a Solid (Making)
 
-Making a new Solid costs just **0.001 ETH** (the creation fee, ~$3) plus gas. Thanks to EIP-1167 minimal proxy cloning, the gas cost is incredibly low - only **~198,000 gas**. At typical gas prices, that's:
+Making a new Solid requires a **minimum of 0.001 ETH** plus gas. Thanks to EIP-1167 minimal proxy cloning, the gas cost is incredibly low - only **~198,000 gas**. At typical gas prices, that's:
 
-- **10 gwei** (quiet times): ~$0.60 in gas → **~$3.60 total**
-- **25 gwei** (moderate): ~$1.50 in gas → **~$4.50 total**
-- **50 gwei** (busy): ~$3.00 in gas → **~$6.00 total**
+- **10 gwei** (quiet times): ~$0.60 in gas → **~$3.60 total minimum**
+- **25 gwei** (moderate): ~$1.50 in gas → **~$4.50 total minimum**
+- **50 gwei** (busy): ~$3.00 in gas → **~$6.00 total minimum**
 
-**Total cost: $3.60-6** depending on network conditions. Here's what happens:
+**But here's the key:** You should consider sending **more ETH** than the minimum. The ETH you send establishes the initial pool value and your token's starting price. More ETH = better initial liquidity and higher intrinsic value.
 
 ```solidity
-// Make a new Solid token called "MyToken" with symbol "MTK"
-solid.make{value: 0.001 ether}("MyToken", "MTK");
+// Make a new Solid token - consider sending more than the minimum!
+solid.make{value: 1 ether}("MyToken", "MTK");  // Better starting price
 ```
 
-**You instantly receive:**
-- **1% of total supply** (~60.2 million tokens) as the maker - exactly **100 mol** worth
-- **99% automatically goes to the pool** (9,900 mol) paired with ETH
+**How the AMM works:**
+
+The AMM assumes both sides of the pool have **equal value**. When you make a Solid:
+
+- **50% of total supply** goes to you (the maker) - exactly **5,000 mol** worth
+- **50% goes to the pool** - also **5,000 mol**
+- Your ETH goes entirely into the pool, paired with those 5,000 mol tokens
 - A **deterministic address** (same name+symbol always produces same address)
 - An **instantly tradeable token** with built-in liquidity
 
 Total supply: **6.02214076 billion** tokens (10,000 mol × Avogadro's number, with 18 decimals)
 
-The clever bit: the decimal point lands right after the 6, mirroring how Avogadro's number is written: **6.02214076** × 10²³. And as the maker, you get exactly 100 mol - a nice round amount in chemistry terms.
+**Starting price scales linearly with your ETH:**
+- Send 0.001 ETH → 5,000 mol tokens worth 0.001 ETH → 1 mol = 0.0000002 ETH
+- Send 1 ETH → 5,000 mol tokens worth 1 ETH → 1 mol = 0.0002 ETH
+- Send 10 ETH → 5,000 mol tokens worth 10 ETH → 1 mol = 0.002 ETH
+
+The clever bit: the decimal point lands right after the 6, mirroring how Avogadro's number is written: **6.02214076** × 10²³. And as the maker, you get exactly 5,000 mol - half the supply, representing half the value.
 
 ### Trading Solids
 
-**Deposit ETH, get tokens:**
+**Deposit ETH, buy tokens:**
 ```solidity
-// Send ETH to the contract
+// Buy tokens by depositing ETH
 solid.deposit{value: 1 ether}();
 // Returns tokens based on constant-product formula
 ```
 
-Or just send ETH directly to the contract - it auto-converts to tokens!
-
-**Withdraw tokens for ETH:**
+**Withdraw tokens, get ETH:**
 ```solidity
-// Burn tokens, receive ETH
+// Sell tokens back for ETH
 solid.withdraw(1000000000);
 ```
+
+**Increase the ETH pool (add intrinsic value):**
+```solidity
+// Send ETH directly to increase pool value without buying tokens
+payable(address(solid)).transfer(1 ether);
+```
+
+This is powerful: anyone can **permanently increase the intrinsic value** of a Solid by sending ETH directly to it. The ETH pool represents the token's **floor price** - it can never be withdrawn except through selling tokens.
 
 The AMM uses the **constant-product formula** (x × y = k) just like Uniswap, but it's built into the token itself.
 
@@ -87,20 +102,23 @@ The AMM uses the **constant-product formula** (x × y = k) just like Uniswap, bu
 
 You save **97%** on total costs plus all the complexity. The gas portion is negligible - most of your cost is the 0.001 ETH creation fee.
 
-### 2. Liquidity Can't Leave
+### 2. Liquidity Can't Leave - Only Grow
 
 With traditional DEX pools, liquidity providers can withdraw at any time, killing your token's tradability.
 
-**With Solids, the initial 99% liquidity is permanently locked in the contract.** It can never be removed. Your token is always tradeable.
+**With Solids, the initial 50% token liquidity is permanently locked in the contract.** The tokens in the pool can never be removed (only traded). Your token is always tradeable.
+
+**Even better:** The ETH pool represents **intrinsic value** that can only increase. Anyone can send ETH directly to the contract to permanently boost the floor price, but that ETH can never be withdrawn except by selling tokens through the AMM. This creates a constantly rising price floor.
 
 ### 3. Fair Launch by Default
 
-- **1% to maker** (you)
-- **99% to pool** (everyone else)
+- **50% to maker** (you) - 5,000 mol
+- **50% to pool** (everyone else) - 5,000 mol
 - No presales, no VC allocation, no team vesting
 - The economics are transparent and hardcoded
+- **Equal value principle:** The AMM assumes your 5,000 mol and the pool's 5,000 mol have equal value, determined by the ETH you send
 
-This is what fair launches should look like.
+This is what fair launches should look like. You get half the supply, but the market gets the other half at a price you set with your initial ETH.
 
 ### 4. Deterministic Addresses
 
@@ -109,19 +127,25 @@ The same name and symbol always produce the same contract address. This means:
 - **Predictable deployments** - you can calculate addresses off-chain
 - **No name squatting** - first person to make("Bitcoin", "BTC") owns it forever
 
-### 5. Chemistry-Inspired Token Economics
+### 5. Chemistry-Inspired Token Economics with Intrinsic Value
 
 The total supply is **6.02214076 billion** tokens (10,000 mol × Avogadro's number, scaled by 18 decimals).
 
 Why? Because if you're going to make internet money, you might as well make it represent actual physical quantities. The decimal point lands exactly where it appears in Avogadro's number: **6.02214076**. This isn't accidental - it's 10,000 mol worth of tokens.
 
-It's nerdy. It's fun. It's memorable. And it makes the token supply actually mean something.
+**The ETH pool = intrinsic value:**
+- Starts with whatever ETH the maker sends (minimum 0.001 ETH)
+- Can only increase when people send ETH to the contract
+- Can never be withdrawn except by selling tokens through the AMM
+- Creates a **permanent price floor** that can only rise
+
+It's nerdy. It's fun. It's memorable. And unlike most tokens, Solids have actual backing value.
 
 ## Real Use Cases for Hobbyists
 
 ### Community Tokens
 
-Launch a token for your Discord, DAO, or group chat in one transaction. Instant tradability means your community can start trading immediately.
+Launch a token for your Discord, DAO, or group chat in one transaction. Instant tradability means your community can start trading immediately. Community members can even boost the token's intrinsic value by sending ETH directly to it.
 
 ### Experimental Economics
 
@@ -143,15 +167,17 @@ Make a token representing you. Trade it with friends. Use it as social money. Wi
 
 ### Constant-Product AMM
 
-When you deposit ETH:
+When you deposit ETH (buy tokens):
 ```
 tokens_out = pool_tokens - (pool_tokens × pool_eth) / (pool_eth + eth_in)
 ```
 
-When you withdraw tokens:
+When you withdraw tokens (sell for ETH):
 ```
 eth_out = pool_eth - (pool_eth × pool_tokens) / (pool_tokens + tokens_in)
 ```
+
+**Key insight:** The pool assumes **equal value** on both sides. If the pool has 5,000 mol tokens and 1 ETH, it values 5,000 mol = 1 ETH. Your starting price is determined by the ETH you send when making the Solid.
 
 Same formula as Uniswap v2, but gas-optimized and built into the token.
 
@@ -202,13 +228,19 @@ Anyone can trade by sending ETH to the contract or calling `deposit()`.
 ## FAQ
 
 **Q: Can I remove liquidity?**
-A: No. The 99% pool liquidity is permanent. This is a feature, not a bug.
+A: No. The 50% token pool liquidity is permanent. The ETH pool can only grow, never shrink (except through token sales). This is a feature, not a bug - it creates a rising price floor.
 
 **Q: What if someone else makes my token name?**
 A: They can't "steal" it - the same name+symbol always produces the same address. Whoever makes it first owns the maker share.
 
 **Q: Can I make multiple Solids?**
-A: Yes! Pay 0.001 ETH per token. Make as many as you want.
+A: Yes! Send at least 0.001 ETH per token (but consider sending more for better initial liquidity). Make as many as you want.
+
+**Q: Should I send more than 0.001 ETH when making a Solid?**
+A: Absolutely! The ETH you send determines your token's starting price. More ETH = higher initial value and better liquidity. The price scales linearly with your ETH contribution.
+
+**Q: Can I increase the ETH pool after making a token?**
+A: Yes! Anyone can send ETH directly to the contract address (using `send` or `transfer`, not `deposit()`). This permanently increases the intrinsic value and price floor of all tokens.
 
 **Q: What blockchain is this on?**
 A: Ethereum mainnet and major L2s (Base, Arbitrum, Optimism, Polygon).
@@ -224,13 +256,14 @@ A: The contracts are simple and secure, but do your own research. Start small, t
 
 ## Philosophy
 
-Solids are built on three principles:
+Solids are built on four principles:
 
 1. **Simplicity** - One transaction to launch a tradeable token
-2. **Permanence** - Liquidity that can't be rugged
-3. **Fairness** - No presales, no special allocations, just transparent code
+2. **Permanence** - Liquidity that can't be rugged, only strengthened
+3. **Fairness** - 50/50 split, no presales, no special allocations
+4. **Intrinsic Value** - ETH backing that can only increase, creating a rising price floor
 
-We believe token launches should be accessible to everyone, not just projects with $100k+ budgets for liquidity bootstrapping.
+We believe tokens should have actual backing value, not just speculation. The ETH pool represents real value that can never be extracted except through the AMM.
 
 ## Try It Today
 
