@@ -14,7 +14,7 @@ interface ISolid is IERC20Metadata {
     function NOTHING() external view returns (ISolid);
 
     /**
-     * @notice Returns the minimum payment required to create a new Solid
+     * @notice Returns the minimum payment required to make a new Solid
      * @return The minimum ETH payment required (default 0.001 ether)
      */
     function MAKER_PAYMENT() external view returns (uint256);
@@ -56,19 +56,19 @@ interface ISolid is IERC20Metadata {
     function made(string calldata n, string calldata s) external view returns (bool yes, address home, bytes32 salt);
 
     /**
-     * @notice Creates a new Solid instance with the given name and symbol
-     * @dev Requires minimum payment of MAKER_PAYMENT. Reverts if already exists.
+     * @notice Makes a new Solid instance with the given name and symbol
+     * @dev Requires minimum payment of MAKER_PAYMENT. Reverts if already made.
      * Mints 50% of SUPPLY to maker and 50% to pool. Initial ETH becomes pool liquidity.
      * Uses CREATE2 for deterministic deployment based on name and symbol.
      * @param n The name of the new Solid token
      * @param s The symbol of the new Solid token
-     * @return sol The newly created Solid instance
+     * @return sol The newly made Solid instance
      */
     function make(string calldata n, string calldata s) external payable returns (ISolid sol);
 
     /**
-     * @notice Emitted when a new Solid is created
-     * @param solid The address of the newly created Solid
+     * @notice Emitted when a new Solid is made
+     * @param solid The address of the newly made Solid
      * @param name The name of the Solid token (indexed)
      * @param symbol The symbol of the Solid token (indexed)
      */
@@ -106,7 +106,7 @@ interface ISolid is IERC20Metadata {
     error PaymentLow();
 
     /**
-     * @notice Thrown when attempting to create a Solid that already exists
+     * @notice Thrown when attempting to make a Solid that has already been made
      */
     error MadeAlready();
 }
