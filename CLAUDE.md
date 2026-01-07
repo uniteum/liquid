@@ -493,7 +493,7 @@ export chain=11155111  # Sepolia testnet
 
 ```bash
 chain=11155111
-forge script script/Solid.qqq.sol \
+forge script script/Solid.sol \
   -f $chain \
   --private-key $tx_key \
   --broadcast \

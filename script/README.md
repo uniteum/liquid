@@ -7,7 +7,7 @@ Three-step deployment process for Solid protocol and periodic table elements.
 Deploy the base Solid contract that serves as the factory for all other Solids.
 
 ```bash
-forge script script/Solid.qqq.sol \
+forge script script/Solid.sol \
   -f $chain \
   --private-key $tx_key \
   --broadcast \
@@ -23,7 +23,7 @@ forge script script/Solid.qqq.sol \
 Deploy the batch factory that will create all elements in one transaction.
 
 ```bash
-SOLID_ADDRESS=0x... forge script script/SolidFactory.qqq.sol \
+SOLID_ADDRESS=0x... forge script script/SolidFactory.sol \
   -f $chain \
   --private-key $tx_key \
   --broadcast \
@@ -39,7 +39,7 @@ SOLID_ADDRESS=0x... forge script script/SolidFactory.qqq.sol \
 Invoke the factory to create Solids from a JSON file in a single transaction.
 
 ```bash
-FACTORY_ADDRESS=0x... SOLIDS_PATH=script/elements.json forge script script/MakeSolids.qqq.sol \
+FACTORY_ADDRESS=0x... SOLIDS_PATH=script/elements.json forge script script/MakeSolids.sol \
   -f $chain \
   --private-key $tx_key \
   --broadcast
@@ -53,7 +53,7 @@ FACTORY_ADDRESS=0x... SOLIDS_PATH=script/elements.json forge script script/MakeS
 
 **Example:** To create all 118 elements:
 ```bash
-FACTORY_ADDRESS=0x... SOLIDS_PATH=script/elements.json forge script script/MakeSolids.qqq.sol \
+FACTORY_ADDRESS=0x... SOLIDS_PATH=script/elements.json forge script script/MakeSolids.sol \
   -f $chain \
   --private-key $tx_key \
   --broadcast
@@ -61,7 +61,7 @@ FACTORY_ADDRESS=0x... SOLIDS_PATH=script/elements.json forge script script/MakeS
 
 ## Files
 
-- **[Solid.qqq.sol](Solid.qqq.sol)** - Deploys Solid protofactory
-- **[SolidFactory.qqq.sol](SolidFactory.qqq.sol)** - Deploys SolidFactory with Solid reference
-- **[MakeSolids.qqq.sol](MakeSolids.qqq.sol)** - Creates Solids from JSON file via factory
+- **[Solid.sol](Solid.sol)** - Deploys Solid protofactory
+- **[SolidFactory.sol](SolidFactory.sol)** - Deploys SolidFactory with Solid reference
+- **[MakeSolids.sol](MakeSolids.sol)** - Creates Solids from JSON file via factory
 - **[elements.json](elements.json)** - Periodic table data (118 elements)
