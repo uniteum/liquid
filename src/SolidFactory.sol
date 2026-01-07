@@ -14,7 +14,7 @@ contract SolidFactory {
         string symbol;
     }
 
-    event BatchCreate(uint256 created, uint256 skipped, uint256 total);
+    event MadeBatch(uint256 created, uint256 skipped, uint256 total);
 
     constructor(Solid solid) {
         SOLID = solid;
@@ -81,7 +81,7 @@ contract SolidFactory {
             SOLID.make{value: 0.001 ether}(created[i].name, created[i].symbol);
         }
 
-        emit BatchCreate(created.length, existing.length, solids.length);
+        emit MadeBatch(created.length, existing.length, solids.length);
 
         // Refund excess ETH
         uint256 spent = created.length * 0.001 ether;
