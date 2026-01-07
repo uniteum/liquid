@@ -1,0 +1,234 @@
+# Why You Should Make and Trade Solids
+
+> **For the crypto hobbyist who's tired of fragmented liquidity and wants to launch tokens the right way.**
+
+## What Are Solids?
+
+Solids are ERC-20 tokens with **built-in ETH liquidity**. Every Solid token you create comes with an automated market maker (AMM) baked directly into the token contract itself.
+
+No external DEXs. No liquidity fragmentation. No complicated pool deployments.
+
+**Just create a token, and it's instantly tradeable.**
+
+## The Problem with Normal Tokens
+
+You've probably been through this before:
+
+1. Create an ERC-20 token
+2. Deploy it to mainnet
+3. Now what? It's worthless without liquidity
+4. Set up a Uniswap pool (more gas, more complexity)
+5. Provide initial liquidity (lock up capital)
+6. Hope traders find your pool
+7. Deal with liquidity fragmentation across multiple DEXs
+
+**With Solids, steps 3-7 disappear.**
+
+## How Solids Work
+
+### Creating a Solid (Making)
+
+Making a new Solid costs just **0.001 ETH** (about $3-4). Here's what happens:
+
+```solidity
+// Create a new Solid token called "MyToken" with symbol "MTK"
+solid.make{value: 0.001 ether}("MyToken", "MTK");
+```
+
+**You instantly receive:**
+- **1% of total supply** (60.2 billion tokens) as the creator
+- **99% automatically goes to the pool** paired with ETH
+- A **deterministic address** (same name+symbol always produces same address)
+- An **instantly tradeable token** with built-in liquidity
+
+Total supply: **6.02214076 × 10²⁴** tokens (10,000 moles, because chemistry is cool)
+
+### Trading Solids
+
+**Deposit ETH, get tokens:**
+```solidity
+// Send ETH to the contract
+solid.deposit{value: 1 ether}();
+// Returns tokens based on constant-product formula
+```
+
+Or just send ETH directly to the contract - it auto-converts to tokens!
+
+**Withdraw tokens for ETH:**
+```solidity
+// Burn tokens, receive ETH
+solid.withdraw(1000000000);
+```
+
+The AMM uses the **constant-product formula** (x × y = k) just like Uniswap, but it's built into the token itself.
+
+## Why Solids Are Better
+
+### 1. Zero Setup Friction
+
+**Traditional approach:**
+- Deploy token contract: ~$50 gas
+- Approve router: ~$10 gas
+- Create Uniswap pool: ~$100 gas
+- Add liquidity: ~$50 gas
+- **Total: $200+ and 4 transactions**
+
+**Solids approach:**
+- Make token: ~$20 gas + 0.001 ETH fee
+- **Total: $25 and 1 transaction**
+
+You save time, money, and complexity.
+
+### 2. Liquidity Can't Leave
+
+With traditional DEX pools, liquidity providers can withdraw at any time, killing your token's tradability.
+
+**With Solids, the initial 99% liquidity is permanently locked in the contract.** It can never be removed. Your token is always tradeable.
+
+### 3. Fair Launch by Default
+
+- **1% to creator** (you)
+- **99% to pool** (everyone else)
+- No presales, no VC allocation, no team vesting
+- The economics are transparent and hardcoded
+
+This is what fair launches should look like.
+
+### 4. Deterministic Addresses
+
+The same name and symbol always produce the same contract address. This means:
+- **No frontrunning** - if someone tries to steal your token name, they create the same address you would have
+- **Predictable deployments** - you can calculate addresses off-chain
+- **No name squatting** - first person to make("Bitcoin", "BTC") owns it forever
+
+### 5. Chemistry-Inspired Token Economics
+
+The total supply is **Avogadro's number × 10,000** (6.02214076 × 10²⁴).
+
+Why? Because if you're going to create internet money, you might as well make it represent actual physical quantities. 10,000 moles of anything is a tangible amount in chemistry.
+
+It's nerdy. It's fun. It's memorable.
+
+## Real Use Cases for Hobbyists
+
+### Community Tokens
+
+Launch a token for your Discord, DAO, or group chat in one transaction. Instant tradability means your community can start trading immediately.
+
+### Experimental Economics
+
+Want to test token bonding curves, game theory, or coordination mechanisms? Solids remove all the setup overhead so you can focus on the experiment.
+
+### Memecoins Done Right
+
+Every memecoin needs liquidity. With Solids, you skip straight to the fun part - building community and culture - without worrying about pools and liquidity management.
+
+### NFT Project Tokens
+
+Already have an NFT project? Launch a Solid as your ecosystem token. The fair launch mechanics and permanent liquidity make it perfect for community governance tokens.
+
+### Personal Currency
+
+Make a token representing you. Trade it with friends. Use it as social money. With a $25 entry price, why not?
+
+## Technical Details (For the Curious)
+
+### Constant-Product AMM
+
+When you deposit ETH:
+```
+tokens_out = pool_tokens - (pool_tokens × pool_eth) / (pool_eth + eth_in)
+```
+
+When you withdraw tokens:
+```
+eth_out = pool_eth - (pool_eth × pool_tokens) / (pool_tokens + tokens_in)
+```
+
+Same formula as Uniswap v2, but gas-optimized and built into the token.
+
+### Security Features
+
+- **Reentrancy protection** via EIP-1153 transient storage
+- **Deterministic deployments** using OpenZeppelin Clones (EIP-1167)
+- **Immutable parameters** - supply and distribution can't change
+- **No admin keys** - completely decentralized after creation
+
+### Gas Costs
+
+- **Make new Solid**: ~100k-150k gas (~$20 at 50 gwei)
+- **Deposit ETH**: ~50k gas (~$10)
+- **Withdraw tokens**: ~60k gas (~$12)
+
+About **3-5x cheaper** than equivalent Uniswap v2 operations because there's no external router or factory.
+
+## Getting Started
+
+### 1. Connect to the NOTHING contract
+
+The "NOTHING" contract is the factory for all Solids. It's deployed at a deterministic address.
+
+### 2. Make your Solid
+
+```solidity
+ISolid mySolid = NOTHING.make{value: 0.001 ether}("MyToken", "MTK");
+```
+
+### 3. Trade immediately
+
+Your token is now live with 99% of supply in the pool and 1% in your wallet.
+
+### 4. Share the contract address
+
+Anyone can trade by sending ETH to the contract or calling `deposit()`.
+
+## FAQ
+
+**Q: Can I remove liquidity?**
+A: No. The 99% pool liquidity is permanent. This is a feature, not a bug.
+
+**Q: What if someone else makes my token name?**
+A: They can't "steal" it - the same name+symbol always produces the same address. Whoever makes it first owns the creator share.
+
+**Q: Can I make multiple Solids?**
+A: Yes! Pay 0.001 ETH per token. Make as many as you want.
+
+**Q: What blockchain is this on?**
+A: Ethereum mainnet and major L2s (Base, Arbitrum, Optimism, Polygon).
+
+**Q: Is this audited?**
+A: The code uses battle-tested OpenZeppelin primitives and standard AMM math. Review the code yourself - it's only 86 lines.
+
+**Q: What's the catch?**
+A: No catch. It's an experiment in minimal viable liquidity. The 0.001 ETH fee prevents spam.
+
+**Q: Can I use this for serious projects?**
+A: The contracts are simple and secure, but do your own research. Start small, test thoroughly.
+
+## Philosophy
+
+Solids are built on three principles:
+
+1. **Simplicity** - One transaction to launch a tradeable token
+2. **Permanence** - Liquidity that can't be rugged
+3. **Fairness** - No presales, no special allocations, just transparent code
+
+We believe token launches should be accessible to everyone, not just projects with $100k+ budgets for liquidity bootstrapping.
+
+## Try It Today
+
+The future of token launches is simple, fair, and permanent.
+
+**Make your first Solid. See how it feels to launch a token with instant liquidity.**
+
+Then make another one for fun.
+
+---
+
+**Ready to start?** Check out the [deployment guide](README.md) or dive into the [technical docs](CLAUDE.md).
+
+**Still skeptical?** Read the [smart contract code](src/Solid.sol) - it's only 86 lines. No hidden surprises.
+
+**Built by crypto hobbyists, for crypto hobbyists.**
+
+*Make something. Make it Solid.*
