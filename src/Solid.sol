@@ -68,9 +68,9 @@ contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
             if (msg.value < MAKER_PAYMENT) revert LowPayment();
             (address location, bytes32 salt) = made(n, s);
             if (location.code.length != 0) revert AlreadyMade();
-            sol = ISolid(payable(location));
             location = Clones.cloneDeterministic(address(NOTHING), salt, 0);
-            Solid(payable(address(sol))).zzz_{value: msg.value}(n, s, msg.sender);
+            Solid(payable(location)).zzz_{value: msg.value}(n, s, msg.sender);
+            sol = ISolid(payable(location));
             emit Make(sol, n, s);
         }
     }
