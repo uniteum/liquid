@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
+import {ISolid} from "./ISolid.sol";
 import {ERC20} from "erc20/ERC20.sol";
 import {Clones} from "clones/Clones.sol";
 import {ReentrancyGuardTransient} from "reentrancy/ReentrancyGuardTransient.sol";
-import {ISolid} from "./ISolid.sol";
 
 contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
     uint256 constant MOLE = 6.02214076e23;
