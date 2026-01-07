@@ -203,23 +203,70 @@ Compare:
 
 ## Getting Started
 
-### 1. Connect to the NOTHING contract
+### Using Etherscan to Interact with Solids
 
-The "NOTHING" contract is the factory for all Solids. It's deployed at a deterministic address.
+You don't need to write any code - you can create and trade Solids directly through Etherscan.io!
 
-### 2. Make your Solid
+#### 1. Find the NOTHING Contract
 
-```solidity
-ISolid mySolid = NOTHING.make{value: 0.001 ether}("MyToken", "MTK");
-```
+The "NOTHING" contract is the factory for all Solids. Go to its address on Etherscan (deployed at a deterministic address on mainnet and L2s).
 
-### 3. Trade immediately
+#### 2. Make Your Solid via Etherscan
 
-Your token is now live with 99% of supply in the pool and 1% in your wallet.
+1. On Etherscan, go to the **Contract** tab
+2. Click **Write Contract**
+3. Click **Connect to Web3** and connect your wallet (MetaMask, WalletConnect, etc.)
+4. Find the **make** function
+5. Enter the following:
+   - **payableAmount (ether)**: Enter at least `0.001` (or more for better initial liquidity!)
+   - **n (string)**: Your token name (e.g., `"MyToken"`)
+   - **s (string)**: Your token symbol (e.g., `"MTK"`)
+6. Click **Write** and confirm the transaction
 
-### 4. Share the contract address
+That's it! Your Solid is now created with instant liquidity.
 
-Anyone can trade by sending ETH to the contract or calling `deposit()`.
+#### 3. Find Your New Solid's Address
+
+After the transaction confirms:
+1. Click on the transaction hash
+2. Look in the **Logs** section
+3. Find the **Make** event - it will show your new Solid's contract address
+4. Click on that address to view your new token contract
+
+#### 4. Trade Your Solid via Etherscan
+
+To **buy tokens** (deposit ETH):
+1. Go to your Solid's contract on Etherscan
+2. Click **Contract** → **Write Contract**
+3. Connect your wallet
+4. Find the **deposit** function
+5. Enter ETH amount in **payableAmount**
+6. Click **Write** and confirm
+
+To **sell tokens** (withdraw ETH):
+1. Same contract, **Write Contract** tab
+2. Find the **withdraw** function
+3. Enter the amount of tokens to sell (in wei, with 18 decimals)
+   - Example: `1000000000000000000` = 1 token
+4. Click **Write** and confirm
+
+To **boost intrinsic value** (add ETH to the pool):
+- Simply send ETH directly to the Solid's contract address from your wallet
+- This permanently increases the price floor for everyone!
+
+#### 5. Check Pool Status
+
+To see the current pool state:
+1. Go to **Read Contract** tab
+2. Find the **pool** function
+3. Click **Query** - it returns:
+   - **solPool**: SOL tokens in the pool
+   - **ethPool**: ETH in the pool (in wei)
+
+You can also check:
+- **balanceOf**: Your token balance (enter your address)
+- **totalSupply**: Always 6.02214076e27 (10,000 mol)
+- **name** and **symbol**: Token metadata
 
 ## FAQ
 
