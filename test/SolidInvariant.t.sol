@@ -137,9 +137,9 @@ contract SolidInvariantTest is StdInvariant, BaseTest {
     Solid public solid;
     SolidHandler public handler;
 
-    uint256 constant MOLE = 6.02214076e23;
-    uint256 constant MOLES = 10000;
-    uint256 constant SUPPLY = MOLES * MOLE;
+    uint256 constant MOL = 6.02214076e23;
+    uint256 constant MOLS = 10000;
+    uint256 constant SUPPLY = MOLS * MOL;
 
     function setUp() public override {
         super.setUp();

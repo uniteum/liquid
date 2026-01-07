@@ -7,9 +7,9 @@ import {BaseTest} from "./Base.t.sol";
 import {SolidUser} from "./SolidUser.sol";
 
 contract SolidTest is BaseTest {
-    uint256 constant MOLE = 6.02214076e23;
-    uint256 constant MOLES = 10000;
-    uint256 constant SUPPLY = MOLES * MOLE;
+    uint256 constant MOL = 6.02214076e23;
+    uint256 constant MOLS = 10000;
+    uint256 constant SUPPLY = MOLS * MOL;
     uint256 constant ETH = 1e9;
     Solid public N;
     SolidUser public owen;

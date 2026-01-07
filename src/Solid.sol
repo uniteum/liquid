@@ -7,9 +7,9 @@ import {Clones} from "clones/Clones.sol";
 import {ReentrancyGuardTransient} from "reentrancy/ReentrancyGuardTransient.sol";
 
 contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
-    uint256 constant MOLE = 6.02214076e23;
-    uint256 constant MOLES = 10000;
-    uint256 constant SUPPLY = MOLES * MOLE;
+    uint256 constant MOL = 6.02214076e23;
+    uint256 constant MOLS = 10000;
+    uint256 constant SUPPLY = MOLS * MOL;
     uint256 constant MAKER_PAYMENT = 0.001 ether;
     uint256 constant MAKER_SHARE = SUPPLY / 100;
     uint256 constant POOL_SHARE = SUPPLY - MAKER_SHARE;
