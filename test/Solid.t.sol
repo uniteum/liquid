@@ -196,4 +196,19 @@ contract SolidTest is BaseTest {
             emit log_named_uint("withdrawn eth", withdrawn);
         }
     }
+
+    function test_MakeFromNonNothingSendsSharesToCaller() public {
+        // Create a first Solid (Hydrogen) from NOTHING
+        Solid H = N.make{value: 0.001 ether}("Hydrogen", "H");
+        assertEq(H.balanceOf(address(this)), SUPPLY / 100, "creator should have 1% of H");
+
+        // Now call make from H (non-NOTHING) to create Helium
+        // The maker shares should still go to msg.sender (this), not to H
+        Solid he = H.make{value: 0.001 ether}("Helium", "He");
+
+        // Verify maker shares went to the actual caller (this), not to H
+        assertEq(he.balanceOf(address(this)), SUPPLY / 100, "creator should have 1% of He");
+        assertEq(he.balanceOf(address(H)), 0, "H should not have any He tokens");
+        assertEq(he.balanceOf(address(he)), SUPPLY - SUPPLY / 100, "He pool should have 99% of supply");
+    }
 }

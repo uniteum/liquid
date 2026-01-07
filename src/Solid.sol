@@ -61,6 +61,7 @@ contract Solid is ERC20, ReentrancyGuardTransient {
     function make(string calldata n, string calldata s) external payable returns (Solid sol) {
         if (this != NOTHING) {
             sol = NOTHING.make{value: msg.value}(n, s);
+            require(sol.transfer(msg.sender, MAKER_SHARE), "Transfer failed");
         } else {
             if (msg.value < MAKER_PAYMENT) revert LowPayment();
             (address location, bytes32 salt) = made(n, s);
