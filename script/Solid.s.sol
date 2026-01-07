@@ -6,7 +6,7 @@ import {Solid} from "../src/Solid.sol";
 
 /**
  * @notice Deploy the Solid protofactory
- * @dev Usage: forge script script/Solid.s.sol -f $chain --private-key $tx_key --broadcast --verify --delay 10 --retries 10
+ * @dev Usage: forge script script/Solid.qqq.sol -f $chain --private-key $tx_key --broadcast --verify --delay 10 --retries 10
  */
 contract SolidDeploy is Script {
     function run() external {

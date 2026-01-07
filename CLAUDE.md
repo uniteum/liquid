@@ -87,11 +87,11 @@ This file provides context for AI assistants (primarily Claude) to understand th
 ### 1. Make (Create New Solid)
 
 ```solidity
-function make(string calldata name, string calldata s) external payable returns (ISolid sol)
+function make(string calldata name, string calldata symbol) external payable returns (ISolid sol)
 ```
 
 **What it does:**
-- Creates new Solid with name `name` and symbol `s`
+- Creates new Solid with name `name` and symbol `symbol`
 - Requires minimum 0.001 ETH payment
 - Mints SUPPLY total supply (50% to maker, 50% to pool)
 - Initial ETH payment becomes pool liquidity
@@ -100,7 +100,7 @@ function make(string calldata name, string calldata s) external payable returns 
 **Formula:**
 ```solidity
 // Salt calculation
-salt = keccak256(abi.encode(name, s))
+salt = keccak256(abi.encode(name, symbol))
 
 // Supply split
 maker_share = SUPPLY / 2  // 50% to msg.sender
@@ -196,12 +196,12 @@ All balances must sum to total supply at all times.
 ### Creating New Solids
 
 ```solidity
-function made(string calldata name, string calldata s)
+function made(string calldata name, string calldata symbol)
     public view returns (bool yes, address location, bytes32 salt)
 ```
 
 **How it works:**
-- Uses CREATE2 with `keccak256(abi.encode(name, s))` as salt
+- Uses CREATE2 with `keccak256(abi.encode(name, symbol))` as salt
 - Same name+symbol always produces same address
 - Uses EIP-1167 minimal proxy (OpenZeppelin Clones)
 - Only callable from NOTHING instance
@@ -223,7 +223,7 @@ if (!exists) {
 When `make()` is called on a non-NOTHING instance:
 ```solidity
 if (this != NOTHING) {
-    sol = NOTHING.make{value: msg.value}(name, s);
+    sol = NOTHING.make{value: msg.value}(name, symbol);
     require(sol.transfer(msg.sender, SUPPLY / 2), "Transfer failed");
 }
 ```
@@ -259,15 +259,15 @@ contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
 - `balanceOf(address)` - Standard ERC20 balance query
 
 **Factory:**
-- `made(name, s)` - Check if Solid exists and predict address
-- `make(name, s)` - Create new Solid with deterministic address
+- `made(name, symbol)` - Check if Solid exists and predict address
+- `make(name, symbol)` - Create new Solid with deterministic address
 
 **Trading:**
 - `deposit()` - Buy SOL with ETH
 - `withdraw(sol)` - Sell SOL for ETH
 
 **Internal:**
-- `zzz_(name, s, maker)` - Initialization function (called once during creation)
+- `zzz_(name, symbol, maker)` - Initialization function (called once during creation)
 
 ## Security
 
@@ -369,7 +369,7 @@ FOUNDRY_PROFILE=deep forge test --match-contract SolidInvariant
 
 **Formatting:**
 - Run `forge fmt` before committing
-- Follows Foundry'ss default style guide
+- Follows Foundry's default style guide
 
 ### Code Quality & Linting
 
@@ -493,7 +493,7 @@ export chain=11155111  # Sepolia testnet
 
 ```bash
 chain=11155111
-forge script script/Solid.s.sol \
+forge script script/Solid.qqq.sol \
   -f $chain \
   --private-key $tx_key \
   --broadcast \
@@ -576,7 +576,7 @@ uint256 eth = H.withdraw(500);
 ## Constants Reference
 
 ```solidity
-MOL = 6.02214076e23        // Avogadro'ss number
+MOL = 6.02214076e23        // Avogadro's number
 MOLS = 10000                // Number of mols
 SUPPLY = MOLS * MOL       // Total supply (6.02214076e27)
 MAKER_FEE = 0.001 ether // Minimum payment to create Solid

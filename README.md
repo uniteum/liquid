@@ -84,7 +84,7 @@ forge snapshot
 
 ```bash
 chain=11155111
-forge script script/Liquid.s.sol -f $chain --private-key $tx_key --broadcast --verify --delay 10 --retries 10
+forge script script/Liquid.qqq.sol -f $chain --private-key $tx_key --broadcast --verify --delay 10 --retries 10
 ```
 
 ## Documentation
