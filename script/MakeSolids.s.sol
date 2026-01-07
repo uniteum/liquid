@@ -34,8 +34,12 @@ contract MakeSolids is Script {
         console2.log("Creating all Solids with total ETH:", totalEth);
 
         vm.startBroadcast();
-        (SolidFactory.SolidSpec[] memory existing, SolidFactory.SolidSpec[] memory created) =
-            factory.make{value: totalEth}(solids);
+        (
+            SolidFactory.SolidSpec[] memory existing,
+            SolidFactory.SolidSpec[] memory created,
+            uint256 feePer,
+            uint256 fee
+        ) = factory.make{value: totalEth}(solids);
 
         console2.log("\nSummary:");
         console2.log("  Created:", created.length);
