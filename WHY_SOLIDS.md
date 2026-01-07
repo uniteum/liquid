@@ -76,12 +76,8 @@ solid.withdraw(1000000000);
 ```
 
 **Increase the ETH pool (add intrinsic value):**
-```solidity
-// Send ETH directly to increase pool value without buying tokens
-payable(address(solid)).transfer(1 ether);
-```
 
-This is powerful: anyone can **permanently increase the intrinsic value** of a Solid by sending ETH directly to it. The ETH pool represents the token's **floor price** - it can never be withdrawn except through selling tokens.
+Simply send ETH directly to the token contract address (like you would send to any wallet). This permanently increases the intrinsic value and price floor of all tokens - the ETH can never be withdrawn except through selling tokens on the AMM.
 
 The AMM uses the **constant-product formula** (x × y = k) just like Uniswap, but it's built into the token itself.
 
@@ -240,7 +236,7 @@ A: Yes! Send at least 0.001 ETH per token (but consider sending more for better 
 A: Absolutely! The ETH you send determines your token's starting price. More ETH = higher initial value and better liquidity. The price scales linearly with your ETH contribution.
 
 **Q: Can I increase the ETH pool after making a token?**
-A: Yes! Anyone can send ETH directly to the contract address (using `send` or `transfer`, not `deposit()`). This permanently increases the intrinsic value and price floor of all tokens.
+A: Yes! Anyone can send ETH directly to the contract address (just like sending to a regular wallet). This permanently increases the intrinsic value and price floor of all tokens.
 
 **Q: What blockchain is this on?**
 A: Ethereum mainnet and major L2s (Base, Arbitrum, Optimism, Polygon).
