@@ -21,34 +21,70 @@ contract SolidFactory {
     }
 
     /**
-     * @notice Create multiple Solids in a single transaction
-     * @dev Refunds excess ETH to msg.sender
-     * @param solids Array of solids to create
-     * @return created Number of new Solids created
-     * @return skipped Number of Solids skipped (already existed)
+     * @notice Check which solids exist and which don't
+     * @param solids Array of solids to check
+     * @return existing Array of SolidSpecs that already exist
+     * @return notExisting Array of SolidSpecs that don't exist yet
      */
-    function batchMake(SolidSpec[] calldata solids) external payable returns (uint256 created, uint256 skipped) {
-        uint256 spent = 0;
+    function made(SolidSpec[] calldata solids)
+        public
+        view
+        returns (SolidSpec[] memory existing, SolidSpec[] memory notExisting)
+    {
+        uint256 existingCount = 0;
+        uint256 notExistingCount = 0;
 
+        // First pass: count
         for (uint256 i = 0; i < solids.length; i++) {
-            SolidSpec calldata solid = solids[i];
-
-            // Check if already exists
-            (bool yes,,) = SOLID.made(solid.name, solid.symbol);
-
+            (bool yes,,) = SOLID.made(solids[i].name, solids[i].symbol);
             if (yes) {
-                skipped++;
+                existingCount++;
             } else {
-                // Create the solid
-                SOLID.make{value: 0.001 ether}(solid.name, solid.symbol);
-                spent += 0.001 ether;
-                created++;
+                notExistingCount++;
             }
         }
 
-        emit BatchCreate(created, skipped, solids.length);
+        // Allocate arrays
+        existing = new SolidSpec[](existingCount);
+        notExisting = new SolidSpec[](notExistingCount);
+
+        // Second pass: populate
+        uint256 existingIndex = 0;
+        uint256 notExistingIndex = 0;
+        for (uint256 i = 0; i < solids.length; i++) {
+            (bool yes,,) = SOLID.made(solids[i].name, solids[i].symbol);
+            if (yes) {
+                existing[existingIndex++] = solids[i];
+            } else {
+                notExisting[notExistingIndex++] = solids[i];
+            }
+        }
+    }
+
+    /**
+     * @notice Create multiple Solids in a single transaction
+     * @dev Refunds excess ETH to msg.sender
+     * @param solids Array of solids to create
+     * @return existing Array of SolidSpecs that already existed
+     * @return created Array of SolidSpecs that were created
+     */
+    function make(SolidSpec[] calldata solids)
+        external
+        payable
+        returns (SolidSpec[] memory existing, SolidSpec[] memory created)
+    {
+        // Get arrays of existing and non-existing solids
+        (existing, created) = made(solids);
+
+        // Create the non-existing ones
+        for (uint256 i = 0; i < created.length; i++) {
+            SOLID.make{value: 0.001 ether}(created[i].name, created[i].symbol);
+        }
+
+        emit BatchCreate(created.length, existing.length, solids.length);
 
         // Refund excess ETH
+        uint256 spent = created.length * 0.001 ether;
         uint256 excess = msg.value - spent;
         if (excess > 0) {
             (bool ok,) = msg.sender.call{value: excess}("");

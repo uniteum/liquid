@@ -31,11 +31,12 @@ contract MakeSolids is Script {
 
         // Create all solids in single transaction
         SolidFactory factory = SolidFactory(factoryAddress);
-        (uint256 created, uint256 skipped) = factory.batchMake{value: totalEth}(solids);
+        (SolidFactory.SolidSpec[] memory existing, SolidFactory.SolidSpec[] memory created) =
+            factory.make{value: totalEth}(solids);
 
         console2.log("\nSummary:");
-        console2.log("  Created:", created);
-        console2.log("  Skipped:", skipped);
+        console2.log("  Created:", created.length);
+        console2.log("  Skipped:", existing.length);
 
         vm.stopBroadcast();
     }
