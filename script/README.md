@@ -34,25 +34,34 @@ SOLID_ADDRESS=0x... forge script script/SolidFactory.s.sol \
 
 **Output:** Save the deployed SolidFactory address for Step 3.
 
-## Step 3: Create All Elements
+## Step 3: Create Solids
 
-Invoke the factory to create all 118 elements from `elements.json` in a single transaction.
+Invoke the factory to create Solids from a JSON file in a single transaction.
 
 ```bash
-FACTORY_ADDRESS=0x... forge script script/MakeElements.s.sol \
+FACTORY_ADDRESS=0x... SOLIDS_PATH=script/elements.json forge script script/MakeSolids.s.sol \
   -f $chain \
   --private-key $tx_key \
   --broadcast
 ```
 
 **Requirements:**
-- Wallet must have at least 0.118 ETH (118 elements × 0.001 ETH)
-- Creates all elements in one transaction
-- Skips elements that already exist (idempotent)
+- Wallet must have at least 0.001 ETH per Solid to create
+- Creates all solids in one transaction
+- Skips solids that already exist (idempotent)
+- `SOLIDS_PATH` must point to a JSON file with array of `{name, symbol}` objects
+
+**Example:** To create all 118 elements:
+```bash
+FACTORY_ADDRESS=0x... SOLIDS_PATH=script/elements.json forge script script/MakeSolids.s.sol \
+  -f $chain \
+  --private-key $tx_key \
+  --broadcast
+```
 
 ## Files
 
 - **[Solid.s.sol](Solid.s.sol)** - Deploys Solid protofactory
 - **[SolidFactory.s.sol](SolidFactory.s.sol)** - Deploys SolidFactory with Solid reference
-- **[MakeElements.s.sol](MakeElements.s.sol)** - Creates all elements via factory
+- **[MakeSolids.s.sol](MakeSolids.s.sol)** - Creates Solids from JSON file via factory
 - **[elements.json](elements.json)** - Periodic table data (118 elements)
