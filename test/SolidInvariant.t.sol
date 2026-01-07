@@ -146,7 +146,7 @@ contract SolidInvariantTest is StdInvariant, BaseTest {
 
         // Create a new solid token
         Solid nothing = new Solid();
-        solid = nothing.make{value: 0.001 ether}("Hydrogen", "H");
+        solid = Solid(payable(address(nothing.make{value: 0.001 ether}("Hydrogen", "H"))));
 
         // Create handler
         handler = new SolidHandler(solid);

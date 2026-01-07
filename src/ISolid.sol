@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import {IERC20} from "ierc20/IERC20.sol";
+import {IERC20Metadata} from "ierc20/IERC20Metadata.sol";
 
 /**
  * @notice Interface for Solid - a constant-product AMM for ETH/SOL pairs with deterministic deployment
  */
-interface ISolid is IERC20 {
+interface ISolid is IERC20Metadata {
     /**
      * @notice Returns the current pool balances of SOL tokens and ETH
      * @return solPool The amount of SOL tokens in the pool

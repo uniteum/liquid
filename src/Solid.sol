@@ -1,11 +1,12 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
 import {ERC20} from "erc20/ERC20.sol";
 import {Clones} from "clones/Clones.sol";
 import {ReentrancyGuardTransient} from "reentrancy/ReentrancyGuardTransient.sol";
+import {ISolid} from "./ISolid.sol";
 
-contract Solid is ERC20, ReentrancyGuardTransient {
+contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
     uint256 public constant MOLE = 6.02214076e23;
     uint256 constant MOLES = 10000;
     uint256 constant SUPPLY = MOLES * MOLE;
@@ -58,7 +59,7 @@ contract Solid is ERC20, ReentrancyGuardTransient {
         location = Clones.predictDeterministicAddress(address(NOTHING), salt, address(NOTHING));
     }
 
-    function make(string calldata n, string calldata s) external payable returns (Solid sol) {
+    function make(string calldata n, string calldata s) external payable returns (ISolid sol) {
         if (this != NOTHING) {
             sol = NOTHING.make{value: msg.value}(n, s);
             require(sol.transfer(msg.sender, MAKER_SHARE), "Transfer failed");
@@ -66,10 +67,10 @@ contract Solid is ERC20, ReentrancyGuardTransient {
             if (msg.value < MAKER_PAYMENT) revert LowPayment();
             (address location, bytes32 salt) = made(n, s);
             if (location.code.length != 0) revert AlreadyMade();
-            sol = Solid(payable(location));
+            sol = ISolid(payable(location));
             location = Clones.cloneDeterministic(address(NOTHING), salt, 0);
-            sol.zzz_{value: msg.value}(n, s, msg.sender);
-            emit Make(this, n, s);
+            Solid(payable(address(sol))).zzz_{value: msg.value}(n, s, msg.sender);
+            emit Make(sol, n, s);
         }
     }
 
@@ -82,12 +83,4 @@ contract Solid is ERC20, ReentrancyGuardTransient {
         }
     }
 
-    event Make(Solid indexed solid, string indexed name, string indexed symbol);
-    event Deposit(Solid indexed solid, uint256 sol, uint256 eth);
-    event Withdraw(Solid indexed solid, uint256 sol, uint256 eth);
-
-    error Nothing();
-    error WithdrawFailed();
-    error LowPayment();
-    error AlreadyMade();
 }

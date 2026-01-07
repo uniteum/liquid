@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
+import {ISolid} from "../src/ISolid.sol";
 import {Solid} from "../src/Solid.sol";
 import {BaseTest} from "./Base.t.sol";
 import {SolidUser} from "./SolidUser.sol";
@@ -30,7 +31,7 @@ contract SolidTest is BaseTest {
         assertEq(N.symbol(), "");
     }
 
-    function test_MakeHydrogen() public returns (Solid H) {
+    function test_MakeHydrogen() public returns (ISolid H) {
         H = N.make{value: 0.001 ether}("Hydrogen", "H");
         assertEq(H.totalSupply(), SUPPLY);
         assertEq(H.name(), "Hydrogen");
@@ -41,7 +42,7 @@ contract SolidTest is BaseTest {
     }
 
     function test_MakeWithExtraPayment() public {
-        Solid H = N.make{value: 0.002 ether}("Helium", "He");
+        ISolid H = N.make{value: 0.002 ether}("Helium", "He");
         assertEq(H.totalSupply(), SUPPLY);
         assertEq(H.balanceOf(address(this)), SUPPLY / 100, "creator should have 1% of supply");
         assertEq(H.balanceOf(address(H)), SUPPLY - SUPPLY / 100, "pool should have 99% of supply");
@@ -49,23 +50,23 @@ contract SolidTest is BaseTest {
     }
 
     function test_MakeRevertsWithInsufficientPayment() public {
-        vm.expectRevert(Solid.LowPayment.selector);
+        vm.expectRevert(ISolid.LowPayment.selector);
         N.make{value: 0.0001 ether}("Lithium", "Li");
     }
 
     function test_MakeRevertsWithNoPayment() public {
-        vm.expectRevert(Solid.LowPayment.selector);
+        vm.expectRevert(ISolid.LowPayment.selector);
         N.make("Beryllium", "Be");
     }
 
     function test_MakeRevertsWhenAlreadyMade() public {
         N.make{value: 0.001 ether}("Carbon", "C");
-        vm.expectRevert(Solid.AlreadyMade.selector);
+        vm.expectRevert(ISolid.AlreadyMade.selector);
         N.make{value: 0.001 ether}("Carbon", "C");
     }
 
     function test_DepositDoesNotCreateTokens() public {
-        Solid H = N.make{value: 0.001 ether}("TestToken", "TT");
+        ISolid H = N.make{value: 0.001 ether}("TestToken", "TT");
 
         uint256 supplyBefore = H.totalSupply();
         uint256 poolBefore = H.balanceOf(address(H));
@@ -92,7 +93,7 @@ contract SolidTest is BaseTest {
     }
 
     function test_DepositWithdrawBalanceIntegrity() public {
-        Solid H = N.make{value: 0.001 ether}("Integrity", "INT");
+        ISolid H = N.make{value: 0.001 ether}("Integrity", "INT");
 
         // Have owen deposit
         uint256 depositAmt = 78227239616666287245;
@@ -110,7 +111,7 @@ contract SolidTest is BaseTest {
         assertEq(H.totalSupply(), SUPPLY, "Total supply changed!");
     }
 
-    function makeHydrogen(uint256 seed) public returns (Solid H, uint256 h, uint256 e) {
+    function makeHydrogen(uint256 seed) public returns (ISolid H, uint256 h, uint256 e) {
         seed = seed % ETH;
         H = test_MakeHydrogen();
         // H already has 0.001 ether from make(), add seed on top
@@ -118,13 +119,13 @@ contract SolidTest is BaseTest {
         (h, e) = H.pool();
     }
 
-    function test_StartingPrice(uint256 seed) public returns (Solid H, uint256 h, uint256 e) {
+    function test_StartingPrice(uint256 seed) public returns (ISolid H, uint256 h, uint256 e) {
         (H, h, e) = makeHydrogen(seed);
         assertEq(h, SUPPLY - SUPPLY / 100, "h should be 99% of SUPPLY");
         assertEq(e, 0.001 ether + (seed % ETH), "e should be 0.001 ether + seed");
     }
 
-    function test_StartingDeposit(uint256 seed, uint256 d) public returns (Solid H, uint256 h, uint256 e, uint256 s) {
+    function test_StartingDeposit(uint256 seed, uint256 d) public returns (ISolid H, uint256 h, uint256 e, uint256 s) {
         (H, h, e) = makeHydrogen(seed);
         d = d % address(owen).balance;
         if (e != 0 || d != 0) {
@@ -150,25 +151,25 @@ contract SolidTest is BaseTest {
         }
     }
 
-    function test_StartingDeposit11() public returns (Solid H, uint256 h, uint256 e, uint256 s) {
+    function test_StartingDeposit11() public returns (ISolid H, uint256 h, uint256 e, uint256 s) {
         (H, h, e, s) = test_StartingDeposit(1e6, 1e6);
     }
 
-    function test_StartingDeposit12() public returns (Solid H, uint256 h, uint256 e, uint256 s) {
+    function test_StartingDeposit12() public returns (ISolid H, uint256 h, uint256 e, uint256 s) {
         (H, h, e, s) = test_StartingDeposit(1e6, 2e6);
     }
 
-    function test_StartingDeposit21() public returns (Solid H, uint256 h, uint256 e, uint256 s) {
+    function test_StartingDeposit21() public returns (ISolid H, uint256 h, uint256 e, uint256 s) {
         (H, h, e, s) = test_StartingDeposit(2e6, 1e6);
     }
 
-    function test_StartingDeposit22() public returns (Solid H, uint256 h, uint256 e, uint256 s) {
+    function test_StartingDeposit22() public returns (ISolid H, uint256 h, uint256 e, uint256 s) {
         (H, h, e, s) = test_StartingDeposit(2e6, 2e6);
     }
 
     function test_DepositWithdraw(uint256 seed, uint256 d)
         public
-        returns (Solid H, uint256 deposited, uint256 withdrawn)
+        returns (ISolid H, uint256 deposited, uint256 withdrawn)
     {
         (H,,) = makeHydrogen(seed);
         d = d % address(owen).balance;
@@ -199,12 +200,12 @@ contract SolidTest is BaseTest {
 
     function test_MakeFromNonNothingSendsSharesToCaller() public {
         // Create a first Solid (Hydrogen) from NOTHING
-        Solid H = N.make{value: 0.001 ether}("Hydrogen", "H");
+        ISolid H = N.make{value: 0.001 ether}("Hydrogen", "H");
         assertEq(H.balanceOf(address(this)), SUPPLY / 100, "creator should have 1% of H");
 
         // Now call make from H (non-NOTHING) to create Helium
         // The maker shares should still go to msg.sender (this), not to H
-        Solid he = H.make{value: 0.001 ether}("Helium", "He");
+        ISolid he = Solid(payable(address(H))).make{value: 0.001 ether}("Helium", "He");
 
         // Verify maker shares went to the actual caller (this), not to H
         assertEq(he.balanceOf(address(this)), SUPPLY / 100, "creator should have 1% of He");
