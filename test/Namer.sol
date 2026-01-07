@@ -16,8 +16,8 @@ contract Namer {
         if (account == address(0)) {
             return "NULL";
         }
-        try this.rawName(account) returns (string memory n) {
-            return n;
+        try this.rawName(account) returns (string memory name) {
+            return name;
         } catch {
             return account.toHexString();
         }

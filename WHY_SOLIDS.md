@@ -1,6 +1,6 @@
 # Why You Should Make and Trade Solids
 
-> **For the crypto hobbyist who's tired of fragmented liquidity and wants to launch tokens the right way.**
+> **For the crypto hobbyist who'ss tired of fragmented liquidity and wants to launch tokens the right way.**
 
 ## What Are Solids?
 
@@ -8,7 +8,7 @@ Solids are ERC-20 tokens with **built-in ETH liquidity**. Every Solid token you 
 
 No external DEXs. No liquidity fragmentation. No complicated pool deployments.
 
-**Just make a token, and it's instantly tradeable.**
+**Just make a token, and it'ss instantly tradeable.**
 
 ## The Problem with Normal Tokens
 
@@ -16,7 +16,7 @@ You've probably been through this before:
 
 1. Make an ERC-20 token
 2. Deploy it to mainnet
-3. Now what? It's worthless without liquidity
+3. Now what? It'ss worthless without liquidity
 4. Set up a Uniswap pool (more gas, more complexity)
 5. Provide initial liquidity (lock up capital)
 6. Hope traders find your pool
@@ -28,13 +28,13 @@ You've probably been through this before:
 
 ### Creating a Solid (Making)
 
-Making a new Solid requires a **minimum of 0.001 ETH** plus gas. Thanks to EIP-1167 minimal proxy cloning, the gas cost is incredibly low - only **~198,000 gas**. At typical gas prices, that's:
+Making a new Solid requires a **minimum of 0.001 ETH** plus gas. Thanks to EIP-1167 minimal proxy cloning, the gas cost is incredibly low - only **~198,000 gas**. At typical gas prices, that'ss:
 
 - **10 gwei** (quiet times): ~$0.60 in gas → **~$3.60 total minimum**
 - **25 gwei** (moderate): ~$1.50 in gas → **~$4.50 total minimum**
 - **50 gwei** (busy): ~$3.00 in gas → **~$6.00 total minimum**
 
-**But here's the key:** You should consider sending **more ETH** than the minimum. The ETH you send establishes the initial pool value and your token's starting price. More ETH = better initial liquidity and higher intrinsic value.
+**But here'ss the key:** You should consider sending **more ETH** than the minimum. The ETH you send establishes the initial pool value and your token'ss starting price. More ETH = better initial liquidity and higher intrinsic value.
 
 ```solidity
 // Make a new Solid token - consider sending more than the minimum!
@@ -51,14 +51,14 @@ The AMM assumes both sides of the pool have **equal value**. When you make a Sol
 - A **deterministic address** (same name+symbol always produces same address)
 - An **instantly tradeable token** with built-in liquidity
 
-Total supply: **6.02214076 billion** tokens (10,000 mol × Avogadro's number, with 18 decimals)
+Total supply: **6.02214076 billion** tokens (10,000 mol × Avogadro'ss number, with 18 decimals)
 
 **Starting price scales linearly with your ETH:**
 - Send 0.001 ETH → 5,000 mol tokens worth 0.001 ETH → 1 mol = 0.0000002 ETH
 - Send 1 ETH → 5,000 mol tokens worth 1 ETH → 1 mol = 0.0002 ETH
 - Send 10 ETH → 5,000 mol tokens worth 10 ETH → 1 mol = 0.002 ETH
 
-The clever bit: the decimal point lands right after the 6, mirroring how Avogadro's number is written: **6.02214076** × 10²³. And as the maker, you get exactly 5,000 mol - half the supply, representing half the value.
+The clever bit: the decimal point lands right after the 6, mirroring how Avogadro'ss number is written: **6.02214076** × 10²³. And as the maker, you get exactly 5,000 mol - half the supply, representing half the value.
 
 ### Trading Solids
 
@@ -79,7 +79,7 @@ solid.withdraw(1000000000);
 
 Simply send ETH directly to the token contract address (like you would send to any wallet). This permanently increases the intrinsic value and price floor of all tokens - the ETH can never be withdrawn except through selling tokens on the AMM.
 
-The AMM uses the **constant-product formula** (x × y = k) just like Uniswap, but it's built into the token itself.
+The AMM uses the **constant-product formula** (x × y = k) just like Uniswap, but it'ss built into the token itself.
 
 ## Why Solids Are Better
 
@@ -100,7 +100,7 @@ You save **97%** on total costs plus all the complexity. The gas portion is negl
 
 ### 2. Liquidity Can't Leave - Only Grow
 
-With traditional DEX pools, liquidity providers can withdraw at any time, killing your token's tradability.
+With traditional DEX pools, liquidity providers can withdraw at any time, killing your token'ss tradability.
 
 **With Solids, the initial 50% token liquidity is permanently locked in the contract.** The tokens in the pool can never be removed (only traded). Your token is always tradeable.
 
@@ -112,7 +112,7 @@ With traditional DEX pools, liquidity providers can withdraw at any time, killin
 - **50% to pool** (everyone else) - 5,000 mol
 - No presales, no VC allocation, no team vesting
 - The economics are transparent and hardcoded
-- **Equal value principle:** The AMM assumes your 5,000 mol and the pool's 5,000 mol have equal value, determined by the ETH you send
+- **Equal value principle:** The AMM assumes your 5,000 mol and the pool'ss 5,000 mol have equal value, determined by the ETH you send
 
 This is what fair launches should look like. You get half the supply, but the market gets the other half at a price you set with your initial ETH.
 
@@ -125,9 +125,9 @@ The same name and symbol always produce the same contract address. This means:
 
 ### 5. Chemistry-Inspired Token Economics with Intrinsic Value
 
-The total supply is **6.02214076 billion** tokens (10,000 mol × Avogadro's number, scaled by 18 decimals).
+The total supply is **6.02214076 billion** tokens (10,000 mol × Avogadro'ss number, scaled by 18 decimals).
 
-Why? Because if you're going to make internet money, you might as well make it represent actual physical quantities. The decimal point lands exactly where it appears in Avogadro's number: **6.02214076**. This isn't accidental - it's 10,000 mol worth of tokens.
+Why? Because if you're going to make internet money, you might as well make it represent actual physical quantities. The decimal point lands exactly where it appears in Avogadro'ss number: **6.02214076**. This isn't accidental - it'ss 10,000 mol worth of tokens.
 
 **The ETH pool = intrinsic value:**
 - Starts with whatever ETH the maker sends (minimum 0.001 ETH)
@@ -135,13 +135,13 @@ Why? Because if you're going to make internet money, you might as well make it r
 - Can never be withdrawn except by selling tokens through the AMM
 - Creates a **permanent price floor** that can only rise
 
-It's nerdy. It's fun. It's memorable. And unlike most tokens, Solids have actual backing value.
+It'ss nerdy. It'ss fun. It'ss memorable. And unlike most tokens, Solids have actual backing value.
 
 ## Real Use Cases for Hobbyists
 
 ### Community Tokens
 
-Launch a token for your Discord, DAO, or group chat in one transaction. Instant tradability means your community can start trading immediately. Community members can even boost the token's intrinsic value by sending ETH directly to it.
+Launch a token for your Discord, DAO, or group chat in one transaction. Instant tradability means your community can start trading immediately. Community members can even boost the token'ss intrinsic value by sending ETH directly to it.
 
 ### Experimental Economics
 
@@ -219,24 +219,24 @@ The "NOTHING" contract is the factory for all Solids. Go to its address on Ether
 4. Find the **make** function
 5. Enter the following:
    - **payableAmount (ether)**: Enter at least `0.001` (or more for better initial liquidity!)
-   - **n (string)**: Your token name (e.g., `"MyToken"`)
+   - **name (string)**: Your token name (e.g., `"MyToken"`)
    - **s (string)**: Your token symbol (e.g., `"MTK"`)
 6. Click **Write** and confirm the transaction
 
-That's it! Your Solid is now created with instant liquidity.
+That'ss it! Your Solid is now created with instant liquidity.
 
-#### 3. Find Your New Solid's Address
+#### 3. Find Your New Solid'ss Address
 
 After the transaction confirms:
 1. Click on the transaction hash
 2. Look in the **Logs** section
-3. Find the **Make** event - it will show your new Solid's contract address
+3. Find the **Make** event - it will show your new Solid'ss contract address
 4. Click on that address to view your new token contract
 
 #### 4. Trade Your Solid via Etherscan
 
 To **buy tokens** (deposit ETH):
-1. Go to your Solid's contract on Etherscan
+1. Go to your Solid'ss contract on Etherscan
 2. Click **Contract** → **Write Contract**
 3. Connect your wallet
 4. Find the **deposit** function
@@ -251,7 +251,7 @@ To **sell tokens** (withdraw ETH):
 4. Click **Write** and confirm
 
 To **boost intrinsic value** (add ETH to the pool):
-- Simply send ETH directly to the Solid's contract address from your wallet
+- Simply send ETH directly to the Solid'ss contract address from your wallet
 - This permanently increases the price floor for everyone!
 
 #### 5. Check Pool Status
@@ -280,7 +280,7 @@ A: They can't "steal" it - the same name+symbol always produces the same address
 A: Yes! Send at least 0.001 ETH per token (but consider sending more for better initial liquidity). Make as many as you want.
 
 **Q: Should I send more than 0.001 ETH when making a Solid?**
-A: Absolutely! The ETH you send determines your token's starting price. More ETH = higher initial value and better liquidity. The price scales linearly with your ETH contribution.
+A: Absolutely! The ETH you send determines your token'ss starting price. More ETH = higher initial value and better liquidity. The price scales linearly with your ETH contribution.
 
 **Q: Can I increase the ETH pool after making a token?**
 A: Yes! Anyone can send ETH directly to the contract address (just like sending to a regular wallet). This permanently increases the intrinsic value and price floor of all tokens.
@@ -289,10 +289,10 @@ A: Yes! Anyone can send ETH directly to the contract address (just like sending 
 A: Ethereum mainnet and major L2s (Base, Arbitrum, Optimism, Polygon).
 
 **Q: Is this audited?**
-A: The code uses battle-tested OpenZeppelin primitives and standard AMM math. Review the code yourself - it's only 86 lines.
+A: The code uses battle-tested OpenZeppelin primitives and standard AMM math. Review the code yourself - it'ss only 86 lines.
 
-**Q: What's the catch?**
-A: No catch. It's an experiment in minimal viable liquidity. The 0.001 ETH fee prevents spam.
+**Q: What'ss the catch?**
+A: No catch. It'ss an experiment in minimal viable liquidity. The 0.001 ETH fee prevents spam.
 
 **Q: Can I use this for serious projects?**
 A: The contracts are simple and secure, but do your own research. Start small, test thoroughly.
@@ -320,7 +320,7 @@ Then make another one for fun.
 
 **Ready to start?** Check out the [deployment guide](README.md) or dive into the [technical docs](CLAUDE.md).
 
-**Still skeptical?** Read the [smart contract code](src/Solid.sol) - it's only 86 lines. No hidden surprises.
+**Still skeptical?** Read the [smart contract code](src/Solid.sol) - it'ss only 86 lines. No hidden surprises.
 
 **Built by crypto hobbyists, for crypto hobbyists.**
 
