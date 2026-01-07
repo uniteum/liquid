@@ -7,7 +7,7 @@ import {ReentrancyGuardTransient} from "reentrancy/ReentrancyGuardTransient.sol"
 import {ISolid} from "./ISolid.sol";
 
 contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
-    uint256 public constant MOLE = 6.02214076e23;
+    uint256 constant MOLE = 6.02214076e23;
     uint256 constant MOLES = 10000;
     uint256 constant SUPPLY = MOLES * MOLE;
     uint256 constant MAKER_PAYMENT = 0.001 ether;
@@ -82,5 +82,4 @@ contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
             _mint(maker, MAKER_SHARE);
         }
     }
-
 }
