@@ -40,10 +40,10 @@ interface ISolid is IERC20Metadata {
      * @param n The name of the Solid token
      * @param s The symbol of the Solid token
      * @return yes If the Solid with given name and symbol already exists
-     * @return location The predicted contract address
+     * @return home The predicted contract address
      * @return salt The CREATE2 salt used for deployment
      */
-    function made(string calldata n, string calldata s) external view returns (bool yes, address location, bytes32 salt);
+    function made(string calldata n, string calldata s) external view returns (bool yes, address home, bytes32 salt);
 
     /**
      * @notice Creates a new Solid instance with the given name and symbol
