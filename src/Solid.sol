@@ -13,6 +13,7 @@ contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
     uint256 constant MAKER_PAYMENT = 0.001 ether;
     uint256 constant MAKER_SHARE = SUPPLY / 100;
     uint256 constant POOL_SHARE = SUPPLY - MAKER_SHARE;
+
     Solid public immutable NOTHING = this;
 
     constructor() ERC20("", "") {}
