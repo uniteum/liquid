@@ -42,14 +42,14 @@ solid.make{value: 0.001 ether}("MyToken", "MTK");
 ```
 
 **You instantly receive:**
-- **1% of total supply** (~60.2 million tokens) as the creator - exactly **100 moles** worth
-- **99% automatically goes to the pool** (9,900 moles) paired with ETH
+- **1% of total supply** (~60.2 million tokens) as the creator - exactly **100 mol** worth
+- **99% automatically goes to the pool** (9,900 mol) paired with ETH
 - A **deterministic address** (same name+symbol always produces same address)
 - An **instantly tradeable token** with built-in liquidity
 
-Total supply: **6.02214076 billion** tokens (10,000 moles × Avogadro's number, with 18 decimals)
+Total supply: **6.02214076 billion** tokens (10,000 mol × Avogadro's number, with 18 decimals)
 
-The clever bit: the decimal point lands right after the 6, mirroring how Avogadro's number is written: **6.02214076** × 10²³. And as the maker, you get exactly 100 moles - a nice round amount in chemistry terms.
+The clever bit: the decimal point lands right after the 6, mirroring how Avogadro's number is written: **6.02214076** × 10²³. And as the maker, you get exactly 100 mol - a nice round amount in chemistry terms.
 
 ### Trading Solids
 
@@ -111,9 +111,9 @@ The same name and symbol always produce the same contract address. This means:
 
 ### 5. Chemistry-Inspired Token Economics
 
-The total supply is **6.02214076 billion** tokens (10,000 moles × Avogadro's number, scaled by 18 decimals).
+The total supply is **6.02214076 billion** tokens (10,000 mol × Avogadro's number, scaled by 18 decimals).
 
-Why? Because if you're going to create internet money, you might as well make it represent actual physical quantities. The decimal point lands exactly where it appears in Avogadro's number: **6.02214076**. This isn't accidental - it's 10,000 moles worth of tokens.
+Why? Because if you're going to create internet money, you might as well make it represent actual physical quantities. The decimal point lands exactly where it appears in Avogadro's number: **6.02214076**. This isn't accidental - it's 10,000 mol worth of tokens.
 
 It's nerdy. It's fun. It's memorable. And it makes the token supply actually mean something.
 
