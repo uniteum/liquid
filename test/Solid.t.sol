@@ -49,12 +49,12 @@ contract SolidTest is BaseTest {
     }
 
     function test_MakeRevertsWithInsufficientPayment() public {
-        vm.expectRevert(Solid.InvalidPayment.selector);
+        vm.expectRevert(Solid.LowPayment.selector);
         N.make{value: 0.0001 ether}("Lithium", "Li");
     }
 
     function test_MakeRevertsWithNoPayment() public {
-        vm.expectRevert(Solid.InvalidPayment.selector);
+        vm.expectRevert(Solid.LowPayment.selector);
         N.make("Beryllium", "Be");
     }
 

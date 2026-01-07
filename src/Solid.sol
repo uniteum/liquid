@@ -59,18 +59,13 @@ contract Solid is ERC20, ReentrancyGuardTransient {
         if (this != NOTHING) {
             sol = NOTHING.make{value: msg.value}(n, s);
         } else {
+            if (msg.value < 0.001 ether) revert LowPayment();
             (address location, bytes32 salt) = made(n, s);
+            if (location.code.length != 0) revert AlreadyMade();
             sol = Solid(payable(location));
-            if (location.code.length == 0) {
-                if (msg.value < 0.001 ether) {
-                    revert InvalidPayment();
-                }
-                location = Clones.cloneDeterministic(address(NOTHING), salt, 0);
-                sol.zzz_{value: msg.value}(n, s, msg.sender);
-                emit Make(this, n, s);
-            } else {
-                revert AlreadyMade();
-            }
+            location = Clones.cloneDeterministic(address(NOTHING), salt, 0);
+            sol.zzz_{value: msg.value}(n, s, msg.sender);
+            emit Make(this, n, s);
         }
     }
 
@@ -91,6 +86,6 @@ contract Solid is ERC20, ReentrancyGuardTransient {
 
     error Nothing();
     error WithdrawFailed();
-    error InvalidPayment();
+    error LowPayment();
     error AlreadyMade();
 }
