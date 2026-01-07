@@ -9,6 +9,9 @@ contract Solid is ERC20, ReentrancyGuardTransient {
     uint256 public constant MOLE = 6.02214076e23;
     uint256 constant MOLES = 10000;
     uint256 constant SUPPLY = MOLES * MOLE;
+    uint256 constant MAKER_PAYMENT = 0.001 ether;
+    uint256 constant MAKER_SHARE = SUPPLY / 100;
+    uint256 constant POOL_SHARE = SUPPLY - MAKER_SHARE;
     Solid public immutable NOTHING = this;
 
     constructor() ERC20("", "") {}
@@ -59,7 +62,7 @@ contract Solid is ERC20, ReentrancyGuardTransient {
         if (this != NOTHING) {
             sol = NOTHING.make{value: msg.value}(n, s);
         } else {
-            if (msg.value < 0.001 ether) revert LowPayment();
+            if (msg.value < MAKER_PAYMENT) revert LowPayment();
             (address location, bytes32 salt) = made(n, s);
             if (location.code.length != 0) revert AlreadyMade();
             sol = Solid(payable(location));
@@ -69,14 +72,12 @@ contract Solid is ERC20, ReentrancyGuardTransient {
         }
     }
 
-    function zzz_(string calldata n, string calldata s, address creator) external payable {
+    function zzz_(string calldata n, string calldata s, address maker) external payable {
         if (bytes(_symbol).length == 0) {
             _name = n;
             _symbol = s;
-            uint256 creatorShare = SUPPLY / 100;
-            uint256 poolShare = SUPPLY - creatorShare;
-            _mint(address(this), poolShare);
-            _mint(creator, creatorShare);
+            _mint(address(this), POOL_SHARE);
+            _mint(maker, MAKER_SHARE);
         }
     }
 
