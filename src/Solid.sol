@@ -48,34 +48,38 @@ contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
 
     receive() external payable {}
 
-    function made(string calldata n, string calldata s) public view returns (bool yes, address home, bytes32 salt) {
-        if (bytes(n).length == 0 || bytes(s).length == 0) {
+    function made(string calldata name, string calldata symbol)
+        public
+        view
+        returns (bool yes, address home, bytes32 salt)
+    {
+        if (bytes(name).length == 0 || bytes(symbol).length == 0) {
             revert Nothing();
         }
-        salt = keccak256(abi.encode(n, s));
+        salt = keccak256(abi.encode(name, symbol));
         home = Clones.predictDeterministicAddress(address(NOTHING), salt, address(NOTHING));
         yes = home.code.length > 0;
     }
 
-    function make(string calldata n, string calldata s) external payable returns (ISolid sol) {
+    function make(string calldata name, string calldata symbol) external payable returns (ISolid sol) {
         if (this != NOTHING) {
-            sol = NOTHING.make{value: msg.value}(n, s);
+            sol = NOTHING.make{value: msg.value}(name, symbol);
             require(sol.transfer(msg.sender, SUPPLY / 2), "Transfer failed");
         } else {
             if (msg.value < MAKER_FEE) revert PaymentLow();
-            (bool yes, address home, bytes32 salt) = made(n, s);
+            (bool yes, address home, bytes32 salt) = made(name, symbol);
             if (yes) revert MadeAlready();
             home = Clones.cloneDeterministic(address(NOTHING), salt, 0);
-            Solid(payable(home)).zzz_{value: msg.value}(n, s, msg.sender);
+            Solid(payable(home)).zzz_{value: msg.value}(name, symbol, msg.sender);
             sol = ISolid(payable(home));
-            emit Make(sol, n, s);
+            emit Make(sol, name, symbol);
         }
     }
 
-    function zzz_(string calldata n, string calldata s, address maker) external payable {
+    function zzz_(string calldata name, string calldata symbol, address maker) external payable {
         if (bytes(_symbol).length == 0) {
-            _name = n;
-            _symbol = s;
+            _name = name;
+            _symbol = symbol;
             _mint(address(this), SUPPLY / 2);
             _mint(maker, SUPPLY / 2);
         }
