@@ -12,7 +12,7 @@ contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
     uint256 constant SUPPLY = MOLS * MOL;
 
     ISolid public immutable NOTHING = this;
-    uint256 public immutable MAKER_PAYMENT = 0.001 ether;
+    uint256 public immutable MAKER_FEE = 0.001 ether;
 
     constructor() ERC20("", "") {}
 
@@ -62,7 +62,7 @@ contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
             sol = NOTHING.make{value: msg.value}(n, s);
             require(sol.transfer(msg.sender, SUPPLY / 2), "Transfer failed");
         } else {
-            if (msg.value < MAKER_PAYMENT) revert PaymentLow();
+            if (msg.value < MAKER_FEE) revert PaymentLow();
             (bool yes, address home, bytes32 salt) = made(n, s);
             if (yes) revert MadeAlready();
             home = Clones.cloneDeterministic(address(NOTHING), salt, 0);

@@ -7,7 +7,7 @@ import {SolidFactory} from "../src/SolidFactory.sol";
 /**
  * @notice Invoke SolidFactory to create Solids from a JSON file
  * @dev Usage: FACTORY_ADDRESS=0x... SOLIDS_PATH=path/to/solids.json forge script script/MakeSolids.s.sol -f $chain --private-key $tx_key --broadcast
- * @dev The script automatically calculates required ETH based on MAKER_PAYMENT from the Solid contract
+ * @dev The script automatically calculates required ETH based on MAKER_FEE from the Solid contract
  */
 contract MakeSolids is Script {
     function run() external {
@@ -27,10 +27,10 @@ contract MakeSolids is Script {
         // Create factory instance
         SolidFactory factory = SolidFactory(factoryAddress);
 
-        // Calculate exact ETH needed based on MAKER_PAYMENT
-        uint256 makerPayment = factory.SOLID().MAKER_PAYMENT();
+        // Calculate exact ETH needed based on MAKER_FEE
+        uint256 makerPayment = factory.SOLID().MAKER_FEE();
         uint256 totalEth = solids.length * makerPayment;
-        console2.log("MAKER_PAYMENT:", makerPayment);
+        console2.log("MAKER_FEE:", makerPayment);
         console2.log("Creating all Solids with total ETH:", totalEth);
 
         vm.startBroadcast();

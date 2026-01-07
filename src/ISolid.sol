@@ -17,7 +17,7 @@ interface ISolid is IERC20Metadata {
      * @notice Returns the minimum payment required to make a new Solid
      * @return The minimum ETH payment required (default 0.001 ether)
      */
-    function MAKER_PAYMENT() external view returns (uint256);
+    function MAKER_FEE() external view returns (uint256);
 
     /**
      * @notice Returns the current pool balances of SOL tokens and ETH
@@ -60,7 +60,7 @@ interface ISolid is IERC20Metadata {
 
     /**
      * @notice Makes a new Solid instance with the given name and symbol
-     * @dev Requires minimum payment of MAKER_PAYMENT. Reverts if already made.
+     * @dev Requires minimum payment of MAKER_FEE. Reverts if already made.
      * Mints 50% of SUPPLY to maker and 50% to pool. Initial ETH becomes pool liquidity.
      * Uses CREATE2 for deterministic deployment based on name and symbol.
      * @param name The name of the Solid token
@@ -104,7 +104,7 @@ interface ISolid is IERC20Metadata {
     error WithdrawFailed();
 
     /**
-     * @notice Thrown when payment is less than MAKER_PAYMENT in make()
+     * @notice Thrown when payment is less than MAKER_FEE in make()
      */
     error PaymentLow();
 

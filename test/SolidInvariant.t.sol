@@ -31,7 +31,7 @@ contract SolidHandler is Test {
     constructor(Solid _solid) {
         solid = _solid;
         // Initialize ghost variables with the creation payment
-        ghostTotalEthDeposited = _solid.MAKER_PAYMENT();
+        ghostTotalEthDeposited = _solid.MAKER_FEE();
     }
 
     /**
@@ -143,7 +143,7 @@ contract SolidInvariantTest is StdInvariant, BaseTest {
 
         // Create a new solid token
         Solid nothing = new Solid();
-        solid = Solid(payable(address(nothing.make{value: nothing.MAKER_PAYMENT()}("Hydrogen", "H"))));
+        solid = Solid(payable(address(nothing.make{value: nothing.MAKER_FEE()}("Hydrogen", "H"))));
         SUPPLY = solid.totalSupply();
 
         // Create handler
@@ -162,7 +162,7 @@ contract SolidInvariantTest is StdInvariant, BaseTest {
 
     /**
      * INVARIANT: Pool ETH balance should equal deposited - withdrawn
-     * (ghostTotalEthDeposited is initialized with the MAKER_PAYMENT creation payment)
+     * (ghostTotalEthDeposited is initialized with the MAKER_FEE creation payment)
      */
     function invariant_ethBalance() public view {
         uint256 poolEth = address(solid).balance;
@@ -242,7 +242,7 @@ contract SolidInvariantTest is StdInvariant, BaseTest {
 
     /**
      * INVARIANT: Pool should never have more ETH than deposited
-     * (ghostTotalEthDeposited includes the initial MAKER_PAYMENT payment)
+     * (ghostTotalEthDeposited includes the initial MAKER_FEE payment)
      */
     function invariant_ethSolvency() public view {
         uint256 poolEth = address(solid).balance;

@@ -77,7 +77,7 @@ contract SolidFactory {
         (existing, created) = made(solids);
 
         // Get the maker payment amount from the Solid contract
-        uint256 makerPayment = SOLID.MAKER_PAYMENT();
+        uint256 makerPayment = SOLID.MAKER_FEE();
 
         // Create the non-existing ones
         for (uint256 i = 0; i < created.length; i++) {
