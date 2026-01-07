@@ -73,7 +73,7 @@ This file provides context for AI assistants (primarily Claude) to understand th
 - **ETH** = Native Ethereum currency used for liquidity
 - **NOTHING** = Base Solid instance used as factory for creating new Solids
 - **Pool** = Contract balances of SOL tokens and ETH
-- **ENPLETHY** = Initial total supply (10000 mols = 6.02214076e27)
+- **SUPPLY** = Initial total supply (10000 mols = 6.02214076e27)
 
 ### Key Files
 
@@ -93,7 +93,7 @@ function make(string calldata n, string calldata s) external payable returns (IS
 **What it does:**
 - Creates new Solid with name `n` and symbol `s`
 - Requires minimum 0.001 ETH payment
-- Mints ENPLETHY total supply (50% to maker, 50% to pool)
+- Mints SUPPLY total supply (50% to maker, 50% to pool)
 - Initial ETH payment becomes pool liquidity
 - Uses CREATE2 for deterministic addresses
 
@@ -103,15 +103,15 @@ function make(string calldata n, string calldata s) external payable returns (IS
 salt = keccak256(abi.encode(n, s))
 
 // Supply split
-maker_share = ENPLETHY / 2  // 50% to msg.sender
-pool_share = ENPLETHY / 2   // 50% to contract
+maker_share = SUPPLY / 2  // 50% to msg.sender
+pool_share = SUPPLY / 2   // 50% to contract
 ```
 
 **Example:**
 ```solidity
 ISolid H = N.make{value: 0.001 ether}("Hydrogen", "H");
-// H.balanceOf(msg.sender) = ENPLETHY / 2
-// H.balanceOf(address(H)) = ENPLETHY / 2
+// H.balanceOf(msg.sender) = SUPPLY / 2
+// H.balanceOf(address(H)) = SUPPLY / 2
 // address(H).balance = 0.001 ether
 ```
 
@@ -178,7 +178,7 @@ solPool * ethPool = k  (approximately constant before and after trades)
 ### 2. Total Supply Conservation
 
 ```
-totalSupply() = ENPLETHY  (never changes after creation)
+totalSupply() = SUPPLY  (never changes after creation)
 ```
 
 Total supply is set once at creation and never changes. Deposit/withdraw only move tokens between users and pool.
@@ -186,7 +186,7 @@ Total supply is set once at creation and never changes. Deposit/withdraw only mo
 ### 3. Balance Integrity
 
 ```
-balanceOf(pool) + balanceOf(maker) + sum(other balances) = ENPLETHY
+balanceOf(pool) + balanceOf(maker) + sum(other balances) = SUPPLY
 ```
 
 All balances must sum to total supply at all times.
@@ -224,7 +224,7 @@ When `make()` is called on a non-NOTHING instance:
 ```solidity
 if (this != NOTHING) {
     sol = NOTHING.make{value: msg.value}(n, s);
-    require(sol.transfer(msg.sender, ENPLETHY / 2), "Transfer failed");
+    require(sol.transfer(msg.sender, SUPPLY / 2), "Transfer failed");
 }
 ```
 
@@ -238,7 +238,7 @@ This allows any Solid to create new Solids, but always delegates to NOTHING.
 contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
     uint256 constant MOL = 6.02214076e23;
     uint256 constant MOLS = 10000;
-    uint256 constant ENPLETHY = MOLS * MOL;
+    uint256 constant SUPPLY = MOLS * MOL;
     uint256 constant MAKER_PAYMENT = 0.001 ether;
 
     ISolid public immutable NOTHING = this;
@@ -312,8 +312,8 @@ if (!ok) {
 
 **IMPORTANT:** These invariants MUST hold at all times:
 
-1. **Total supply never changes**: `totalSupply() == ENPLETHY` always
-2. **Pool balance consistency**: `balanceOf(address(this)) + sum(user balances) == ENPLETHY`
+1. **Total supply never changes**: `totalSupply() == SUPPLY` always
+2. **Pool balance consistency**: `balanceOf(address(this)) + sum(user balances) == SUPPLY`
 3. **ETH balance consistency**: `address(this).balance` accurately reflects pool liquidity
 
 ## Development Workflow
@@ -541,9 +541,9 @@ always_use_create_2_factory = true
 ```solidity
 // Create "Hydrogen" "H"
 ISolid H = N.make{value: 0.001 ether}("Hydrogen", "H");
-// H.totalSupply() = ENPLETHY
-// H.balanceOf(msg.sender) = ENPLETHY / 2
-// H.balanceOf(address(H)) = ENPLETHY / 2
+// H.totalSupply() = SUPPLY
+// H.balanceOf(msg.sender) = SUPPLY / 2
+// H.balanceOf(address(H)) = SUPPLY / 2
 ```
 
 ### Adding Liquidity (Depositing ETH)
@@ -578,7 +578,7 @@ uint256 eth = H.withdraw(500);
 ```solidity
 MOL = 6.02214076e23        // Avogadro's number
 MOLS = 10000                // Number of mols
-ENPLETHY = MOLS * MOL       // Total supply (6.02214076e27)
+SUPPLY = MOLS * MOL       // Total supply (6.02214076e27)
 MAKER_PAYMENT = 0.001 ether // Minimum payment to create Solid
 ```
 
@@ -606,7 +606,7 @@ error MadeAlready();    // Solid already exists
 ```solidity
 (uint256 solPool, uint256 ethPool) = solid.pool();
 uint256 balance = solid.balanceOf(address(user));
-uint256 supply = solid.totalSupply();  // Always ENPLETHY
+uint256 supply = solid.totalSupply();  // Always SUPPLY
 ```
 
 ### Trading Formulas
