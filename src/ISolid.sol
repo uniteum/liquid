@@ -46,25 +46,28 @@ interface ISolid is IERC20Metadata {
 
     /**
      * @notice Checks if a Solid exists and computes its deterministic address
-     * @dev Uses CREATE2 with salt = keccak256(abi.encode(n, s)) for deterministic deployment
-     * @param n The name of the Solid token
-     * @param s The symbol of the Solid token
+     * @dev Uses CREATE2 with salt = keccak256(abi.encode(name, symbol)) for deterministic deployment
+     * @param name The name of the Solid token
+     * @param symbol The symbol of the Solid token
      * @return yes True if the Solid with given name and symbol already exists
      * @return home The predicted (or actual if exists) contract address
-     * @return salt The CREATE2 salt used for deployment (keccak256(abi.encode(n, s)))
+     * @return salt The CREATE2 salt used for deployment (keccak256(abi.encode(name, symbol)))
      */
-    function made(string calldata n, string calldata s) external view returns (bool yes, address home, bytes32 salt);
+    function made(string calldata name, string calldata symbol)
+        external
+        view
+        returns (bool yes, address home, bytes32 salt);
 
     /**
      * @notice Makes a new Solid instance with the given name and symbol
      * @dev Requires minimum payment of MAKER_PAYMENT. Reverts if already made.
      * Mints 50% of SUPPLY to maker and 50% to pool. Initial ETH becomes pool liquidity.
      * Uses CREATE2 for deterministic deployment based on name and symbol.
-     * @param n The name of the new Solid token
-     * @param s The symbol of the new Solid token
+     * @param name The name of the Solid token
+     * @param symbol The symbol of the Solid token
      * @return sol The newly made Solid instance
      */
-    function make(string calldata n, string calldata s) external payable returns (ISolid sol);
+    function make(string calldata name, string calldata symbol) external payable returns (ISolid sol);
 
     /**
      * @notice Emitted when a new Solid is made
