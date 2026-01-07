@@ -105,11 +105,15 @@ interface ISolid is IERC20Metadata {
 
     /**
      * @notice Thrown when payment is less than MAKER_FEE in make()
+     * @param sent The amount of ETH sent
+     * @param required The required minimum ETH payment
      */
-    error PaymentLow();
+    error PaymentLow(uint256 sent, uint256 required);
 
     /**
      * @notice Thrown when attempting to make a Solid that has already been made
+     * @param name The name of the Solid token
+     * @param symbol The symbol of the Solid token
      */
-    error MadeAlready();
+    error MadeAlready(string name, string symbol);
 }

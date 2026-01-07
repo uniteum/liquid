@@ -55,19 +55,21 @@ contract SolidTest is BaseTest {
 
     function test_MakeRevertsWithInsufficientPayment() public {
         uint256 insufficientPayment = N.MAKER_FEE() - 1;
-        vm.expectRevert(ISolid.PaymentLow.selector);
+        vm.expectRevert(
+            abi.encodeWithSelector(ISolid.PaymentLow.selector, insufficientPayment, N.MAKER_FEE())
+        );
         N.make{value: insufficientPayment}("Lithium", "Li");
     }
 
     function test_MakeRevertsWithNoPayment() public {
-        vm.expectRevert(ISolid.PaymentLow.selector);
+        vm.expectRevert(abi.encodeWithSelector(ISolid.PaymentLow.selector, 0, N.MAKER_FEE()));
         N.make("Beryllium", "Be");
     }
 
     function test_MakeRevertsWhenAlreadyMade() public {
         uint256 payment = N.MAKER_FEE();
         N.make{value: payment}("Carbon", "C");
-        vm.expectRevert(ISolid.MadeAlready.selector);
+        vm.expectRevert(abi.encodeWithSelector(ISolid.MadeAlready.selector, "Carbon", "C"));
         N.make{value: payment}("Carbon", "C");
     }
 
