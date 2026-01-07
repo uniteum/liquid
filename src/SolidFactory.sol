@@ -76,15 +76,18 @@ contract SolidFactory {
         // Get arrays of existing and non-existing solids
         (existing, created) = made(solids);
 
+        // Get the maker payment amount from the Solid contract
+        uint256 makerPayment = SOLID.MAKER_PAYMENT();
+
         // Create the non-existing ones
         for (uint256 i = 0; i < created.length; i++) {
-            SOLID.make{value: 0.001 ether}(created[i].name, created[i].symbol);
+            SOLID.make{value: makerPayment}(created[i].name, created[i].symbol);
         }
 
         emit MadeBatch(created.length, existing.length, solids.length);
 
         // Refund excess ETH
-        uint256 spent = created.length * 0.001 ether;
+        uint256 spent = created.length * makerPayment;
         uint256 excess = msg.value - spent;
         if (excess > 0) {
             (bool ok,) = msg.sender.call{value: excess}("");
