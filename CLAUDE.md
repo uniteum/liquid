@@ -1,11 +1,11 @@
-# CLAUDE.md - Liquid Protocol
+# CLAUDE.md - Solid Protocol
 
-> Context guide for AI-assisted development of the Liquid protocol.
+> Context guide for AI-assisted development of the Solid protocol.
 
 ## Meta: Maintaining This Document
 
 ### Purpose
-This file provides context for AI assistants (primarily Claude) to understand the Liquid protocol codebase. It is optimized for token efficiency and accuracy.
+This file provides context for AI assistants (primarily Claude) to understand the Solid protocol codebase. It is optimized for token efficiency and accuracy.
 
 ### When to Update
 
@@ -25,7 +25,7 @@ This file provides context for AI assistants (primarily Claude) to understand th
 ### How to Update
 
 **Optimization Guidelines:**
-- Keep total length under 650 lines (currently ~641 lines)
+- Keep total length under 500 lines
 - Prioritize formulas, patterns, and non-obvious mechanics
 - Remove redundant explanations
 - Use concise code examples over prose
@@ -48,7 +48,7 @@ This file provides context for AI assistants (primarily Claude) to understand th
 ### Validation Process
 
 **Before finalizing updates:**
-1. Verify formulas against actual code in [src/Liquid.sol](src/Liquid.sol)
+1. Verify formulas against actual code in [src/Solid.sol](src/Solid.sol)
 2. Check that line counts are approximately correct
 3. Test code examples compile/run if they've changed
 4. Ensure Quick Reference section remains accurate
@@ -58,210 +58,216 @@ This file provides context for AI assistants (primarily Claude) to understand th
 
 - [README.md](README.md) - User-facing introduction
 - [foundry.toml](foundry.toml) - Build configuration (authoritative source)
-- [src/Liquid.sol](src/Liquid.sol) - Source of truth for all mechanics
+- [src/Solid.sol](src/Solid.sol) - Source of truth for all mechanics
+- [src/ISolid.sol](src/ISolid.sol) - Interface definitions
 
 **If user feedback conflicts with CLAUDE.md:** Update this file to reflect reality, then confirm the change with the user.
 
 ## Overview
 
-**Liquid** is a constant-product AMM protocol on Ethereum where any ERC-20 token can be wrapped into a "liquid" token with built-in liquidity.
+**Solid** is a constant-product AMM protocol on Ethereum where SOL tokens are traded against ETH with deterministic deployment.
 
-### Core Metaphor
+### Core Concepts
 
-- **Ice/Substance** = External ERC-20 backing token (state variable: `substance`)
-- **Solid** = Backing token amount (parameter: `solid`)
-- **Liquid** = Wrapped ERC-20 with AMM liquidity (parameter: `liquid`)
-- **Fluids** = Variable name for other liquid amounts in cross-swaps
-- **Water** = Base Liquid instance used for cross-pool swaps
-- **Pool** = Liquid tokens held by contract
-- **Lake** = Water tokens held by contract
-- **Mass** = Backing token balance held by contract
+- **SOL** = ERC-20 token created by the protocol (state variable: balances)
+- **ETH** = Native Ethereum currency used for liquidity
+- **NOTHING** = Base Solid instance used as factory for creating new Solids
+- **Pool** = Contract balances of SOL tokens and ETH
+- **ENPLETHY** = Initial total supply (10000 mols = 6.02214076e27)
 
-### Key File
+### Key Files
 
-**[src/Liquid.sol](src/Liquid.sol)** (189 lines) - Single contract implementing entire protocol
+- **[src/Solid.sol](src/Solid.sol)** (84 lines) - Main contract
+- **[src/ISolid.sol](src/ISolid.sol)** (102 lines) - Interface with comprehensive NatSpec
+- **[test/Solid.t.sol](test/Solid.t.sol)** (264 lines) - Core tests
+- **[test/SolidUser.sol](test/SolidUser.sol)** (49 lines) - Test helper
 
 ## Core Operations
 
-### 1. Heat (Solid → Liquid)
+### 1. Make (Create New Solid)
 
 ```solidity
-function heat(uint256 solid) external nonReentrant
+function make(string calldata n, string calldata s) external payable returns (ISolid sol)
 ```
 
 **What it does:**
-- User deposits `solid` of backing token
-- Contract mints `solid` to pool AND `solid` to user (2x mint)
-- Result: User owns `solid` liquid tokens, pool grows by `solid`
-
-**Example:**
-```solidity
-// User has 1000 USDC
-usdc.approve(address(liquidUSDC), 1000);
-liquidUSDC.heat(1000);
-// User now has: 1000 liquid (liquid-USDC)
-// Pool now has: 1000 liquid (liquid-USDC)
-```
-
-### 2. Cool (Liquid → Solid)
-
-```solidity
-function cool(uint256 liquid) external nonReentrant returns (uint256 solid)
-```
-
-**What it does:**
-- Burns liquid proportionally from both user and pool
-- Returns backing tokens based on: `liquid * (backing_balance / user_held_liquid)`
-- Burns total of `2 * liquid` (maintaining symmetry with heat)
+- Creates new Solid with name `n` and symbol `s`
+- Requires minimum 0.001 ETH payment
+- Mints ENPLETHY total supply (50% to maker, 50% to pool)
+- Initial ETH payment becomes pool liquidity
+- Uses CREATE2 for deterministic addresses
 
 **Formula:**
 ```solidity
-ours = 2 * liquid * pool / totalSupply   // pool burn
-mine = 2 * liquid * held / totalSupply   // user burn
-solid = liquid * mass() / held           // backing tokens returned
+// Salt calculation
+salt = keccak256(abi.encode(n, s))
+
+// Supply split
+maker_share = ENPLETHY / 2  // 50% to msg.sender
+pool_share = ENPLETHY / 2   // 50% to contract
 ```
 
-### 3. Sell (Liquid → Water)
-
+**Example:**
 ```solidity
-function sell(uint256 liquid) external returns (uint256 water)
+ISolid H = N.make{value: 0.001 ether}("Hydrogen", "H");
+// H.balanceOf(msg.sender) = ENPLETHY / 2
+// H.balanceOf(address(H)) = ENPLETHY / 2
+// address(H).balance = 0.001 ether
 ```
 
-**Constant Product Formula:**
+### 2. Deposit (ETH → SOL)
+
 ```solidity
-// Invariant: pool * lake = k
-filled = pool + liquid
-drained = pool * lake / filled
-water = lake - drained
+function deposit() public payable returns (uint256 sol)
 ```
 
 **What it does:**
-- Calculates water received for selling `liquid` to pool
-- Transfers liquid from user to pool
-- Transfers water from pool's lake to user
-
-### 4. Buy (Water → Liquid)
-
-```solidity
-function buy(uint256 water) external returns (uint256 liquid)
-```
+- Deposits ETH to receive SOL tokens from pool
+- Uses constant-product formula
+- Does NOT mint new tokens (transfers from pool)
+- Pool SOL decreases, pool ETH increases
 
 **Formula:**
 ```solidity
-// Uses sells() with reversed pool/lake (symmetric formula)
-liquid = sells(water, lake, pool)
-// Which expands to: liquid = pool - pool * lake / (lake + water)
+sol = solPool - solPool * (ethPool - eth) / ethPool
+// Equivalent to: sol = solPool * eth / ethPool
+// This is the delta that makes the product constant
 ```
-
-**What it does:**
-- Buys liquid by spending exactly `water` amount
-- Transfers water from user to pool's lake
-- Transfers liquid from pool to user
-
-### 5. Cross-Liquid Swaps
-
-```solidity
-function sell(uint256 liquid, Liquid fluid) external
-    returns (uint256 water, uint256 fluids)
-function buy(uint256 liquid, Liquid fluid) external
-    returns (uint256 water, uint256 fluids)
-```
-
-**What it does:**
-- Swaps between two different Liquid pools using water as intermediary
-- `sell(liquid, fluid)`: Sell `liquid` from this pool, buy from `fluid` pool
-- `buy(liquid, fluid)`: Buy `liquid` from `fluid` pool, sell to this pool
-- Example: Sell liquid-USDC to buy liquid-DAI in single transaction
-- Both pools maintain their AMM invariants
-
-## Factory Pattern
-
-### Creating New Liquids
-
-```solidity
-function liquify(IERC20Metadata stuff) public returns (Liquid fluid)
-```
-
-**How it works:**
-- Uses CREATE2 with `bytes32(uint160(address(stuff)))` as salt
-- Same backing token always produces same Liquid address
-- Uses EIP-1167 minimal proxy (OpenZeppelin Clones)
-- Only callable from main WATER instance
 
 **Example:**
 ```solidity
-IERC20Metadata usdc = IERC20Metadata(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-Liquid liquidUSDC = water.liquify(usdc);
-// liquidUSDC address is deterministic based on USDC address
+uint256 sol = H.deposit{value: 1 ether}();
+// Transfers sol tokens from pool to msg.sender
+// Pool ETH increases by 1 ether
 ```
 
-### Convenience: Create and Heat in One Call
+### 3. Withdraw (SOL → ETH)
 
 ```solidity
-function liquify(uint256 solid, IERC20Metadata stuff) external
+function withdraw(uint256 sol) external nonReentrant returns (uint256 eth)
 ```
 
 **What it does:**
-- Creates new liquid for `stuff` (if doesn't exist)
-- Heats `solid` amount into that liquid
-- Transfers the resulting liquid tokens to msg.sender
+- Withdraws ETH by depositing SOL tokens to pool
+- Uses constant-product formula
+- Does NOT burn tokens (transfers to pool)
+- Pool SOL increases, pool ETH decreases
+
+**Formula:**
+```solidity
+eth = ethPool - ethPool * solPool / (solPool + sol)
+```
 
 **Example:**
 ```solidity
-// Create liquid-USDC and heat 1000 USDC in one transaction
-usdc.approve(address(water), 1000);
-water.liquify(1000, usdc);
-// Creates liquidUSDC if needed, heats 1000, sends liquid tokens to msg.sender
+uint256 eth = H.withdraw(100);
+// Transfers 100 SOL from msg.sender to pool
+// Transfers calculated eth to msg.sender
 ```
-
-## Architecture
-
-### Contract Structure
-
-```solidity
-contract Liquid is ERC20, ReentrancyGuardTransient {
-    Liquid public immutable WATER = this;
-    IERC20Metadata public substance;  // Backing token
-}
-```
-
-### State Variables
-
-- `WATER` - Immutable self-reference (main instance for factory)
-- `substance` - The backing ERC-20 token for this Liquid
-
-### Key Functions
-
-**Balance Queries:**
-- `pool()` - Returns liquid tokens held by contract
-- `lake()` - Returns water tokens held by contract
-- `mass()` - Returns backing tokens held by contract
-- `update()` - Internal token transfer (callable only by other Liquids)
-
-**Access Control:**
-- `onlyLiquid` modifier - Ensures caller is registered Liquid instance
-- Protects `bought()`, `sold()`, `update()` from external manipulation
 
 ## Mathematical Invariants
 
 ### 1. Constant Product AMM
 
 ```
-pool * lake = k  (constant before and after trades)
+solPool * ethPool = k  (approximately constant before and after trades)
 ```
 
-### 2. Heat/Cool Symmetry
+**Note:** Due to the formulas used, the product actually increases slightly after each trade, providing a built-in fee mechanism.
+
+### 2. Total Supply Conservation
 
 ```
-Total minted in heat = 2 * solid
-Total burned in cool = 2 * liquid
+totalSupply() = ENPLETHY  (never changes after creation)
 ```
 
-### 3. Backing Token Conservation
+Total supply is set once at creation and never changes. Deposit/withdraw only move tokens between users and pool.
+
+### 3. Balance Integrity
 
 ```
-substance.balanceOf(address(liquid)) = sum of all heated solid - sum of all cooled solid
+balanceOf(pool) + balanceOf(maker) + sum(other balances) = ENPLETHY
 ```
+
+All balances must sum to total supply at all times.
+
+## Factory Pattern
+
+### Creating New Solids
+
+```solidity
+function made(string calldata n, string calldata s)
+    public view returns (bool yes, address location, bytes32 salt)
+```
+
+**How it works:**
+- Uses CREATE2 with `keccak256(abi.encode(n, s))` as salt
+- Same name+symbol always produces same address
+- Uses EIP-1167 minimal proxy (OpenZeppelin Clones)
+- Only callable from NOTHING instance
+
+**Example:**
+```solidity
+// Check if "Hydrogen" "H" exists
+(bool exists, address addr, bytes32 salt) = N.made("Hydrogen", "H");
+
+// Create if doesn't exist
+if (!exists) {
+    ISolid H = N.make{value: 0.001 ether}("Hydrogen", "H");
+    assert(address(H) == addr);  // Deterministic!
+}
+```
+
+### Delegation Pattern
+
+When `make()` is called on a non-NOTHING instance:
+```solidity
+if (this != NOTHING) {
+    sol = NOTHING.make{value: msg.value}(n, s);
+    require(sol.transfer(msg.sender, ENPLETHY / 2), "Transfer failed");
+}
+```
+
+This allows any Solid to create new Solids, but always delegates to NOTHING.
+
+## Architecture
+
+### Contract Structure
+
+```solidity
+contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
+    uint256 constant MOL = 6.02214076e23;
+    uint256 constant MOLS = 10000;
+    uint256 constant ENPLETHY = MOLS * MOL;
+    uint256 constant MAKER_PAYMENT = 0.001 ether;
+
+    ISolid public immutable NOTHING = this;
+}
+```
+
+### State Variables
+
+- `NOTHING` - Immutable self-reference (main instance for factory)
+- `_name` - Token name (from ERC20)
+- `_symbol` - Token symbol (from ERC20)
+- `_balances` - Token balances mapping (from ERC20)
+
+### Key Functions
+
+**Balance Queries:**
+- `pool()` - Returns (solPool, ethPool) tuple
+- `balanceOf(address)` - Standard ERC20 balance query
+
+**Factory:**
+- `made(n, s)` - Check if Solid exists and predict address
+- `make(n, s)` - Create new Solid with deterministic address
+
+**Trading:**
+- `deposit()` - Buy SOL with ETH
+- `withdraw(sol)` - Sell SOL for ETH
+
+**Internal:**
+- `zzz_(n, s, maker)` - Initialization function (called once during creation)
 
 ## Security
 
@@ -274,51 +280,41 @@ modifier nonReentrant() {
 }
 ```
 
-- All state-changing functions use `nonReentrant`
+- `withdraw()` uses `nonReentrant` (sends ETH to msg.sender)
+- `deposit()` is payable, no reentrancy needed (receives ETH)
 - Transient storage clears after transaction
-- Protects against malicious ERC-20 callbacks
 
-### Access Control
+### Safe ETH Transfers
 
 ```solidity
-modifier onlyLiquid() {
-    Liquid fluid = Liquid(msg.sender);
-    (address predicted,) = WATER.liquified(fluid.substance());
-    if (msg.sender != predicted) {
-        revert Unauthorized();
+(bool ok, bytes memory returnData) = msg.sender.call{value: eth}("");
+if (!ok) {
+    if (returnData.length > 0) {
+        assembly {
+            revert(add(returnData, 32), mload(returnData))
+        }
+    } else {
+        revert WithdrawFailed();
     }
-    _;
 }
 ```
 
-- Only registered Liquid instances can call cross-pool functions
-- Validates caller by checking predicted CREATE2 address
-- Applied to: `bought()`, `sold()`, `update()`
+- Propagates revert reason from failed transfers
+- Custom error if no revert reason provided
 
-### Safe Token Handling
+### Factory Access Control
 
-```solidity
-using SafeERC20 for IERC20Metadata;
-```
+- `zzz_()` only callable during initialization (checks `_symbol` is empty)
+- No explicit access control (anyone can call once)
+- CREATE2 ensures deterministic addresses prevent front-running
 
-- All token transfers use SafeERC20
-- Handles non-standard ERC-20 implementations
-- No raw `transfer()` or `transferFrom()` calls
+### Critical Invariants
 
-### Token Approval Requirements
+**IMPORTANT:** These invariants MUST hold at all times:
 
-**IMPORTANT:** Token approval is ONLY required for heat operations.
-
-**Requires approval:**
-- `heat(solid)` - User must approve liquid contract to spend backing tokens
-
-**NO approval needed (only requires msg.sender ownership):**
-- `cool(liquid)` - Burns from msg.sender's balance
-- `buy(water)` - Transfers water from msg.sender
-- `sell(liquid)` - Transfers liquid from msg.sender
-- Cross-swaps - Use msg.sender's tokens
-
-The contract uses `transferFrom(msg.sender, ...)` which works directly when msg.sender owns the tokens being transferred.
+1. **Total supply never changes**: `totalSupply() == ENPLETHY` always
+2. **Pool balance consistency**: `balanceOf(address(this)) + sum(user balances) == ENPLETHY`
+3. **ETH balance consistency**: `address(this).balance` accurately reflects pool liquidity
 
 ## Development Workflow
 
@@ -334,8 +330,8 @@ forge fmt            # Format code
 ### Running Specific Tests
 
 ```bash
-forge test --match-test test_HeatCool
-forge test --match-test test_HeatSellCoolBuy
+forge test --match-test test_MakeHydrogen
+forge test --match-test test_DepositWithdraw
 forge test --match-contract SolidInvariant  # Run invariant tests
 ```
 
@@ -421,21 +417,23 @@ FOUNDRY_PROFILE=deep forge test --match-contract SolidInvariant
 ### Base Test Setup
 
 ```solidity
-contract LiquidTest is BaseTest {
-    Liquid public W;    // Water
-    Liquid public U;    // First liquid
-    Liquid public V;    // Second liquid
-    LiquidUser public owen;  // Test users
-    LiquidUser public alex;
-    LiquidUser public beck;
+contract SolidTest is BaseTest {
+    uint256 constant MOL = 6.02214076e23;
+    uint256 constant MOLS = 10000;
+    uint256 constant SUPPLY = MOLS * MOL;
+    uint256 constant ETH = 1e9;
+    Solid public N;
+    SolidUser public owen;
 
     function setUp() public virtual override {
         super.setUp();
         owen = newUser("owen");
-        W = new Liquid(owen.newToken("W", 1e9));
-        owen.heat(W, 1e9);
-        U = W.liquify(owen.newToken("U", 1e9));
-        V = W.liquify(owen.newToken("V", 1e9));
+        N = new Solid();
+    }
+
+    function newUser(string memory name) internal returns (SolidUser user) {
+        user = new SolidUser(name, N);
+        vm.deal(address(user), ETH);
     }
 }
 ```
@@ -443,34 +441,43 @@ contract LiquidTest is BaseTest {
 ### Test User Pattern
 
 ```solidity
-contract LiquidUser is User {
-    function heat(Liquid U, uint256 solid) public { }
-    function cool(Liquid U, uint256 liquid) public returns (uint256 solid) { }
-    function sell(Liquid U, uint256 liquid) public returns (uint256 water) { }
-    function liquidate(Liquid U) public returns (uint256 liquid, uint256 solid) { }
+contract SolidUser is User {
+    function deposit(ISolid U, uint256 eth) public returns (uint256 solid) { }
+    function withdraw(ISolid U, uint256 solid) public returns (uint256 eth) { }
+    function liquidate(ISolid U) public returns (uint256 eth, uint256 solid) { }
 }
 ```
 
-**LiquidUser** wraps operations with automatic logging and balance tracking.
+**SolidUser** wraps operations with automatic logging and balance tracking.
 
 ### Example Test
 
 ```solidity
-function test_HeatCool() public returns (uint256 liquid, uint256 solid) {
-    giveaway();                        // Distribute tokens to users
-    owen.heat(U, 500);
-    alex.heat(U, 500);
-    beck.heat(U, 500);
+function test_DepositWithdraw(uint256 seed, uint256 d) public {
+    (ISolid H,,) = makeHydrogen(seed);
+    d = d % address(owen).balance;
+    if (d != 0) {
+        uint256 deposited = owen.deposit(H, d);
+        uint256 withdrawn = owen.withdraw(H, deposited);
 
-    liquid = 100;
-    solid = alex.cool(U, liquid);
-    assertEq(liquid, solid, "alex liquid != solid");
-
-    // Full liquidation
-    (liquid, solid) = alex.liquidate(U);
-    assertEq(liquid, solid, "alex liquid != solid");
+        assertEq(H.balanceOf(address(owen)), 0, "should have no solids left");
+        assertGt(withdrawn, 0, "should receive some ETH");
+    }
 }
 ```
+
+### Important Test Helpers
+
+```solidity
+function makeHydrogen(uint256 seed) public returns (ISolid H, uint256 h, uint256 e) {
+    seed = seed % ETH;
+    H = N.make{value: 0.001 ether}("Hydrogen", "H");
+    vm.deal(address(H), 0.001 ether + seed);
+    (h, e) = H.pool();
+}
+```
+
+This creates a Hydrogen Solid with random ETH in the pool for fuzz testing.
 
 ## Deployment
 
@@ -486,7 +493,7 @@ export chain=11155111  # Sepolia testnet
 
 ```bash
 chain=11155111
-forge script script/Ice.s.sol \
+forge script script/Solid.s.sol \
   -f $chain \
   --private-key $tx_key \
   --broadcast \
@@ -494,8 +501,6 @@ forge script script/Ice.s.sol \
   --delay 10 \
   --retries 10
 ```
-
-Note: Ice.s.sol deploys the initial WATAR token which serves as the base water instance.
 
 ### Supported Networks
 
@@ -531,81 +536,67 @@ always_use_create_2_factory = true
 
 ## Common Operations
 
-### Creating a New Liquid
+### Creating a New Solid
 
 ```solidity
-// From water instance
-IERC20Metadata dai = IERC20Metadata(0x6B175474E89094C44Da98b954EedeAC495271d0F);
-Liquid liquidDAI = water.liquify(dai);
+// Create "Hydrogen" "H"
+ISolid H = N.make{value: 0.001 ether}("Hydrogen", "H");
+// H.totalSupply() = ENPLETHY
+// H.balanceOf(msg.sender) = ENPLETHY / 2
+// H.balanceOf(address(H)) = ENPLETHY / 2
 ```
 
-### Adding Liquidity
+### Adding Liquidity (Depositing ETH)
 
 ```solidity
-// User deposits backing token (solid)
-dai.approve(address(liquidDAI), 1000 ether);
-liquidDAI.heat(1000 ether);
-// User receives 1000 liquid (liquid-DAI), pool grows by 1000
+uint256 sol = H.deposit{value: 1 ether}();
+// Receive sol tokens from pool
+// Pool ETH increases by 1 ether
+// Pool SOL decreases by sol amount
 ```
 
-### Removing Liquidity
+### Removing Liquidity (Withdrawing ETH)
 
 ```solidity
-// User withdraws backing token (solid)
-uint256 solid = liquidDAI.cool(500 ether);
-// User receives DAI, burns liquid (liquid-DAI) from self and pool
+uint256 eth = H.withdraw(500);
+// Send 500 SOL to pool
+// Receive eth back
+// Pool ETH decreases by eth amount
+// Pool SOL increases by 500
 ```
 
-### Trading
+### Checking Pool State
 
 ```solidity
-// Buy liquid with water
-uint256 liquid = liquidDAI.buy(100 ether);  // Spend 100 water, receive liquid
-
-// Sell liquid for water
-uint256 water = liquidDAI.sell(50 ether);   // Sell 50 liquid, receive water
-
-// Cross-liquid swap
-(uint256 water, uint256 fluids) = liquidDAI.sell(100 ether, liquidUSDC);
+(uint256 solPool, uint256 ethPool) = H.pool();
+// solPool = SOL tokens in pool
+// ethPool = ETH in pool
 ```
 
-## Key Differences from Unit Protocol
+## Constants Reference
 
-**This is NOT the algebraic Unit protocol described in previous documentation:**
-
-❌ No algebraic composition (kg*m/s^2)
-❌ No rational exponents
-❌ No symbolic algebra
-❌ No reciprocal relationships with geometric mean
-❌ No forge operations with three-way relationships
-
-✅ Simple constant-product AMM
-✅ Single token wrapping
-✅ Standard liquidity pool mechanics
-✅ Cross-pool swaps via water intermediary
-
-## Reference Documentation
-
-- **[README.md](README.md)** - Quick start guide
-- **[foundry.toml](foundry.toml)** - Build configuration
-- **[Foundry Book](https://book.getfoundry.sh/)** - Foundry framework docs
-- **[OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts/)** - Dependency docs
+```solidity
+MOL = 6.02214076e23        // Avogadro's number
+MOLS = 10000                // Number of mols
+ENPLETHY = MOLS * MOL       // Total supply (6.02214076e27)
+MAKER_PAYMENT = 0.001 ether // Minimum payment to create Solid
+```
 
 ## Events
 
 ```solidity
-event Heat(Liquid indexed fluid, uint256 solid);
-event Cool(Liquid indexed fluid, uint256 liquid, uint256 solid);
-event Buy(Liquid indexed fluid, uint256 liquid, uint256 water);
-event Sell(Liquid indexed fluid, uint256 liquid, uint256 water);
-event Liquify(IERC20Metadata indexed substance, Liquid indexed fluid);
+event Make(ISolid indexed solid, string indexed name, string indexed symbol);
+event Deposit(ISolid indexed solid, uint256 sol, uint256 eth);
+event Withdraw(ISolid indexed solid, uint256 sol, uint256 eth);
 ```
 
 ## Errors
 
 ```solidity
-error Nothing();        // Zero address token
-error Unauthorized();   // Non-liquid caller
+error Nothing();        // Empty name or symbol
+error WithdrawFailed(); // ETH transfer failed
+error LowPayment();     // Payment < 0.001 ETH
+error AlreadyMade();    // Solid already exists
 ```
 
 ## Quick Reference
@@ -613,28 +604,39 @@ error Unauthorized();   // Non-liquid caller
 ### Pool State Queries
 
 ```solidity
-uint256 pool = liquid.pool();              // Pool liquid balance
-uint256 lake = liquid.lake();              // Pool water balance
-uint256 mass = liquid.mass();              // Backing token balance
+(uint256 solPool, uint256 ethPool) = solid.pool();
+uint256 balance = solid.balanceOf(address(user));
+uint256 supply = solid.totalSupply();  // Always ENPLETHY
 ```
 
-### Quote Functions
+### Trading Formulas
 
 ```solidity
-uint256 water = liquid.sells(50 ether);                       // Water from selling liquid
-uint256 liquid = liquid.buys(100 ether);                      // Liquid from buying with water
-(uint256 water, uint256 fluids) = liquid.sells(50 ether, otherLiquid);   // Cross-swap quote
-(uint256 water, uint256 liquid) = liquid.buys(100 ether, otherLiquid);   // Cross-swap quote
+// Deposit: ETH → SOL
+sol = solPool - solPool * (ethPool - eth) / ethPool
+// Simplified: sol = solPool * eth / ethPool
+
+// Withdraw: SOL → ETH
+eth = ethPool - ethPool * solPool / (solPool + sol)
 ```
 
 ### Metadata
 
 ```solidity
-string memory name = liquid.name();              // From backing token
-string memory symbol = liquid.symbol();          // From backing token
-uint8 decimals = liquid.decimals();              // From backing token
-IERC20Metadata backing = liquid.substance();     // Get backing token
+string memory name = solid.name();
+string memory symbol = solid.symbol();
+uint8 decimals = solid.decimals();    // 18 (default)
+ISolid nothing = solid.NOTHING();     // Factory instance
 ```
+
+## Key Differences from Traditional AMMs
+
+1. **Fixed Supply**: Total supply never changes (no minting/burning)
+2. **Native ETH**: Uses ETH directly (not WETH)
+3. **Deterministic Addresses**: CREATE2 based on name+symbol
+4. **Factory Pattern**: NOTHING instance creates all Solids
+5. **Maker Share**: Creator receives 50% of initial supply
+6. **No Liquidity Tokens**: SOL tokens ARE the liquidity
 
 ---
 
