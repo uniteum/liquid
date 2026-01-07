@@ -48,12 +48,13 @@ contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
 
     receive() external payable {}
 
-    function made(string calldata n, string calldata s) public view returns (address location, bytes32 salt) {
+    function made(string calldata n, string calldata s) public view returns (bool yes, address location, bytes32 salt) {
         if (bytes(n).length == 0 || bytes(s).length == 0) {
             revert Nothing();
         }
         salt = keccak256(abi.encode(n, s));
         location = Clones.predictDeterministicAddress(address(NOTHING), salt, address(NOTHING));
+        yes = location.code.length > 0;
     }
 
     function make(string calldata n, string calldata s) external payable returns (ISolid sol) {
@@ -62,8 +63,8 @@ contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
             require(sol.transfer(msg.sender, ENPLETHY / 2), "Transfer failed");
         } else {
             if (msg.value < MAKER_PAYMENT) revert LowPayment();
-            (address location, bytes32 salt) = made(n, s);
-            if (location.code.length != 0) revert AlreadyMade();
+            (bool yes, address location, bytes32 salt) = made(n, s);
+            if (yes) revert AlreadyMade();
             location = Clones.cloneDeterministic(address(NOTHING), salt, 0);
             Solid(payable(location)).zzz_{value: msg.value}(n, s, msg.sender);
             sol = ISolid(payable(location));
