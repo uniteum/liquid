@@ -46,9 +46,7 @@ contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
         emit Deposit(this, eth, sol);
     }
 
-    receive() external payable {
-        deposit();
-    }
+    receive() external payable {}
 
     function made(string calldata n, string calldata s) public view returns (address location, bytes32 salt) {
         if (bytes(n).length == 0 || bytes(s).length == 0) {
