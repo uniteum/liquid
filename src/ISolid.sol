@@ -8,6 +8,12 @@ import {IERC20Metadata} from "ierc20/IERC20Metadata.sol";
  */
 interface ISolid is IERC20Metadata {
     /**
+     * @notice Returns the NOTHING instance (the base Solid used as factory)
+     * @return The immutable NOTHING Solid instance
+     */
+    function NOTHING() external view returns (ISolid);
+
+    /**
      * @notice Returns the current pool balances of SOL tokens and ETH
      * @return solPool The amount of SOL tokens in the pool
      * @return ethPool The amount of ETH in the pool
