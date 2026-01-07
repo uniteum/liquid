@@ -10,9 +10,9 @@ contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
     uint256 constant MOL = 6.02214076e23;
     uint256 constant MOLS = 10000;
     uint256 constant SUPPLY = MOLS * MOL;
-    uint256 constant MAKER_PAYMENT = 0.001 ether;
 
     ISolid public immutable NOTHING = this;
+    uint256 public immutable MAKER_PAYMENT = 0.001 ether;
 
     constructor() ERC20("", "") {}
 

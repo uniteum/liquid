@@ -14,6 +14,12 @@ interface ISolid is IERC20Metadata {
     function NOTHING() external view returns (ISolid);
 
     /**
+     * @notice Returns the minimum payment to make Solid
+     * @return Minimum payment to make Solid
+     */
+    function MAKER_PAYMENT() external view returns (uint256);
+
+    /**
      * @notice Returns the current pool balances of SOL tokens and ETH
      * @return solPool The amount of SOL tokens in the pool
      * @return ethPool The amount of ETH in the pool
