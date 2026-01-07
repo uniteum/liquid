@@ -22,11 +22,14 @@ contract SolidFactory {
 
     /**
      * @notice Create multiple Solids in a single transaction
+     * @dev Refunds excess ETH to msg.sender
      * @param elements Array of elements to create
      * @return created Number of new Solids created
      * @return skipped Number of Solids skipped (already existed)
      */
     function batchMake(Element[] calldata elements) external payable returns (uint256 created, uint256 skipped) {
+        uint256 spent = 0;
+
         for (uint256 i = 0; i < elements.length; i++) {
             Element calldata element = elements[i];
 
@@ -38,10 +41,18 @@ contract SolidFactory {
             } else {
                 // Create the solid
                 SOLID.make{value: 0.001 ether}(element.name, element.symbol);
+                spent += 0.001 ether;
                 created++;
             }
         }
 
         emit BatchCreate(created, skipped, elements.length);
+
+        // Refund excess ETH
+        uint256 excess = msg.value - spent;
+        if (excess > 0) {
+            (bool ok,) = msg.sender.call{value: excess}("");
+            require(ok, "Refund failed");
+        }
     }
 }
