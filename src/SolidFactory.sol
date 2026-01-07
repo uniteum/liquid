@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-import {Solid} from "./Solid.sol";
+import {Solid, ISolid} from "./Solid.sol";
 
 /**
  * @notice Factory for batch creation of Solid tokens
@@ -78,6 +78,10 @@ contract SolidFactory {
     {
         // Get arrays of existing and non-existing solids
         (existing, created, feePer, fee) = made(solids);
+
+        if (msg.value < fee) {
+            revert ISolid.PaymentLow(msg.value, fee);
+        }
 
         // Create the non-existing ones
         for (uint256 i = 0; i < created.length; i++) {
