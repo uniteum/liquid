@@ -595,8 +595,8 @@ event Withdraw(ISolid indexed solid, uint256 sol, uint256 eth);
 ```solidity
 error Nothing();        // Empty name or symbol
 error WithdrawFailed(); // ETH transfer failed
-error LowPayment();     // Payment < 0.001 ETH
-error AlreadyMade();    // Solid already exists
+error PaymentLow();     // Payment < 0.001 ETH
+error MadeAlready();    // Solid already exists
 ```
 
 ## Quick Reference

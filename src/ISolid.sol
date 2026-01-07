@@ -92,10 +92,10 @@ interface ISolid is IERC20Metadata {
     /**
      * @notice Thrown when payment is less than 0.001 ETH in make()
      */
-    error LowPayment();
+    error PaymentLow();
 
     /**
      * @notice Thrown when attempting to create a Solid that already exists
      */
-    error AlreadyMade();
+    error MadeAlready();
 }
