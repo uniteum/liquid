@@ -14,8 +14,8 @@ interface ISolid is IERC20Metadata {
     function NOTHING() external view returns (ISolid);
 
     /**
-     * @notice Returns the minimum payment to make Solid
-     * @return Minimum payment to make Solid
+     * @notice Returns the minimum payment required to create a new Solid
+     * @return The minimum ETH payment required (default 0.001 ether)
      */
     function MAKER_PAYMENT() external view returns (uint256);
 
@@ -29,6 +29,8 @@ interface ISolid is IERC20Metadata {
     /**
      * @notice Withdraws ETH from the pool by depositing SOL tokens
      * @dev Uses constant-product formula: eth = ethPool - ethPool * solPool / (solPool + sol)
+     * Transfers SOL tokens from caller to pool, sends ETH to caller.
+     * Protected by reentrancy guard.
      * @param sol The amount of SOL tokens to deposit into the pool
      * @return eth The amount of ETH withdrawn from the pool
      */
@@ -37,24 +39,27 @@ interface ISolid is IERC20Metadata {
     /**
      * @notice Deposits ETH into the pool and receives SOL tokens
      * @dev Uses constant-product formula: sol = solPool - solPool * (ethPool - eth) / ethPool
+     * Transfers SOL tokens from pool to caller. Does not mint new tokens.
      * @return sol The amount of SOL tokens received from the pool
      */
     function deposit() external payable returns (uint256 sol);
 
     /**
-     * @notice Computes the deterministic address for a Solid instance with given name and symbol
+     * @notice Checks if a Solid exists and computes its deterministic address
+     * @dev Uses CREATE2 with salt = keccak256(abi.encode(n, s)) for deterministic deployment
      * @param n The name of the Solid token
      * @param s The symbol of the Solid token
-     * @return yes If the Solid with given name and symbol already exists
-     * @return home The predicted contract address
-     * @return salt The CREATE2 salt used for deployment
+     * @return yes True if the Solid with given name and symbol already exists
+     * @return home The predicted (or actual if exists) contract address
+     * @return salt The CREATE2 salt used for deployment (keccak256(abi.encode(n, s)))
      */
     function made(string calldata n, string calldata s) external view returns (bool yes, address home, bytes32 salt);
 
     /**
      * @notice Creates a new Solid instance with the given name and symbol
-     * @dev Requires minimum payment of 0.001 ETH. Reverts if already exists.
-     * Mints 1% to maker and 99% to pool. Initial ETH becomes pool liquidity.
+     * @dev Requires minimum payment of MAKER_PAYMENT. Reverts if already exists.
+     * Mints 50% of SUPPLY to maker and 50% to pool. Initial ETH becomes pool liquidity.
+     * Uses CREATE2 for deterministic deployment based on name and symbol.
      * @param n The name of the new Solid token
      * @param s The symbol of the new Solid token
      * @return sol The newly created Solid instance
@@ -72,10 +77,10 @@ interface ISolid is IERC20Metadata {
     /**
      * @notice Emitted when ETH is deposited into the pool for SOL tokens
      * @param solid The Solid instance where deposit occurred
-     * @param sol The amount of SOL tokens received
      * @param eth The amount of ETH deposited
+     * @param sol The amount of SOL tokens received from the pool
      */
-    event Deposit(ISolid indexed solid, uint256 sol, uint256 eth);
+    event Deposit(ISolid indexed solid, uint256 eth, uint256 sol);
 
     /**
      * @notice Emitted when SOL is deposited into the pool for ETH
@@ -96,7 +101,7 @@ interface ISolid is IERC20Metadata {
     error WithdrawFailed();
 
     /**
-     * @notice Thrown when payment is less than 0.001 ETH in make()
+     * @notice Thrown when payment is less than MAKER_PAYMENT in make()
      */
     error PaymentLow();
 
