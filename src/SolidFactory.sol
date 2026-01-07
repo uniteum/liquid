@@ -29,7 +29,7 @@ contract SolidFactory {
     function made(SolidSpec[] calldata solids)
         public
         view
-        returns (SolidSpec[] memory existing, SolidSpec[] memory notExisting)
+        returns (SolidSpec[] memory existing, SolidSpec[] memory notExisting, uint256 feePer, uint256 fee)
     {
         uint256 existingCount = 0;
         uint256 notExistingCount = 0;
@@ -43,6 +43,9 @@ contract SolidFactory {
                 notExistingCount++;
             }
         }
+
+        feePer = SOLID.MAKER_FEE();
+        fee = notExistingCount * feePer;
 
         // Allocate arrays
         existing = new SolidSpec[](existingCount);
@@ -71,24 +74,20 @@ contract SolidFactory {
     function make(SolidSpec[] calldata solids)
         external
         payable
-        returns (SolidSpec[] memory existing, SolidSpec[] memory created)
+        returns (SolidSpec[] memory existing, SolidSpec[] memory created, uint256 feePer, uint256 fee)
     {
         // Get arrays of existing and non-existing solids
-        (existing, created) = made(solids);
-
-        // Get the maker payment amount from the Solid contract
-        uint256 makerPayment = SOLID.MAKER_FEE();
+        (existing, created, feePer, fee) = made(solids);
 
         // Create the non-existing ones
         for (uint256 i = 0; i < created.length; i++) {
-            SOLID.make{value: makerPayment}(created[i].name, created[i].symbol);
+            SOLID.make{value: feePer}(created[i].name, created[i].symbol);
         }
 
         emit MadeBatch(created.length, existing.length, solids.length);
 
         // Refund excess ETH
-        uint256 spent = created.length * makerPayment;
-        uint256 excess = msg.value - spent;
+        uint256 excess = msg.value - fee;
         if (excess > 0) {
             (bool ok,) = msg.sender.call{value: excess}("");
             require(ok, "Refund failed");
