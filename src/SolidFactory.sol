@@ -9,7 +9,7 @@ import {Solid} from "./Solid.sol";
 contract SolidFactory {
     Solid public immutable SOLID;
 
-    struct Element {
+    struct SolidSpec {
         string name;
         string symbol;
     }
@@ -23,30 +23,30 @@ contract SolidFactory {
     /**
      * @notice Create multiple Solids in a single transaction
      * @dev Refunds excess ETH to msg.sender
-     * @param elements Array of elements to create
+     * @param solids Array of solids to create
      * @return created Number of new Solids created
      * @return skipped Number of Solids skipped (already existed)
      */
-    function batchMake(Element[] calldata elements) external payable returns (uint256 created, uint256 skipped) {
+    function batchMake(SolidSpec[] calldata solids) external payable returns (uint256 created, uint256 skipped) {
         uint256 spent = 0;
 
-        for (uint256 i = 0; i < elements.length; i++) {
-            Element calldata element = elements[i];
+        for (uint256 i = 0; i < solids.length; i++) {
+            SolidSpec calldata solid = solids[i];
 
             // Check if already exists
-            (bool yes,,) = SOLID.made(element.name, element.symbol);
+            (bool yes,,) = SOLID.made(solid.name, solid.symbol);
 
             if (yes) {
                 skipped++;
             } else {
                 // Create the solid
-                SOLID.make{value: 0.001 ether}(element.name, element.symbol);
+                SOLID.make{value: 0.001 ether}(solid.name, solid.symbol);
                 spent += 0.001 ether;
                 created++;
             }
         }
 
-        emit BatchCreate(created, skipped, elements.length);
+        emit BatchCreate(created, skipped, solids.length);
 
         // Refund excess ETH
         uint256 excess = msg.value - spent;

@@ -19,7 +19,7 @@ contract MakeSolids is Script {
         string memory fullPath = string.concat(vm.projectRoot(), "/", path);
         string memory json = vm.readFile(fullPath);
 
-        SolidFactory.Element[] memory solids = abi.decode(vm.parseJson(json, "$"), (SolidFactory.Element[]));
+        SolidFactory.SolidSpec[] memory solids = abi.decode(vm.parseJson(json, "$"), (SolidFactory.SolidSpec[]));
 
         console2.log("Found", solids.length, "solids to create");
 
