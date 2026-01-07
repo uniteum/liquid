@@ -11,8 +11,6 @@ contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
     uint256 constant MOLS = 10000;
     uint256 constant SUPPLY = MOLS * MOL;
     uint256 constant MAKER_PAYMENT = 0.001 ether;
-    uint256 constant MAKER_SHARE = SUPPLY / 100;
-    uint256 constant POOL_SHARE = SUPPLY - MAKER_SHARE;
 
     ISolid public immutable NOTHING = this;
 
@@ -63,7 +61,7 @@ contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
     function make(string calldata n, string calldata s) external payable returns (ISolid sol) {
         if (this != NOTHING) {
             sol = NOTHING.make{value: msg.value}(n, s);
-            require(sol.transfer(msg.sender, MAKER_SHARE), "Transfer failed");
+            require(sol.transfer(msg.sender, SUPPLY / 2), "Transfer failed");
         } else {
             if (msg.value < MAKER_PAYMENT) revert LowPayment();
             (address location, bytes32 salt) = made(n, s);
@@ -79,8 +77,8 @@ contract Solid is ISolid, ERC20, ReentrancyGuardTransient {
         if (bytes(_symbol).length == 0) {
             _name = n;
             _symbol = s;
-            _mint(address(this), POOL_SHARE);
-            _mint(maker, MAKER_SHARE);
+            _mint(address(this), SUPPLY / 2);
+            _mint(maker, SUPPLY / 2);
         }
     }
 }

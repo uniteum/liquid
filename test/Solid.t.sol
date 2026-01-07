@@ -36,16 +36,16 @@ contract SolidTest is BaseTest {
         assertEq(H.totalSupply(), SUPPLY);
         assertEq(H.name(), "Hydrogen");
         assertEq(H.symbol(), "H");
-        assertEq(H.balanceOf(address(this)), SUPPLY / 100, "creator should have 1% of supply");
-        assertEq(H.balanceOf(address(H)), SUPPLY - SUPPLY / 100, "pool should have 99% of supply");
+        assertEq(H.balanceOf(address(this)), SUPPLY / 2, "creator should have 50% of supply");
+        assertEq(H.balanceOf(address(H)), SUPPLY / 2, "pool should have 50% of supply");
         assertEq(address(H).balance, 0.001 ether, "pool should have 0.001 ETH");
     }
 
     function test_MakeWithExtraPayment() public {
         ISolid H = N.make{value: 0.002 ether}("Helium", "He");
         assertEq(H.totalSupply(), SUPPLY);
-        assertEq(H.balanceOf(address(this)), SUPPLY / 100, "creator should have 1% of supply");
-        assertEq(H.balanceOf(address(H)), SUPPLY - SUPPLY / 100, "pool should have 99% of supply");
+        assertEq(H.balanceOf(address(this)), SUPPLY / 2, "creator should have 50% of supply");
+        assertEq(H.balanceOf(address(H)), SUPPLY / 2, "pool should have 50% of supply");
         assertEq(address(H).balance, 0.002 ether, "pool should have 0.002 ETH");
     }
 
@@ -121,7 +121,7 @@ contract SolidTest is BaseTest {
 
     function test_StartingPrice(uint256 seed) public returns (ISolid H, uint256 h, uint256 e) {
         (H, h, e) = makeHydrogen(seed);
-        assertEq(h, SUPPLY - SUPPLY / 100, "h should be 99% of SUPPLY");
+        assertEq(h, SUPPLY / 2, "h should be 50% of SUPPLY");
         assertEq(e, 0.001 ether + (seed % ETH), "e should be 0.001 ether + seed");
     }
 
@@ -201,15 +201,15 @@ contract SolidTest is BaseTest {
     function test_MakeFromNonNothingSendsSharesToCaller() public {
         // Create a first Solid (Hydrogen) from NOTHING
         ISolid H = N.make{value: 0.001 ether}("Hydrogen", "H");
-        assertEq(H.balanceOf(address(this)), SUPPLY / 100, "creator should have 1% of H");
+        assertEq(H.balanceOf(address(this)), SUPPLY / 2, "creator should have 50% of H");
 
         // Now call make from H (non-NOTHING) to create Helium
         // The maker shares should still go to msg.sender (this), not to H
         ISolid he = Solid(payable(address(H))).make{value: 0.001 ether}("Helium", "He");
 
         // Verify maker shares went to the actual caller (this), not to H
-        assertEq(he.balanceOf(address(this)), SUPPLY / 100, "creator should have 1% of He");
+        assertEq(he.balanceOf(address(this)), SUPPLY / 2, "creator should have 50% of He");
         assertEq(he.balanceOf(address(H)), 0, "H should not have any He tokens");
-        assertEq(he.balanceOf(address(he)), SUPPLY - SUPPLY / 100, "He pool should have 99% of supply");
+        assertEq(he.balanceOf(address(he)), SUPPLY / 2, "He pool should have 50% of supply");
     }
 }
