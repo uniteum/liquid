@@ -198,6 +198,54 @@ contract SolidTest is BaseTest {
         }
     }
 
+    function test_DepositWithdrawPoolReturnsToStartSpecific() public {
+        test_DepositWithdrawPoolReturnsToStart(12345, 5 ether);
+    }
+
+    function test_DepositWithdrawPoolReturnsToStart(uint256 seed, uint256 d) public {
+        // Create a Solid with random initial ETH
+        (ISolid H,,) = makeHydrogen(seed);
+
+        // Ensure owen has enough ETH and bound deposit amount
+        uint256 owenBalance = address(owen).balance;
+        if (owenBalance < 1e15) {
+            return; // Skip test if owen doesn't have minimum
+        }
+        d = bound(d, 1e15, owenBalance);
+
+        // Capture initial pool state BEFORE any deposit
+        uint256 poolSolidsInitial = H.balanceOf(address(H));
+        uint256 poolEthInitial = address(H).balance;
+
+        // Do deposit
+        uint256 solidsReceived = owen.deposit(H, d);
+
+        // Verify pool state changed
+        assertGt(H.balanceOf(address(H)), poolSolidsInitial, "pool solids should increase after deposit");
+        assertGt(address(H).balance, poolEthInitial, "pool ETH should increase after deposit");
+
+        // Do withdraw (all solids received)
+        uint256 ethReceived = owen.withdraw(H, solidsReceived);
+
+        // Verify pool returned to initial state
+        uint256 poolSolidsFinal = H.balanceOf(address(H));
+        uint256 poolEthFinal = address(H).balance;
+
+        assertEq(poolSolidsFinal, poolSolidsInitial, "pool solids should return to initial state");
+        assertEq(poolEthFinal, poolEthInitial, "pool ETH should return to initial state");
+
+        // Verify user has no solids left
+        assertEq(H.balanceOf(address(owen)), 0, "user should have no solids after full withdraw");
+
+        emit log_named_uint("initial pool solids", poolSolidsInitial);
+        emit log_named_uint("initial pool ETH", poolEthInitial);
+        emit log_named_uint("deposit amount", d);
+        emit log_named_uint("solids received", solidsReceived);
+        emit log_named_uint("ETH received back", ethReceived);
+        emit log_named_uint("final pool solids", poolSolidsFinal);
+        emit log_named_uint("final pool ETH", poolEthFinal);
+    }
+
     function test_MakeFromNonNothingSendsSharesToCaller() public {
         // Create a first Solid (Hydrogen) from NOTHING
         ISolid H = N.make{value: 0.001 ether}("Hydrogen", "H");
