@@ -367,6 +367,11 @@ FOUNDRY_PROFILE=deep forge test --match-contract SolidInvariant
 - Include `@notice` for public descriptions
 - Add `@param` and `@return` as needed
 
+**Parameter Naming:**
+- Interface (ISolid.sol): Use full names (`name`, `symbol`) - better for ABI/documentation
+- Implementation (Solid.sol): Use short names (`n`, `s`) - avoids shadowing lint warnings
+- This convention keeps code clean while maintaining clear external API
+
 **Formatting:**
 - Run `forge fmt` before committing
 - Follows Foundry's default style guide
