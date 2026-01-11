@@ -143,29 +143,30 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _update(from, to, amount);
     }
 
-    function made(IERC20Metadata solid_) public view returns (address home, bytes32 salt) {
+    function made(IERC20Metadata solid_) public view returns (bool yes, address home, bytes32 salt) {
         if (address(solid_) == address(0)) {
             revert Nothing();
         }
         salt = bytes32(uint256(uint160(address(solid_))));
         home = Clones.predictDeterministicAddress(address(HUB), salt, address(HUB));
+        yes = home.code.length != 0;
     }
 
     function make(IERC20Metadata solid_) public returns (Liquid spokes) {
         if (this != HUB) {
             spokes = HUB.make(solid_);
         } else {
-            (address home, bytes32 salt) = made(solid_);
+            (bool yes, address home, bytes32 salt) = made(solid_);
             spokes = Liquid(home);
-            if (home.code.length == 0) {
+            if (!yes) {
                 home = Clones.cloneDeterministic(address(HUB), salt, 0);
-                spokes.__initialize(solid_);
                 emit Wrap(spokes, solid_);
+                spokes.zzz_(solid_);
             }
         }
     }
 
-    function __initialize(IERC20Metadata solid_) external {
+    function zzz_(IERC20Metadata solid_) external {
         if (address(solid) == address(0)) {
             solid = solid_;
         }
@@ -177,7 +178,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     function _onlyLiquid() private view {
-        (address home,) = HUB.made(Liquid(msg.sender).solid());
+        (, address home,) = HUB.made(Liquid(msg.sender).solid());
         if (msg.sender != home) {
             revert Unauthorized();
         }
