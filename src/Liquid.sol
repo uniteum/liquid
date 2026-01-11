@@ -75,46 +75,46 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         emit Cool(this, spokes, solids);
     }
 
-    function aways(uint256 here, uint256 near, uint256 far) public pure returns (uint256 there) {
+    function sells(uint256 here, uint256 near, uint256 far) public pure returns (uint256 there) {
         there = far - near * far / (near + here);
     }
 
-    function aways(uint256 spokes) public view returns (uint256 hubs) {
-        hubs = aways(spokes, pool(), lake());
+    function sells(uint256 spokes) public view returns (uint256 hubs) {
+        hubs = sells(spokes, pool(), lake());
     }
 
-    function away(uint256 spokes) external returns (uint256 hubs) {
-        hubs = aways(spokes);
+    function sell(uint256 spokes) external returns (uint256 hubs) {
+        hubs = sells(spokes);
         _went(spokes, hubs);
     }
 
-    function aways(uint256 spokes, Liquid fluid) public view returns (uint256 hubs, uint256 fluids) {
-        hubs = aways(spokes);
-        fluids = fluid.backs(hubs);
+    function sells(uint256 spokes, Liquid fluid) public view returns (uint256 hubs, uint256 fluids) {
+        hubs = sells(spokes);
+        fluids = fluid.buys(hubs);
     }
 
-    function away(uint256 spokes, Liquid fluid) external returns (uint256 hubs, uint256 fluids) {
-        (hubs, fluids) = aways(spokes, fluid);
+    function sell(uint256 spokes, Liquid fluid) external returns (uint256 hubs, uint256 fluids) {
+        (hubs, fluids) = sells(spokes, fluid);
         _went(spokes, hubs);
         fluid.came(fluids, hubs);
     }
 
-    function backs(uint256 hubs) public view returns (uint256 spokes) {
-        spokes = aways(hubs, lake(), pool());
+    function buys(uint256 hubs) public view returns (uint256 spokes) {
+        spokes = sells(hubs, lake(), pool());
     }
 
-    function back(uint256 hubs) external returns (uint256 spokes) {
-        spokes = backs(hubs);
+    function buy(uint256 hubs) external returns (uint256 spokes) {
+        spokes = buys(hubs);
         _came(spokes, hubs);
     }
 
-    function backs(uint256 fluids, Liquid fluid) public view returns (uint256 hubs, uint256 spokes) {
-        hubs = backs(fluids);
-        spokes = fluid.backs(hubs);
+    function buys(uint256 fluids, Liquid fluid) public view returns (uint256 hubs, uint256 spokes) {
+        hubs = buys(fluids);
+        spokes = fluid.buys(hubs);
     }
 
-    function back(uint256 fluids, Liquid fluid) external returns (uint256 hubs, uint256 spokes) {
-        (hubs, spokes) = backs(fluids, fluid);
+    function buy(uint256 fluids, Liquid fluid) external returns (uint256 hubs, uint256 spokes) {
+        (hubs, spokes) = buys(fluids, fluid);
         fluid.went(spokes, hubs);
         _came(fluids, hubs);
     }
