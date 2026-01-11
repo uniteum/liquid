@@ -58,85 +58,85 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         emit Heat(this, solids);
     }
 
-    function cools(uint256 liquids) public view returns (uint256 solids, uint256 pools, uint256 senders) {
+    function cools(uint256 spokes) public view returns (uint256 solids, uint256 pools, uint256 senders) {
         uint256 total = totalSupply();
         uint256 pooled = pool();
         uint256 unpooled = total - pooled;
-        pools = 2 * liquids * pooled / total;
-        senders = 2 * liquids * unpooled / total;
-        solids = liquids * mass() / unpooled;
+        pools = 2 * spokes * pooled / total;
+        senders = 2 * spokes * unpooled / total;
+        solids = spokes * mass() / unpooled;
     }
 
-    function cool(uint256 liquids) external nonReentrant returns (uint256 solids, uint256 pools, uint256 senders) {
-        (solids, pools, senders) = cools(liquids);
+    function cool(uint256 spokes) external nonReentrant returns (uint256 solids, uint256 pools, uint256 senders) {
+        (solids, pools, senders) = cools(spokes);
         _burn(address(this), pools);
         _burn(msg.sender, senders);
         solid.safeTransfer(msg.sender, solids);
-        emit Cool(this, liquids, solids);
+        emit Cool(this, spokes, solids);
     }
 
     function aways(uint256 here, uint256 near, uint256 far) public pure returns (uint256 there) {
         there = far - near * far / (near + here);
     }
 
-    function aways(uint256 liquids) public view returns (uint256 hubs) {
-        hubs = aways(liquids, pool(), lake());
+    function aways(uint256 spokes) public view returns (uint256 hubs) {
+        hubs = aways(spokes, pool(), lake());
     }
 
-    function away(uint256 liquids) external returns (uint256 hubs) {
-        hubs = aways(liquids);
-        _went(liquids, hubs);
+    function away(uint256 spokes) external returns (uint256 hubs) {
+        hubs = aways(spokes);
+        _went(spokes, hubs);
     }
 
-    function aways(uint256 liquids, Liquid fluid) public view returns (uint256 hubs, uint256 fluids) {
-        hubs = aways(liquids);
+    function aways(uint256 spokes, Liquid fluid) public view returns (uint256 hubs, uint256 fluids) {
+        hubs = aways(spokes);
         fluids = fluid.backs(hubs);
     }
 
-    function away(uint256 liquids, Liquid fluid) external returns (uint256 hubs, uint256 fluids) {
-        (hubs, fluids) = aways(liquids, fluid);
-        _went(liquids, hubs);
+    function away(uint256 spokes, Liquid fluid) external returns (uint256 hubs, uint256 fluids) {
+        (hubs, fluids) = aways(spokes, fluid);
+        _went(spokes, hubs);
         fluid.came(fluids, hubs);
     }
 
-    function backs(uint256 hubs) public view returns (uint256 liquids) {
-        liquids = aways(hubs, lake(), pool());
+    function backs(uint256 hubs) public view returns (uint256 spokes) {
+        spokes = aways(hubs, lake(), pool());
     }
 
-    function back(uint256 hubs) external returns (uint256 liquids) {
-        liquids = backs(hubs);
-        _came(liquids, hubs);
+    function back(uint256 hubs) external returns (uint256 spokes) {
+        spokes = backs(hubs);
+        _came(spokes, hubs);
     }
 
-    function backs(uint256 fluids, Liquid fluid) public view returns (uint256 hubs, uint256 liquids) {
+    function backs(uint256 fluids, Liquid fluid) public view returns (uint256 hubs, uint256 spokes) {
         hubs = backs(fluids);
-        liquids = fluid.backs(hubs);
+        spokes = fluid.backs(hubs);
     }
 
-    function back(uint256 fluids, Liquid fluid) external returns (uint256 hubs, uint256 liquids) {
-        (hubs, liquids) = backs(fluids, fluid);
-        fluid.went(liquids, hubs);
+    function back(uint256 fluids, Liquid fluid) external returns (uint256 hubs, uint256 spokes) {
+        (hubs, spokes) = backs(fluids, fluid);
+        fluid.went(spokes, hubs);
         _came(fluids, hubs);
     }
 
-    function came(uint256 liquids, uint256 hubs) external onlyLiquid {
-        _came(liquids, hubs);
+    function came(uint256 spokes, uint256 hubs) external onlyLiquid {
+        _came(spokes, hubs);
     }
 
-    function _came(uint256 liquids, uint256 hubs) private {
+    function _came(uint256 spokes, uint256 hubs) private {
         HUB.update(msg.sender, address(this), hubs);
-        _update(address(this), msg.sender, liquids);
-        emit Back(this, liquids, hubs);
+        _update(address(this), msg.sender, spokes);
+        emit Back(this, spokes, hubs);
     }
 
-    function went(uint256 liquids, uint256 hubs) external onlyLiquid {
-        _went(liquids, hubs);
+    function went(uint256 spokes, uint256 hubs) external onlyLiquid {
+        _went(spokes, hubs);
     }
 
-    function _went(uint256 liquids, uint256 hubs) private {
+    function _went(uint256 spokes, uint256 hubs) private {
         HUB.update(address(this), msg.sender, hubs);
-        _update(msg.sender, address(this), liquids);
-        emit Away(this, liquids, hubs);
+        _update(msg.sender, address(this), spokes);
+        emit Away(this, spokes, hubs);
     }
 
     function update(address from, address to, uint256 amount) external onlyLiquid {
@@ -151,16 +151,16 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         location = Clones.predictDeterministicAddress(address(HUB), salt, address(HUB));
     }
 
-    function make(IERC20Metadata solid_) public returns (Liquid liquids) {
+    function make(IERC20Metadata solid_) public returns (Liquid spokes) {
         if (this != HUB) {
-            liquids = HUB.make(solid_);
+            spokes = HUB.make(solid_);
         } else {
             (address location, bytes32 salt) = made(solid_);
-            liquids = Liquid(location);
+            spokes = Liquid(location);
             if (location.code.length == 0) {
                 location = Clones.cloneDeterministic(address(HUB), salt, 0);
-                liquids.__initialize(solid_);
-                emit Wrap(liquids, solid_);
+                spokes.__initialize(solid_);
+                emit Wrap(spokes, solid_);
             }
         }
     }
@@ -184,9 +184,9 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     event Heat(Liquid indexed liquid, uint256 solids);
-    event Cool(Liquid indexed liquid, uint256 liquids, uint256 solids);
-    event Back(Liquid indexed liquid, uint256 liquids, uint256 hubs);
-    event Away(Liquid indexed liquid, uint256 liquids, uint256 hubs);
+    event Cool(Liquid indexed liquid, uint256 spokes, uint256 solids);
+    event Back(Liquid indexed liquid, uint256 spokes, uint256 hubs);
+    event Away(Liquid indexed liquid, uint256 spokes, uint256 hubs);
     event Wrap(Liquid indexed liquid, IERC20Metadata indexed solid);
 
     error Nothing();
