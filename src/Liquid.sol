@@ -74,8 +74,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         emit Cool(this, spokes, solids);
     }
 
-    function sells(uint256 here, uint256 near, uint256 far) public pure returns (uint256 there) {
-        there = far - near * far / (near + here);
+    function sells(uint256 x, uint256 X, uint256 Y) public pure returns (uint256 y) {
+        y = Y - Y * X / (X + x);
     }
 
     function sells(uint256 spokes) public view returns (uint256 hubs) {
