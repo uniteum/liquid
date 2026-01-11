@@ -52,9 +52,9 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     function heat(uint256 solids) external nonReentrant returns (uint256 pools, uint256 senders) {
         solid.safeTransferFrom(msg.sender, address(this), solids);
         (pools, senders) = heats(solids);
+        emit Heat(this, solids);
         _mint(address(this), pools);
         _mint(msg.sender, senders);
-        emit Heat(this, solids);
     }
 
     function cools(uint256 spokes) public view returns (uint256 solids, uint256 pools, uint256 senders) {
@@ -68,10 +68,10 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function cool(uint256 spokes) external nonReentrant returns (uint256 solids, uint256 pools, uint256 senders) {
         (solids, pools, senders) = cools(spokes);
+        emit Cool(this, spokes, solids);
         _burn(address(this), pools);
         _burn(msg.sender, senders);
         solid.safeTransfer(msg.sender, solids);
-        emit Cool(this, spokes, solids);
     }
 
     function sells(uint256 x, uint256 X, uint256 Y) public pure returns (uint256 y) {
@@ -124,8 +124,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function _came(uint256 spokes, uint256 hubs) private {
         HUB.update(msg.sender, address(this), hubs);
-        _update(address(this), msg.sender, spokes);
         emit Back(this, spokes, hubs);
+        _update(address(this), msg.sender, spokes);
     }
 
     function went(uint256 spokes, uint256 hubs) external onlyLiquid {
@@ -134,8 +134,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function _went(uint256 spokes, uint256 hubs) private {
         HUB.update(address(this), msg.sender, hubs);
-        _update(msg.sender, address(this), spokes);
         emit Away(this, spokes, hubs);
+        _update(msg.sender, address(this), spokes);
     }
 
     function update(address from, address to, uint256 amount) external onlyLiquid {
@@ -158,8 +158,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
             (bool yes, address home, bytes32 salt) = made(solid_);
             spokes = Liquid(home);
             if (!yes) {
-                home = Clones.cloneDeterministic(address(HUB), salt, 0);
                 emit Make(spokes, solid_);
+                home = Clones.cloneDeterministic(address(HUB), salt, 0);
                 spokes.zzz_(solid_);
             }
         }
