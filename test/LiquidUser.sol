@@ -50,32 +50,32 @@ contract LiquidUser is User {
         console.log("solid:", solid);
     }
 
-    function away(Liquid U, uint256 liquid) public logging("away", U, liquid) returns (uint256 water) {
-        water = U.away(liquid);
+    function sell(Liquid U, uint256 liquid) public logging("sell", U, liquid) returns (uint256 water) {
+        water = U.sell(liquid);
         console.log("water:", water);
     }
 
-    function away(Liquid U, uint256 liquid, Liquid V)
+    function sell(Liquid U, uint256 liquid, Liquid V)
         public
-        waterlog("away", U, liquid, 0)
+        waterlog("sell", U, liquid, 0)
         returns (uint256 water, uint256 fluid)
     {
-        (water, fluid) = U.away(liquid, V);
+        (water, fluid) = U.sell(liquid, V);
         console.log("water:", water);
         console.log("fluid:", fluid);
     }
 
-    function back(Liquid U, uint256 water) public waterlog("back", U, 0, water) returns (uint256 liquid) {
-        liquid = U.back(water);
+    function buy(Liquid U, uint256 water) public waterlog("buy", U, 0, water) returns (uint256 liquid) {
+        liquid = U.buy(water);
         console.log("liquid:", liquid);
     }
 
-    function back(Liquid U, uint256 fluid, Liquid V)
+    function buy(Liquid U, uint256 fluid, Liquid V)
         public
-        waterlog("back", U, fluid, 0)
+        waterlog("buy", U, fluid, 0)
         returns (uint256 water, uint256 liquid)
     {
-        (water, liquid) = U.back(fluid, V);
+        (water, liquid) = U.buy(fluid, V);
         console.log("water:", water);
         console.log("liquid:", liquid);
     }

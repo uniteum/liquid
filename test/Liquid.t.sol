@@ -83,7 +83,7 @@ contract LiquidTest is BaseTest {
         // Alex sells 50 liquid for water
         uint256 hotToSell = 50;
         uint256 alexHotBeforeSell = U.balanceOf(address(alex));
-        water = alex.away(U, hotToSell);
+        water = alex.sell(U, hotToSell);
         assertGt(water, 0, "alex should receive water from away");
         assertEq(U.balanceOf(address(alex)), alexHotBeforeSell - hotToSell, "alex liquid should decrease after away");
         uint256 poolAfterSell = U.balanceOf(address(U));
@@ -122,11 +122,11 @@ contract LiquidTest is BaseTest {
 
         // Step 2: Sell all liquid for water
         uint256 du = alex.balance(U) - u0;
-        alex.away(U, du);
+        alex.sell(U, du);
 
         // Step 3: Buy back liquid with the water gained (if any)
         uint256 waterGained = W.balanceOf(address(alex)) - w0;
-        alex.back(U, waterGained);
+        alex.buy(U, waterGained);
 
         // Step 4: Cool all liquid back to solid
         uint256 finalHot = alex.balance(U) - u0;
