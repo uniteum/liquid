@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: UNLICENSED
-
 pragma solidity ^0.8.30;
 
 import {ERC20, IERC20Metadata} from "erc20/ERC20.sol";
@@ -160,7 +159,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
             spokes = Liquid(home);
             if (!yes) {
                 home = Clones.cloneDeterministic(address(HUB), salt, 0);
-                emit Wrap(spokes, solid_);
+                emit Make(spokes, solid_);
                 spokes.zzz_(solid_);
             }
         }
@@ -188,7 +187,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     event Cool(Liquid indexed liquid, uint256 spokes, uint256 solids);
     event Back(Liquid indexed liquid, uint256 spokes, uint256 hubs);
     event Away(Liquid indexed liquid, uint256 spokes, uint256 hubs);
-    event Wrap(Liquid indexed liquid, IERC20Metadata indexed solid);
+    event Make(Liquid indexed liquid, IERC20Metadata indexed solid);
 
     error Nothing();
     error Unauthorized();
