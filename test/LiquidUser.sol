@@ -70,16 +70,6 @@ contract LiquidUser is User {
         console.log("liquid:", liquid);
     }
 
-    function buy(Liquid U, uint256 fluid, Liquid V)
-        public
-        waterlog("buy", U, fluid, 0)
-        returns (uint256 water, uint256 liquid)
-    {
-        (water, liquid) = U.buy(fluid, V);
-        console.log("water:", water);
-        console.log("liquid:", liquid);
-    }
-
     function liquidate(Liquid U) public returns (uint256 liquid, uint256 solid) {
         liquid = U.balanceOf(address(this));
         solid = cool(U, liquid);
