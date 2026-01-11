@@ -151,16 +151,16 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         yes = home.code.length != 0;
     }
 
-    function make(IERC20Metadata solid_) public returns (Liquid spokes) {
+    function make(IERC20Metadata solid_) public returns (Liquid liquid) {
         if (this != HUB) {
-            spokes = HUB.make(solid_);
+            liquid = HUB.make(solid_);
         } else {
             (bool yes, address home, bytes32 salt) = made(solid_);
-            spokes = Liquid(home);
+            liquid = Liquid(home);
             if (!yes) {
-                emit Make(spokes, solid_);
+                emit Make(liquid, solid_);
                 home = Clones.cloneDeterministic(address(HUB), salt, 0);
-                spokes.zzz_(solid_);
+                liquid.zzz_(solid_);
             }
         }
     }
