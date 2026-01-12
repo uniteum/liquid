@@ -72,9 +72,9 @@ This file provides context for AI assistants (primarily Claude) to understand th
 - **Solid** = Backing token amount (parameter: `solid`)
 - **Liquid** = Wrapped ERC-20 with AMM liquidity (parameter: `liquid`)
 - **Fluids** = Variable name for other liquid amounts in cross-swaps
-- **Water** = Base Liquid instance used for cross-pool swaps
+- **Hub** = Base Liquid instance used for cross-pool swaps
 - **Pool** = Liquid tokens held by contract
-- **Lake** = Water tokens held by contract
+- **Reserve** = Hub tokens held by contract
 - **Mass** = Backing token balance held by contract
 
 ### Key File
@@ -121,54 +121,54 @@ mine = 2 * liquid * held / totalSupply   // user burn
 solid = liquid * mass() / held           // backing tokens returned
 ```
 
-### 3. Sell (Liquid → Water)
+### 3. Sell (Liquid → Hub)
 
 ```solidity
-function sell(uint256 liquid) external returns (uint256 water)
+function sell(uint256 liquid) external returns (uint256 hub)
 ```
 
 **Constant Product Formula:**
 ```solidity
-// Invariant: pool * lake = k
+// Invariant: pool * reserve = k
 filled = pool + liquid
-drained = pool * lake / filled
-water = lake - drained
+drained = pool * reserve / filled
+hub = reserve - drained
 ```
 
 **What it does:**
-- Calculates water received for selling `liquid` to pool
+- Calculates hub received for selling `liquid` to pool
 - Transfers liquid from user to pool
-- Transfers water from pool's lake to user
+- Transfers hub from pool's reserve to user
 
-### 4. Buy (Water → Liquid)
+### 4. Buy (Hub → Liquid)
 
 ```solidity
-function buy(uint256 water) external returns (uint256 liquid)
+function buy(uint256 hub) external returns (uint256 liquid)
 ```
 
 **Formula:**
 ```solidity
-// Uses sells() with reversed pool/lake (symmetric formula)
-liquid = sells(water, lake, pool)
-// Which expands to: liquid = pool - pool * lake / (lake + water)
+// Uses sells() with reversed pool/reserve (symmetric formula)
+liquid = sells(hub, reserve, pool)
+// Which expands to: liquid = pool - pool * reserve / (reserve + hub)
 ```
 
 **What it does:**
-- Buys liquid by spending exactly `water` amount
-- Transfers water from user to pool's lake
+- Buys liquid by spending exactly `hub` amount
+- Transfers hub from user to pool's reserve
 - Transfers liquid from pool to user
 
 ### 5. Cross-Liquid Swaps
 
 ```solidity
 function sell(uint256 liquid, Liquid fluid) external
-    returns (uint256 water, uint256 fluids)
+    returns (uint256 hub, uint256 fluids)
 function buy(uint256 liquid, Liquid fluid) external
-    returns (uint256 water, uint256 fluids)
+    returns (uint256 hub, uint256 fluids)
 ```
 
 **What it does:**
-- Swaps between two different Liquid pools using water as intermediary
+- Swaps between two different Liquid pools using hub as intermediary
 - `sell(liquid, fluid)`: Sell `liquid` from this pool, buy from `fluid` pool
 - `buy(liquid, fluid)`: Buy `liquid` from `fluid` pool, sell to this pool
 - Example: Sell liquid-USDC to buy liquid-DAI in single transaction
@@ -186,12 +186,12 @@ function liquify(IERC20Metadata stuff) public returns (Liquid fluid)
 - Uses CREATE2 with `bytes32(uint160(address(stuff)))` as salt
 - Same backing token always produces same Liquid address
 - Uses EIP-1167 minimal proxy (OpenZeppelin Clones)
-- Only callable from main WATER instance
+- Only callable from main HUB instance
 
 **Example:**
 ```solidity
 IERC20Metadata usdc = IERC20Metadata(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-Liquid liquidUSDC = water.liquify(usdc);
+Liquid liquidUSDC = hub.liquify(usdc);
 // liquidUSDC address is deterministic based on USDC address
 ```
 
@@ -209,8 +209,8 @@ function liquify(uint256 solid, IERC20Metadata stuff) external
 **Example:**
 ```solidity
 // Create liquid-USDC and heat 1000 USDC in one transaction
-usdc.approve(address(water), 1000);
-water.liquify(1000, usdc);
+usdc.approve(address(hub), 1000);
+hub.liquify(1000, usdc);
 // Creates liquidUSDC if needed, heats 1000, sends liquid tokens to msg.sender
 ```
 
@@ -220,21 +220,21 @@ water.liquify(1000, usdc);
 
 ```solidity
 contract Liquid is ERC20, ReentrancyGuardTransient {
-    Liquid public immutable WATER = this;
+    Liquid public immutable HUB = this;
     IERC20Metadata public substance;  // Backing token
 }
 ```
 
 ### State Variables
 
-- `WATER` - Immutable self-reference (main instance for factory)
+- `HUB` - Immutable self-reference (main instance for factory)
 - `substance` - The backing ERC-20 token for this Liquid
 
 ### Key Functions
 
 **Balance Queries:**
 - `pool()` - Returns liquid tokens held by contract
-- `lake()` - Returns water tokens held by contract
+- `reserve()` - Returns hub tokens held by contract
 - `mass()` - Returns backing tokens held by contract
 - `update()` - Internal token transfer (callable only by other Liquids)
 
@@ -247,7 +247,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 ### 1. Constant Product AMM
 
 ```
-pool * lake = k  (constant before and after trades)
+pool * reserve = k  (constant before and after trades)
 ```
 
 ### 2. Heat/Cool Symmetry
@@ -283,7 +283,7 @@ modifier nonReentrant() {
 ```solidity
 modifier onlyLiquid() {
     Liquid fluid = Liquid(msg.sender);
-    (address predicted,) = WATER.liquified(fluid.substance());
+    (address predicted,) = HUB.liquified(fluid.substance());
     if (msg.sender != predicted) {
         revert Unauthorized();
     }
@@ -314,7 +314,7 @@ using SafeERC20 for IERC20Metadata;
 
 **NO approval needed (only requires msg.sender ownership):**
 - `cool(liquid)` - Burns from msg.sender's balance
-- `buy(water)` - Transfers water from msg.sender
+- `buy(hub)` - Transfers hub from msg.sender
 - `sell(liquid)` - Transfers liquid from msg.sender
 - Cross-swaps - Use msg.sender's tokens
 
@@ -422,7 +422,7 @@ FOUNDRY_PROFILE=deep forge test --match-contract SolidInvariant
 
 ```solidity
 contract LiquidTest is BaseTest {
-    Liquid public W;    // Water
+    Liquid public H;    // Hub
     Liquid public U;    // First liquid
     Liquid public V;    // Second liquid
     LiquidUser public owen;  // Test users
@@ -432,10 +432,10 @@ contract LiquidTest is BaseTest {
     function setUp() public virtual override {
         super.setUp();
         owen = newUser("owen");
-        W = new Liquid(owen.newToken("W", 1e9));
-        owen.heat(W, 1e9);
-        U = W.liquify(owen.newToken("U", 1e9));
-        V = W.liquify(owen.newToken("V", 1e9));
+        H = new Liquid(owen.newToken("H", 1e9));
+        owen.heat(H, 1e9);
+        U = H.liquify(owen.newToken("U", 1e9));
+        V = H.liquify(owen.newToken("V", 1e9));
     }
 }
 ```
@@ -446,7 +446,7 @@ contract LiquidTest is BaseTest {
 contract LiquidUser is User {
     function heat(Liquid U, uint256 solid) public { }
     function cool(Liquid U, uint256 liquid) public returns (uint256 solid) { }
-    function sell(Liquid U, uint256 liquid) public returns (uint256 water) { }
+    function sell(Liquid U, uint256 liquid) public returns (uint256 hub) { }
     function liquidate(Liquid U) public returns (uint256 liquid, uint256 solid) { }
 }
 ```
@@ -495,7 +495,7 @@ forge script script/Ice.s.sol \
   --retries 10
 ```
 
-Note: Ice.s.sol deploys the initial WATAR token which serves as the base water instance.
+Note: Ice.s.sol deploys the initial HUB token which serves as the base hub instance.
 
 ### Supported Networks
 
@@ -534,9 +534,9 @@ always_use_create_2_factory = true
 ### Creating a New Liquid
 
 ```solidity
-// From water instance
+// From hub instance
 IERC20Metadata dai = IERC20Metadata(0x6B175474E89094C44Da98b954EedeAC495271d0F);
-Liquid liquidDAI = water.liquify(dai);
+Liquid liquidDAI = hub.liquify(dai);
 ```
 
 ### Adding Liquidity
@@ -559,14 +559,14 @@ uint256 solid = liquidDAI.cool(500 ether);
 ### Trading
 
 ```solidity
-// Buy liquid with water
-uint256 liquid = liquidDAI.buy(100 ether);  // Spend 100 water, receive liquid
+// Buy liquid with hub
+uint256 liquid = liquidDAI.buy(100 ether);  // Spend 100 hub, receive liquid
 
-// Sell liquid for water
-uint256 water = liquidDAI.sell(50 ether);   // Sell 50 liquid, receive water
+// Sell liquid for hub
+uint256 hub = liquidDAI.sell(50 ether);   // Sell 50 liquid, receive hub
 
 // Cross-liquid swap
-(uint256 water, uint256 fluids) = liquidDAI.sell(100 ether, liquidUSDC);
+(uint256 hub, uint256 fluids) = liquidDAI.sell(100 ether, liquidUSDC);
 ```
 
 ## Key Differences from Unit Protocol
@@ -582,7 +582,7 @@ uint256 water = liquidDAI.sell(50 ether);   // Sell 50 liquid, receive water
 ✅ Simple constant-product AMM
 ✅ Single token wrapping
 ✅ Standard liquidity pool mechanics
-✅ Cross-pool swaps via water intermediary
+✅ Cross-pool swaps via hub intermediary
 
 ## Reference Documentation
 
@@ -596,8 +596,8 @@ uint256 water = liquidDAI.sell(50 ether);   // Sell 50 liquid, receive water
 ```solidity
 event Heat(Liquid indexed fluid, uint256 solid);
 event Cool(Liquid indexed fluid, uint256 liquid, uint256 solid);
-event Buy(Liquid indexed fluid, uint256 liquid, uint256 water);
-event Sell(Liquid indexed fluid, uint256 liquid, uint256 water);
+event Buy(Liquid indexed fluid, uint256 liquid, uint256 hub);
+event Sell(Liquid indexed fluid, uint256 liquid, uint256 hub);
 event Liquify(IERC20Metadata indexed substance, Liquid indexed fluid);
 ```
 
@@ -614,17 +614,17 @@ error Unauthorized();   // Non-liquid caller
 
 ```solidity
 uint256 pool = liquid.pool();              // Pool liquid balance
-uint256 lake = liquid.lake();              // Pool water balance
+uint256 reserve = liquid.reserve();        // Pool hub balance
 uint256 mass = liquid.mass();              // Backing token balance
 ```
 
 ### Quote Functions
 
 ```solidity
-uint256 water = liquid.sells(50 ether);                       // Water from selling liquid
-uint256 liquid = liquid.buys(100 ether);                      // Liquid from buying with water
-(uint256 water, uint256 fluids) = liquid.sells(50 ether, otherLiquid);   // Cross-swap quote
-(uint256 water, uint256 liquid) = liquid.buys(100 ether, otherLiquid);   // Cross-swap quote
+uint256 hub = liquid.sells(50 ether);                       // Hub from selling liquid
+uint256 liquid = liquid.buys(100 ether);                    // Liquid from buying with hub
+(uint256 hub, uint256 fluids) = liquid.sells(50 ether, otherLiquid);   // Cross-swap quote
+(uint256 hub, uint256 liquid) = liquid.buys(100 ether, otherLiquid);   // Cross-swap quote
 ```
 
 ### Metadata
