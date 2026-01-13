@@ -52,7 +52,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     function heat(uint256 solids) external nonReentrant returns (uint256 pools, uint256 senders) {
         solid.safeTransferFrom(msg.sender, address(this), solids);
         (pools, senders) = heats(solids);
-        emit Heat(this, solids);
+        emit Heat(this, solids, pools, senders);
         _mint(address(this), pools);
         _mint(msg.sender, senders);
     }
@@ -68,7 +68,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function cool(uint256 spokes) external nonReentrant returns (uint256 solids, uint256 pools, uint256 senders) {
         (solids, pools, senders) = cools(spokes);
-        emit Cool(this, spokes, solids);
+        emit Cool(this, spokes, solids, pools, senders);
         _burn(address(this), pools);
         _burn(msg.sender, senders);
         solid.safeTransfer(msg.sender, solids);
@@ -168,8 +168,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         }
     }
 
-    event Heat(Liquid indexed liquid, uint256 solids);
-    event Cool(Liquid indexed liquid, uint256 liquids, uint256 solids);
+    event Heat(Liquid indexed liquid, uint256 solids, uint256 pools, uint256 senders);
+    event Cool(Liquid indexed liquid, uint256 liquids, uint256 solids, uint256 pools, uint256 senders);
     event Back(Liquid indexed liquid, uint256 liquids, uint256 hubs);
     event Away(Liquid indexed liquid, uint256 liquids, uint256 hubs);
     event Make(Liquid indexed liquid, IERC20Metadata indexed solid);
