@@ -84,7 +84,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function sell(uint256 spokes) external returns (uint256 hubs) {
         hubs = sells(spokes);
-        _went(spokes, hubs);
+        _sell(spokes, hubs);
     }
 
     function sells(uint256 spokes, Liquid fluid) public view returns (uint256 hubs, uint256 fluids) {
@@ -94,8 +94,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function sell(uint256 spokes, Liquid fluid) external returns (uint256 hubs, uint256 fluids) {
         (hubs, fluids) = sells(spokes, fluid);
-        _went(spokes, hubs);
-        fluid.came(fluids, hubs);
+        _sell(spokes, hubs);
+        fluid.__buy(fluids, hubs);
     }
 
     function buys(uint256 hubs) public view returns (uint256 spokes) {
@@ -104,24 +104,20 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function buy(uint256 hubs) external returns (uint256 spokes) {
         spokes = buys(hubs);
-        _came(spokes, hubs);
+        _buy(spokes, hubs);
     }
 
-    function came(uint256 spokes, uint256 hubs) external onlyLiquid {
-        _came(spokes, hubs);
+    function __buy(uint256 spokes, uint256 hubs) external onlyLiquid {
+        _buy(spokes, hubs);
     }
 
-    function _came(uint256 spokes, uint256 hubs) private {
+    function _buy(uint256 spokes, uint256 hubs) private {
         HUB.update(msg.sender, address(this), hubs);
         emit Back(this, spokes, hubs);
         _update(address(this), msg.sender, spokes);
     }
 
-    function went(uint256 spokes, uint256 hubs) external onlyLiquid {
-        _went(spokes, hubs);
-    }
-
-    function _went(uint256 spokes, uint256 hubs) private {
+    function _sell(uint256 spokes, uint256 hubs) private {
         HUB.update(address(this), msg.sender, hubs);
         emit Away(this, spokes, hubs);
         _update(msg.sender, address(this), spokes);
