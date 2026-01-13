@@ -1,7 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
   <defs>
-    <!-- Token bar primitive -->
-    <g id="token-bar">
+    <!-- Diagonal stripe pattern for solid tokens -->
+    <pattern id="solid-pattern-green" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+      <rect width="4" height="8" fill="#22c55e"/>
+      <rect x="4" width="4" height="8" fill="#16a34a"/>
+    </pattern>
+    <pattern id="solid-pattern-blue" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+      <rect width="4" height="8" fill="#3b82f6"/>
+      <rect x="4" width="4" height="8" fill="#2563eb"/>
+    </pattern>
+
+    <!-- Solid token bar (striped) -->
+    <g id="solid-token">
+      <rect x="0" y="0" width="120" height="200" rx="8" ry="8" fill="url(#solid-pattern)" stroke="#333" stroke-width="2"/>
+      <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Label</text>
+      <text x="60" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">Amount</text>
+    </g>
+
+    <!-- Liquid token bar (solid fill) -->
+    <g id="liquid-token">
       <rect x="0" y="0" width="120" height="200" rx="8" ry="8" fill="currentColor" stroke="#333" stroke-width="2"/>
       <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Label</text>
       <text x="60" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">Amount</text>
@@ -11,6 +28,8 @@
     <style>
       .spoke { color: #22c55e; }
       .hub { color: #3b82f6; }
+      .solid-spoke { --pattern: url(#solid-pattern-green); }
+      .solid-hub { --pattern: url(#solid-pattern-blue); }
     </style>
   </defs>
 
@@ -27,39 +46,39 @@
 
   <!-- Token bars (drawn from baseline at y=320, growing upward) -->
 
-  <!-- 1. Solid Spoke (green) -->
+  <!-- 1. Solid Spoke (green striped) -->
   <g transform="translate(60, 120)">
-    <use href="#token-bar" class="spoke"/>
+    <rect x="0" y="0" width="120" height="200" rx="8" ry="8" fill="url(#solid-pattern-green)" stroke="#333" stroke-width="2"/>
     <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Solid Spoke</text>
     <text x="60" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
   </g>
 
-  <!-- 2. Unpooled Liquid Spoke (green) -->
+  <!-- 2. Unpooled Liquid Spoke (green solid) -->
   <g transform="translate(200, 120)">
-    <use href="#token-bar" class="spoke"/>
+    <rect x="0" y="0" width="120" height="200" rx="8" ry="8" fill="#22c55e" stroke="#333" stroke-width="2"/>
     <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Unpooled</text>
     <text x="60" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Liquid Spoke</text>
     <text x="60" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
   </g>
 
-  <!-- 3. Pooled Liquid Spoke (green) -->
+  <!-- 3. Pooled Liquid Spoke (green solid) -->
   <g transform="translate(340, 120)">
-    <use href="#token-bar" class="spoke"/>
+    <rect x="0" y="0" width="120" height="200" rx="8" ry="8" fill="#22c55e" stroke="#333" stroke-width="2"/>
     <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Pooled</text>
     <text x="60" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Liquid Spoke</text>
     <text x="60" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
   </g>
 
-  <!-- 4. Liquid Hub (blue) -->
+  <!-- 4. Liquid Hub (blue solid) -->
   <g transform="translate(480, 120)">
-    <use href="#token-bar" class="hub"/>
+    <rect x="0" y="0" width="120" height="200" rx="8" ry="8" fill="#3b82f6" stroke="#333" stroke-width="2"/>
     <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Liquid Hub</text>
     <text x="60" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
   </g>
 
-  <!-- 5. Solid Hub (blue) -->
+  <!-- 5. Solid Hub (blue striped) -->
   <g transform="translate(620, 120)">
-    <use href="#token-bar" class="hub"/>
+    <rect x="0" y="0" width="120" height="200" rx="8" ry="8" fill="url(#solid-pattern-blue)" stroke="#333" stroke-width="2"/>
     <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Solid Hub</text>
     <text x="60" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
   </g>
