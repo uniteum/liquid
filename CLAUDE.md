@@ -68,14 +68,16 @@ This file provides context for AI assistants (primarily Claude) to understand th
 
 ### Core Metaphor
 
-- **Ice/Substance** = External ERC-20 backing token (state variable: `substance`)
-- **Solid** = Backing token amount (parameter: `solid`)
-- **Liquid** = Wrapped ERC-20 with AMM liquidity (parameter: `liquid`)
-- **Fluids** = Variable name for other liquid amounts in cross-swaps
-- **Hub** = Base Liquid instance used for cross-pool swaps
-- **Pool** = Liquid tokens held by contract
+- **Solid** = Backing token
+- **Liquid** = Wrapped token with AMM liquidity
+- **Hub** = Central Liquid token used for cross-pool swaps
+- **Spoke** = Liquid token paired with Hub token forming a liquidity pool
+- **Pool** = Spoke tokens held by contract
 - **Lake** = Hub tokens held by contract
+- **Fluid** = Name of other liquid in cross-swaps
 - **Mass** = Backing token balance held by contract
+
+Note that token amounts are specified by lowercasing and pluralizing the corresponding token: solids, liquids, hubs, spokes, fluids.
 
 ### Key File
 
@@ -86,13 +88,13 @@ This file provides context for AI assistants (primarily Claude) to understand th
 ### 1. Heat (Solid → Liquid)
 
 ```solidity
-function heat(uint256 solid) external nonReentrant
+function heat(uint256 solids) external nonReentrant returns (uint256 pools, uint256 senders)
 ```
 
 **What it does:**
-- User deposits `solid` of backing token
-- Contract mints `solid` to pool AND `solid` to user (2x mint)
-- Result: User owns `solid` liquid tokens, pool grows by `solid`
+- User deposits `solids` of backing token
+- Contract mints `solids` to pool AND `solids` to user (2x mint)
+- Result: User owns `solids` liquid tokens, pool grows by `solids`
 
 **Example:**
 ```solidity
@@ -483,19 +485,6 @@ export chain=11155111  # Sepolia testnet
 ```
 
 ### Deploy Script
-
-```bash
-chain=11155111
-forge script script/Ice.s.sol \
-  -f $chain \
-  --private-key $tx_key \
-  --broadcast \
-  --verify \
-  --delay 10 \
-  --retries 10
-```
-
-Note: Ice.s.sol deploys the initial HUB token which serves as the base hub instance.
 
 ### Supported Networks
 
