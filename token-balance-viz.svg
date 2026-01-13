@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <defs>
+    <!-- Token bar primitive -->
+    <g id="token-bar">
+      <rect x="0" y="0" width="120" height="200" rx="8" ry="8" fill="currentColor" stroke="#333" stroke-width="2"/>
+      <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Label</text>
+      <text x="60" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">Amount</text>
+    </g>
+
+    <!-- Color definitions -->
+    <style>
+      .spoke { color: #22c55e; }
+      .hub { color: #3b82f6; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#333">
+    Balanced Liquid System
+  </text>
+  <text x="400" y="50" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">
+    All tokens at equal height (1000 units each)
+  </text>
+
+  <!-- Y-axis baseline -->
+  <line x1="40" y1="320" x2="760" y2="320" stroke="#999" stroke-width="2"/>
+
+  <!-- Token bars (drawn from baseline at y=320, growing upward) -->
+
+  <!-- 1. Solid Spoke (green) -->
+  <g transform="translate(60, 120)">
+    <use href="#token-bar" class="spoke"/>
+    <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Solid Spoke</text>
+    <text x="60" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
+  </g>
+
+  <!-- 2. Unpooled Liquid Spoke (green) -->
+  <g transform="translate(200, 120)">
+    <use href="#token-bar" class="spoke"/>
+    <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Unpooled</text>
+    <text x="60" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Liquid Spoke</text>
+    <text x="60" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
+  </g>
+
+  <!-- 3. Pooled Liquid Spoke (green) -->
+  <g transform="translate(340, 120)">
+    <use href="#token-bar" class="spoke"/>
+    <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Pooled</text>
+    <text x="60" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Liquid Spoke</text>
+    <text x="60" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
+  </g>
+
+  <!-- 4. Liquid Hub (blue) -->
+  <g transform="translate(480, 120)">
+    <use href="#token-bar" class="hub"/>
+    <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Liquid Hub</text>
+    <text x="60" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
+  </g>
+
+  <!-- 5. Solid Hub (blue) -->
+  <g transform="translate(620, 120)">
+    <use href="#token-bar" class="hub"/>
+    <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Solid Hub</text>
+    <text x="60" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
+  </g>
+</svg>
