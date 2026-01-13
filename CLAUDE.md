@@ -72,10 +72,10 @@ This file provides context for AI assistants (primarily Claude) to understand th
 - **Liquid** = Wrapped token with AMM liquidity
 - **Hub** = Central Liquid token used for cross-pool swaps
 - **Spoke** = Liquid token paired with Hub token forming a liquidity pool
+- **Mass** = Solid backing tokens held by contract
 - **Pool** = Spoke tokens held by contract
 - **Lake** = Hub tokens held by contract
 - **Fluid** = Name of other liquid in cross-swaps
-- **Mass** = Backing token balance held by contract
 
 Note that token amounts are specified by lowercasing and pluralizing the corresponding token: solids, liquids, hubs, spokes, fluids.
 
@@ -92,9 +92,9 @@ function heat(uint256 solids) external nonReentrant returns (uint256 pools, uint
 ```
 
 **What it does:**
-- User deposits `solids` of backing token
-- Contract mints `solids` to pool AND `solids` to user (2x mint)
-- Result: User owns `solids` liquid tokens, pool grows by `solids`
+- User deposits `s` solid token
+- Contract mints `2 s` liquid tokens split between the pool and user to preserve imbalance between pool and unpooled liquids
+- Result: User gains s ± ds liquid tokens, pool gains s ∓ ds liquid tokens
 
 **Example:**
 ```solidity
