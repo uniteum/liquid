@@ -35,10 +35,10 @@
 
   <!-- Title -->
   <text x="450" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#333">
-    Balanced Liquid System
+    After Heating 100 Spoke Tokens
   </text>
   <text x="450" y="50" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">
-    All liquid tokens balanced at 1000 units each
+    Solid: 750 → 650 | Liquid: 1000 → 1100 (both pooled and unpooled)
   </text>
 
   <!-- Y-axis baseline -->
@@ -46,30 +46,30 @@
 
   <!-- Token bars (drawn from baseline at y=320, growing upward) -->
 
-  <!-- 1. Solid Spoke (green striped) -->
-  <g transform="translate(60, 170)">
-    <rect x="0" y="0" width="120" height="150" rx="8" ry="8" fill="url(#solid-pattern-green)" stroke="#333" stroke-width="2"/>
-    <text x="60" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Solid Spoke</text>
-    <text x="60" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">750</text>
+  <!-- 1. Solid Spoke (green striped) - 650 units -->
+  <g transform="translate(60, 190)">
+    <rect x="0" y="0" width="120" height="130" rx="8" ry="8" fill="url(#solid-pattern-green)" stroke="#333" stroke-width="2"/>
+    <text x="60" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Solid Spoke</text>
+    <text x="60" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">650</text>
   </g>
 
-  <!-- 2. Unpooled Liquid Spoke (green solid) -->
-  <g transform="translate(200, 120)">
-    <rect x="0" y="0" width="120" height="200" rx="8" ry="8" fill="#22c55e" stroke="#333" stroke-width="2"/>
-    <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Unpooled</text>
-    <text x="60" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Liquid Spoke</text>
-    <text x="60" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
+  <!-- 2. Unpooled Liquid Spoke (green solid) - 1100 units -->
+  <g transform="translate(200, 100)">
+    <rect x="0" y="0" width="120" height="220" rx="8" ry="8" fill="#22c55e" stroke="#333" stroke-width="2"/>
+    <text x="60" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Unpooled</text>
+    <text x="60" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Liquid Spoke</text>
+    <text x="60" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1100</text>
   </g>
 
-  <!-- 3. Pooled Liquid Spoke (green solid) -->
-  <g transform="translate(340, 120)">
-    <rect x="0" y="0" width="120" height="200" rx="8" ry="8" fill="#22c55e" stroke="#333" stroke-width="2"/>
-    <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Pooled</text>
-    <text x="60" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Liquid Spoke</text>
-    <text x="60" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
+  <!-- 3. Pooled Liquid Spoke (green solid) - 1100 units -->
+  <g transform="translate(340, 100)">
+    <rect x="0" y="0" width="120" height="220" rx="8" ry="8" fill="#22c55e" stroke="#333" stroke-width="2"/>
+    <text x="60" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Pooled</text>
+    <text x="60" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Liquid Spoke</text>
+    <text x="60" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1100</text>
   </g>
 
-  <!-- 4. Pooled Liquid Hub (blue solid) -->
+  <!-- 4. Pooled Liquid Hub (blue solid) - 1000 units -->
   <g transform="translate(480, 120)">
     <rect x="0" y="0" width="120" height="200" rx="8" ry="8" fill="#3b82f6" stroke="#333" stroke-width="2"/>
     <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Pooled</text>
@@ -77,7 +77,7 @@
     <text x="60" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
   </g>
 
-  <!-- 5. Unpooled Liquid Hub (blue solid) -->
+  <!-- 5. Unpooled Liquid Hub (blue solid) - 1000 units -->
   <g transform="translate(620, 120)">
     <rect x="0" y="0" width="120" height="200" rx="8" ry="8" fill="#3b82f6" stroke="#333" stroke-width="2"/>
     <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Unpooled</text>
@@ -85,7 +85,7 @@
     <text x="60" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
   </g>
 
-  <!-- 6. Solid Hub (blue striped) -->
+  <!-- 6. Solid Hub (blue striped) - 1250 units -->
   <g transform="translate(760, 70)">
     <rect x="0" y="0" width="120" height="250" rx="8" ry="8" fill="url(#solid-pattern-blue)" stroke="#333" stroke-width="2"/>
     <text x="60" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Solid Hub</text>
