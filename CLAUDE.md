@@ -74,7 +74,7 @@ This file provides context for AI assistants (primarily Claude) to understand th
 - **Fluids** = Variable name for other liquid amounts in cross-swaps
 - **Hub** = Base Liquid instance used for cross-pool swaps
 - **Pool** = Liquid tokens held by contract
-- **Reserve** = Hub tokens held by contract
+- **Lake** = Hub tokens held by contract
 - **Mass** = Backing token balance held by contract
 
 ### Key File
@@ -129,16 +129,16 @@ function sell(uint256 liquid) external returns (uint256 hub)
 
 **Constant Product Formula:**
 ```solidity
-// Invariant: pool * reserve = k
+// Invariant: pool * lake = k
 filled = pool + liquid
-drained = pool * reserve / filled
-hub = reserve - drained
+drained = pool * lake / filled
+hub = lake - drained
 ```
 
 **What it does:**
 - Calculates hub received for selling `liquid` to pool
 - Transfers liquid from user to pool
-- Transfers hub from pool's reserve to user
+- Transfers hub from pool's lake to user
 
 ### 4. Buy (Hub → Liquid)
 
@@ -148,14 +148,14 @@ function buy(uint256 hub) external returns (uint256 liquid)
 
 **Formula:**
 ```solidity
-// Uses sells() with reversed pool/reserve (symmetric formula)
-liquid = sells(hub, reserve, pool)
-// Which expands to: liquid = pool - pool * reserve / (reserve + hub)
+// Uses sells() with reversed pool/lake (symmetric formula)
+liquid = sells(hub, lake, pool)
+// Which expands to: liquid = pool - pool * lake / (lake + hub)
 ```
 
 **What it does:**
 - Buys liquid by spending exactly `hub` amount
-- Transfers hub from user to pool's reserve
+- Transfers hub from user to pool's lake
 - Transfers liquid from pool to user
 
 ### 5. Cross-Liquid Swaps
@@ -234,7 +234,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
 **Balance Queries:**
 - `pool()` - Returns liquid tokens held by contract
-- `reserve()` - Returns hub tokens held by contract
+- `lake()` - Returns hub tokens held by contract
 - `mass()` - Returns backing tokens held by contract
 - `update()` - Internal token transfer (callable only by other Liquids)
 
@@ -247,7 +247,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 ### 1. Constant Product AMM
 
 ```
-pool * reserve = k  (constant before and after trades)
+pool * lake = k  (constant before and after trades)
 ```
 
 ### 2. Heat/Cool Symmetry
@@ -614,7 +614,7 @@ error Unauthorized();   // Non-liquid caller
 
 ```solidity
 uint256 pool = liquid.pool();              // Pool liquid balance
-uint256 reserve = liquid.reserve();        // Pool hub balance
+uint256 lake = liquid.lake();        // Pool hub balance
 uint256 mass = liquid.mass();              // Backing token balance
 ```
 
