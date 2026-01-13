@@ -38,7 +38,7 @@
     Balanced Liquid System
   </text>
   <text x="400" y="50" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">
-    All tokens at equal height (1000 units each)
+    Liquid tokens balanced at 1000 units each
   </text>
 
   <!-- Y-axis baseline -->
@@ -47,10 +47,10 @@
   <!-- Token bars (drawn from baseline at y=320, growing upward) -->
 
   <!-- 1. Solid Spoke (green striped) -->
-  <g transform="translate(60, 120)">
-    <rect x="0" y="0" width="120" height="200" rx="8" ry="8" fill="url(#solid-pattern-green)" stroke="#333" stroke-width="2"/>
-    <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Solid Spoke</text>
-    <text x="60" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
+  <g transform="translate(60, 170)">
+    <rect x="0" y="0" width="120" height="150" rx="8" ry="8" fill="url(#solid-pattern-green)" stroke="#333" stroke-width="2"/>
+    <text x="60" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Solid Spoke</text>
+    <text x="60" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">750</text>
   </g>
 
   <!-- 2. Unpooled Liquid Spoke (green solid) -->
@@ -77,9 +77,9 @@
   </g>
 
   <!-- 5. Solid Hub (blue striped) -->
-  <g transform="translate(620, 120)">
-    <rect x="0" y="0" width="120" height="200" rx="8" ry="8" fill="url(#solid-pattern-blue)" stroke="#333" stroke-width="2"/>
-    <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Solid Hub</text>
-    <text x="60" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
+  <g transform="translate(620, 70)">
+    <rect x="0" y="0" width="120" height="250" rx="8" ry="8" fill="url(#solid-pattern-blue)" stroke="#333" stroke-width="2"/>
+    <text x="60" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Solid Hub</text>
+    <text x="60" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1250</text>
   </g>
 </svg>
