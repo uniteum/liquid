@@ -127,22 +127,22 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _update(from, to, amount);
     }
 
-    function made(IERC20Metadata backing) public view returns (bool yes, address home, bytes32 salt) {
+    function made(IERC20Metadata backing) public view returns (bool cloned, address home, bytes32 salt) {
         if (address(backing) == address(0)) {
             revert Nothing();
         }
         salt = bytes32(uint256(uint160(address(backing))));
         home = Clones.predictDeterministicAddress(address(HUB), salt, address(HUB));
-        yes = home.code.length != 0;
+        cloned = home.code.length != 0;
     }
 
     function make(IERC20Metadata backing) public returns (Liquid liquid) {
         if (this != HUB) {
             liquid = HUB.make(backing);
         } else {
-            (bool yes, address home, bytes32 salt) = made(backing);
+            (bool cloned, address home, bytes32 salt) = made(backing);
             liquid = Liquid(home);
-            if (!yes) {
+            if (!cloned) {
                 emit Make(liquid, backing);
                 home = Clones.cloneDeterministic(address(HUB), salt, 0);
                 liquid.zzz_(backing);
