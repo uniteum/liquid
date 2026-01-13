@@ -87,15 +87,15 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _sell(spokes, hubs);
     }
 
-    function sells(uint256 spokes, Liquid fluid) public view returns (uint256 hubs, uint256 fluids) {
+    function sellsFor(Liquid that, uint256 spokes) public view returns (uint256 hubs, uint256 thats) {
         hubs = sells(spokes);
-        fluids = fluid.buys(hubs);
+        thats = that.buys(hubs);
     }
 
-    function sell(uint256 spokes, Liquid fluid) external returns (uint256 hubs, uint256 fluids) {
-        (hubs, fluids) = sells(spokes, fluid);
+    function sellFor(Liquid that, uint256 spokes) external returns (uint256 hubs, uint256 thats) {
+        (hubs, thats) = sellsFor(that, spokes);
         _sell(spokes, hubs);
-        fluid.__buy(fluids, hubs);
+        that.__buy(thats, hubs);
     }
 
     function buys(uint256 hubs) public view returns (uint256 spokes) {

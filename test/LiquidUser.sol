@@ -55,12 +55,12 @@ contract LiquidUser is User {
         console.log("water:", water);
     }
 
-    function sell(Liquid U, uint256 liquid, Liquid V)
+    function sellFor(Liquid U, Liquid V, uint256 liquid)
         public
         waterlog("sell", U, liquid, 0)
         returns (uint256 water, uint256 fluid)
     {
-        (water, fluid) = U.sell(liquid, V);
+        (water, fluid) = U.sellFor(V, liquid);
         console.log("water:", water);
         console.log("fluid:", fluid);
     }
