@@ -131,32 +131,32 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _update(from, to, amount);
     }
 
-    function made(IERC20Metadata solid_) public view returns (bool yes, address home, bytes32 salt) {
-        if (address(solid_) == address(0)) {
+    function made(IERC20Metadata backing) public view returns (bool yes, address home, bytes32 salt) {
+        if (address(backing) == address(0)) {
             revert Nothing();
         }
-        salt = bytes32(uint256(uint160(address(solid_))));
+        salt = bytes32(uint256(uint160(address(backing))));
         home = Clones.predictDeterministicAddress(address(HUB), salt, address(HUB));
         yes = home.code.length != 0;
     }
 
-    function make(IERC20Metadata solid_) public returns (Liquid liquid) {
+    function make(IERC20Metadata backing) public returns (Liquid liquid) {
         if (this != HUB) {
-            liquid = HUB.make(solid_);
+            liquid = HUB.make(backing);
         } else {
-            (bool yes, address home, bytes32 salt) = made(solid_);
+            (bool yes, address home, bytes32 salt) = made(backing);
             liquid = Liquid(home);
             if (!yes) {
-                emit Make(liquid, solid_);
+                emit Make(liquid, backing);
                 home = Clones.cloneDeterministic(address(HUB), salt, 0);
-                liquid.zzz_(solid_);
+                liquid.zzz_(backing);
             }
         }
     }
 
-    function zzz_(IERC20Metadata solid_) external {
+    function zzz_(IERC20Metadata backing) external {
         if (address(solid) == address(0)) {
-            solid = solid_;
+            solid = backing;
         }
     }
 
@@ -173,9 +173,9 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
     }
 
     event Heat(Liquid indexed liquid, uint256 solids);
-    event Cool(Liquid indexed liquid, uint256 spokes, uint256 solids);
-    event Back(Liquid indexed liquid, uint256 spokes, uint256 hubs);
-    event Away(Liquid indexed liquid, uint256 spokes, uint256 hubs);
+    event Cool(Liquid indexed liquid, uint256 liquids, uint256 solids);
+    event Back(Liquid indexed liquid, uint256 liquids, uint256 hubs);
+    event Away(Liquid indexed liquid, uint256 liquids, uint256 hubs);
     event Make(Liquid indexed liquid, IERC20Metadata indexed solid);
 
     error Nothing();
