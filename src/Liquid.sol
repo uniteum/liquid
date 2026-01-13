@@ -113,13 +113,13 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     function _buy(uint256 spokes, uint256 hubs) private {
         HUB.update(msg.sender, address(this), hubs);
-        emit Back(this, spokes, hubs);
+        emit Buy(this, spokes, hubs);
         _update(address(this), msg.sender, spokes);
     }
 
     function _sell(uint256 spokes, uint256 hubs) private {
         HUB.update(address(this), msg.sender, hubs);
-        emit Away(this, spokes, hubs);
+        emit Sell(this, spokes, hubs);
         _update(msg.sender, address(this), spokes);
     }
 
@@ -170,8 +170,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     event Heat(Liquid indexed liquid, uint256 solids, uint256 pools, uint256 senders);
     event Cool(Liquid indexed liquid, uint256 liquids, uint256 solids, uint256 pools, uint256 senders);
-    event Back(Liquid indexed liquid, uint256 liquids, uint256 hubs);
-    event Away(Liquid indexed liquid, uint256 liquids, uint256 hubs);
+    event Buy(Liquid indexed liquid, uint256 liquids, uint256 hubs);
+    event Sell(Liquid indexed liquid, uint256 liquids, uint256 hubs);
     event Make(Liquid indexed liquid, IERC20Metadata indexed solid);
 
     error Nothing();
