@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.30;
 
+import {ILiquid} from "iliquid/ILiquid.sol";
 import {ERC20, IERC20Metadata} from "erc20/ERC20.sol";
 import {SafeERC20} from "erc20/SafeERC20.sol";
 import {Clones} from "clones/Clones.sol";
 import {ReentrancyGuardTransient} from "reentrancy/ReentrancyGuardTransient.sol";
 
-contract Liquid is ERC20, ReentrancyGuardTransient {
+contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
     using SafeERC20 for IERC20Metadata;
 
     Liquid public immutable HUB = this;
@@ -17,15 +18,15 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         solid = hub;
     }
 
-    function name() public view virtual override returns (string memory) {
+    function name() public view virtual override(ERC20, IERC20Metadata) returns (string memory) {
         return solid.name();
     }
 
-    function symbol() public view virtual override returns (string memory) {
+    function symbol() public view virtual override(ERC20, IERC20Metadata) returns (string memory) {
         return solid.symbol();
     }
 
-    function decimals() public view virtual override returns (uint8) {
+    function decimals() public view virtual override(ERC20, IERC20Metadata) returns (uint8) {
         return solid.decimals();
     }
 
@@ -87,15 +88,15 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         _sell(spokes, hubs);
     }
 
-    function sellsFor(Liquid that, uint256 spokes) public view returns (uint256 hubs, uint256 thats) {
+    function sellsFor(ILiquid that, uint256 spokes) public view returns (uint256 hubs, uint256 thats) {
         hubs = sells(spokes);
         thats = that.buys(hubs);
     }
 
-    function sellFor(Liquid that, uint256 spokes) external returns (uint256 hubs, uint256 thats) {
+    function sellFor(ILiquid that, uint256 spokes) external returns (uint256 hubs, uint256 thats) {
         (hubs, thats) = sellsFor(that, spokes);
         _sell(spokes, hubs);
-        that.__buy(thats, hubs);
+        Liquid(address(that)).__buy(thats, hubs);
     }
 
     function buys(uint256 hubs) public view returns (uint256 spokes) {
@@ -136,7 +137,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
         cloned = home.code.length != 0;
     }
 
-    function make(IERC20Metadata backing) public returns (Liquid liquid) {
+    function make(IERC20Metadata backing) public returns (ILiquid liquid) {
         if (this != HUB) {
             liquid = HUB.make(backing);
         } else {
@@ -145,7 +146,7 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
             if (!cloned) {
                 emit Make(liquid, backing);
                 home = Clones.cloneDeterministic(address(HUB), salt, 0);
-                liquid.zzz_(backing);
+                Liquid(home).zzz_(backing);
             }
         }
     }
@@ -167,13 +168,4 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
             revert Unauthorized();
         }
     }
-
-    event Heat(Liquid indexed liquid, uint256 solids, uint256 pools, uint256 senders);
-    event Cool(Liquid indexed liquid, uint256 liquids, uint256 solids, uint256 pools, uint256 senders);
-    event Buy(Liquid indexed liquid, uint256 liquids, uint256 hubs);
-    event Sell(Liquid indexed liquid, uint256 liquids, uint256 hubs);
-    event Make(Liquid indexed liquid, IERC20Metadata indexed solid);
-
-    error Nothing();
-    error Unauthorized();
 }

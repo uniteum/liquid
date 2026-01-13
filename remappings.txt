@@ -5,3 +5,4 @@ erc20/=lib/erc20/
 math/=lib/math/
 strings/=lib/strings/
 panic/=lib/panic/
+iliquid/=lib/iliquid/

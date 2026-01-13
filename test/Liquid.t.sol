@@ -2,16 +2,16 @@
 
 pragma solidity ^0.8.30;
 
-import {Liquid} from "../src/Liquid.sol";
+import {Liquid, ILiquid} from "../src/Liquid.sol";
 import {BaseTest} from "./Base.t.sol";
 import {LiquidUser, IERC20} from "./LiquidUser.sol";
 
 contract LiquidTest is BaseTest {
     uint256 constant INITIAL_BALANCE = 1e9;
     uint256 constant U_WATER = 1e6;
-    Liquid public W;
-    Liquid public U;
-    Liquid public V;
+    ILiquid public W;
+    ILiquid public U;
+    ILiquid public V;
     IERC20 public S;
     LiquidUser public owen;
     LiquidUser public alex;
