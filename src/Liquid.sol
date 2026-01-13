@@ -13,8 +13,8 @@ contract Liquid is ERC20, ReentrancyGuardTransient {
 
     IERC20Metadata public solid;
 
-    constructor(IERC20Metadata ice) ERC20("", "") {
-        solid = ice;
+    constructor(IERC20Metadata hub) ERC20("", "") {
+        solid = hub;
     }
 
     function name() public view virtual override returns (string memory) {
