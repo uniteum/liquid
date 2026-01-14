@@ -7,21 +7,9 @@
 >
 
   <style>
-    .bar {
-      rx: 8;
-      ry: 8;
-    }
-
-    .label {
-      font-size: 12px;
-      fill: #666;
-      text-anchor: middle;
-      font-family: system-ui, Arial, sans-serif;
-    }
-
-    .amount {
+    .label, .amount {
       font-size: 16px;
-      font-weight: 700;
+      fill: #666;
       text-anchor: middle;
       font-family: system-ui, Arial, sans-serif;
     }
@@ -44,9 +32,8 @@
 
     <!-- reusable label block -->
     <symbol id="legend-block">
-      <text class="label"  x="60" y="20">Pooled</text>
-      <text class="label"  x="60" y="36">Liquid Spoke</text>
-      <text class="amount" x="60" y="58">1100</text>
+      <text class="label"  x="60" y="20">Pooled Spoke</text>
+      <text class="amount" x="60" y="40">1100</text>
     </symbol>
   </defs>
 
