@@ -10,15 +10,6 @@
     </pattern>
   </defs>
 
-  <text x="450" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#333">
-    After Heating 100 Spoke Tokens
-  </text>
-  <text x="450" y="50" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">
-    Solid: 750 → 650 | Liquid: 1000 → 1100 (both pooled and unpooled)
-  </text>
-
-  <line x1="40" y1="320" x2="860" y2="320" stroke="#999" stroke-width="2"/>
-
   <!-- 1. Solid Spoke: 650 -->
   <g transform="translate(60, 190)">
     <rect width="120" height="130" rx="8" ry="8" fill="url(#stripe-green)" stroke="#333" stroke-width="2"/>
