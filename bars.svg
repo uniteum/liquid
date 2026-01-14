@@ -1,22 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg
+  xmlns="http://www.w3.org/2000/svg"
   width="520"
   height="360"
   viewBox="0 0 520 360"
-  xmlns="http://www.w3.org/2000/svg"
 >
 
   <style>
-    .bar { rx: 8; ry: 8; }
-    .label { font-size: 12px; fill: #666; text-anchor: middle; }
-    .amount { font-size: 16px; font-weight: bold; text-anchor: middle; }
-    .axis { stroke: #ccc; stroke-width: 1; }
+    .bar {
+      rx: 8;
+      ry: 8;
+    }
+
+    .label {
+      font-size: 12px;
+      fill: #666;
+      text-anchor: middle;
+      font-family: system-ui, Arial, sans-serif;
+    }
+
+    .amount {
+      font-size: 16px;
+      font-weight: 700;
+      text-anchor: middle;
+      font-family: system-ui, Arial, sans-serif;
+    }
+
+    .axis {
+      stroke: #ccc;
+      stroke-width: 1;
+    }
   </style>
 
   <!-- baseline -->
   <line class="axis" x1="20" y1="300" x2="500" y2="300" />
 
-  <!-- reusable label block -->
   <defs>
+    <!-- REFERENCED SHAPE: width is defined ONCE here -->
+    <symbol id="bar-shape" overflow="visible">
+      <!-- Unit height (1). We scale Y to set the bar height. -->
+      <rect class="bar" x="0" y="0" width="120" height="1" />
+    </symbol>
+
+    <!-- reusable label block -->
     <symbol id="legend-block">
       <text class="label"  x="60" y="20">Pooled</text>
       <text class="label"  x="60" y="36">Liquid Spoke</text>
@@ -26,8 +52,10 @@
 
   <!-- BAR 1 -->
   <g transform="translate(40 300)">
+    <!-- flip y-axis for the bar only -->
     <g transform="scale(1,-1)">
-      <rect class="bar" width="120" height="180" fill="#4da3ff" />
+      <!-- only height changes: scaleY = barHeight -->
+      <use href="#bar-shape" fill="#4da3ff" transform="scale(1,180)" />
     </g>
     <use href="#legend-block" y="8" />
   </g>
@@ -35,7 +63,7 @@
   <!-- BAR 2 -->
   <g transform="translate(200 300)">
     <g transform="scale(1,-1)">
-      <rect class="bar" width="120" height="95" fill="#6ad58b" />
+      <use href="#bar-shape" fill="#6ad58b" transform="scale(1,95)" />
     </g>
     <use href="#legend-block" y="8" />
   </g>
@@ -43,7 +71,7 @@
   <!-- BAR 3 -->
   <g transform="translate(360 300)">
     <g transform="scale(1,-1)">
-      <rect class="bar" width="120" height="40" fill="#ffb347" />
+      <use href="#bar-shape" fill="#ffb347" transform="scale(1,40)" />
     </g>
     <use href="#legend-block" y="8" />
   </g>
