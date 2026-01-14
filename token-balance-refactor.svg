@@ -8,51 +8,78 @@
       <rect width="4" height="8" fill="#3b82f6"/>
       <rect x="4" width="4" height="8" fill="#2563eb"/>
     </pattern>
+
+    <style>
+      /* Common styling for bars and bar labels */
+      .bar {
+        stroke: #333;
+        stroke-width: 2;
+      }
+
+      /* All text under each bar shares these */
+      .barText {
+        font-family: Arial, sans-serif;
+        text-anchor: middle;
+        fill: #666;
+      }
+
+      /* Size-only variants */
+      .label  { font-size: 14px; }
+      .amount { font-size: 12px; }
+    </style>
   </defs>
 
   <!-- 1. Solid Spoke: 650 -->
   <g transform="translate(60, 190)">
-    <rect width="120" height="130" rx="8" ry="8" fill="url(#stripe-green)" stroke="#333" stroke-width="2"/>
-    <text x="60" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Solid Spoke</text>
-    <text x="60" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">650</text>
+    <rect class="bar" width="120" height="130" rx="8" ry="8" fill="url(#stripe-green)"/>
+    <g class="barText" transform="translate(60, 0)">
+      <text class="label" y="150">Solid Spoke</text>
+      <text class="amount" y="170">650</text>
+    </g>
   </g>
 
   <!-- 2. Unpooled Liquid Spoke: 1100 -->
   <g transform="translate(200, 100)">
-    <rect width="120" height="220" rx="8" ry="8" fill="#22c55e" stroke="#333" stroke-width="2"/>
-    <text x="60" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Unpooled</text>
-    <text x="60" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Liquid Spoke</text>
-    <text x="60" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1100</text>
+    <rect class="bar" width="120" height="220" rx="8" ry="8" fill="#22c55e"/>
+    <g class="barText" transform="translate(60, 0)">
+      <text class="label" y="240">Unpooled Spoke</text>
+      <text class="amount" y="275">1100</text>
+    </g>
   </g>
 
   <!-- 3. Pooled Liquid Spoke: 1100 -->
   <g transform="translate(340, 100)">
-    <rect width="120" height="220" rx="8" ry="8" fill="#22c55e" stroke="#333" stroke-width="2"/>
-    <text x="60" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Pooled</text>
-    <text x="60" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Liquid Spoke</text>
-    <text x="60" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1100</text>
+    <rect class="bar" width="120" height="220" rx="8" ry="8" fill="url(#stripe-green)"/>
+    <g class="barText" transform="translate(60, 0)">
+      <text class="label" y="240">Pooled Spoke</text>
+      <text class="amount" y="275">1100</text>
+    </g>
   </g>
 
   <!-- 4. Pooled Liquid Hub: 1000 -->
   <g transform="translate(480, 120)">
-    <rect width="120" height="200" rx="8" ry="8" fill="#3b82f6" stroke="#333" stroke-width="2"/>
-    <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Pooled</text>
-    <text x="60" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Liquid Hub</text>
-    <text x="60" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
+    <rect class="bar" width="120" height="200" rx="8" ry="8" fill="#3b82f6"/>
+    <g class="barText" transform="translate(60, 0)">
+      <text class="label" y="220">Pooled Hub</text>
+      <text class="amount" y="255">1000</text>
+    </g>
   </g>
 
   <!-- 5. Unpooled Liquid Hub: 1000 -->
   <g transform="translate(620, 120)">
-    <rect width="120" height="200" rx="8" ry="8" fill="#3b82f6" stroke="#333" stroke-width="2"/>
-    <text x="60" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Unpooled</text>
-    <text x="60" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Liquid Hub</text>
-    <text x="60" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1000</text>
+    <rect class="bar" width="120" height="200" rx="8" ry="8" fill="#3b82f6"/>
+    <g class="barText" transform="translate(60, 0)">
+      <text class="label" y="220">Unpooled Hub</text>
+      <text class="amount" y="255">1000</text>
+    </g>
   </g>
 
   <!-- 6. Solid Hub: 1250 -->
   <g transform="translate(760, 70)">
-    <rect width="120" height="250" rx="8" ry="8" fill="url(#stripe-blue)" stroke="#333" stroke-width="2"/>
-    <text x="60" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#333">Solid Hub</text>
-    <text x="60" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">1250</text>
+    <rect class="bar" width="120" height="250" rx="8" ry="8" fill="url(#stripe-blue)"/>
+    <g class="barText" transform="translate(60, 0)">
+      <text class="label" y="270">Solid Hub</text>
+      <text class="amount" y="290">1250</text>
+    </g>
   </g>
 </svg>
