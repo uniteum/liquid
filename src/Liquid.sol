@@ -30,12 +30,10 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         return solid.decimals();
     }
 
-    function pool() public view returns (uint256) {
-        return balanceOf(address(this));
-    }
-
-    function lake() public view returns (uint256) {
-        return HUB.balanceOf(address(this));
+    function pool() public view returns (uint256 S, uint256 H) {
+        if (this == HUB) revert Nothing();
+        S = balanceOf(address(this));
+        H = HUB.balanceOf(address(this));
     }
 
     function heat(uint256 solids) external nonReentrant {
@@ -50,12 +48,9 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         solid.safeTransfer(msg.sender, spokes);
     }
 
-    function sells(uint256 x, uint256 X, uint256 Y) public pure returns (uint256 y) {
-        y = Y - Y * X / (X + x);
-    }
-
-    function sells(uint256 spokes) public view returns (uint256 hubs) {
-        hubs = sells(spokes, pool(), lake());
+    function sells(uint256 s) public view returns (uint256 e) {
+        (uint256 S, uint256 E) = pool();
+        e = E - (E * S + E - 1) / (S + s);
     }
 
     function sell(uint256 spokes) external returns (uint256 hubs) {
@@ -74,8 +69,9 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         Liquid(address(that)).__buy(thats, hubs);
     }
 
-    function buys(uint256 hubs) public view returns (uint256 spokes) {
-        spokes = sells(hubs, lake(), pool());
+    function buys(uint256 e) public view returns (uint256 s) {
+        (uint256 S, uint256 E) = pool();
+        s = S - S * E / (E + e);
     }
 
     function buy(uint256 hubs) external returns (uint256 spokes) {

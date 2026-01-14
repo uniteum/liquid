@@ -6,15 +6,11 @@ import {IERC20Metadata} from "ierc20/IERC20Metadata.sol";
 interface ILiquid is IERC20Metadata {
     function solid() external view returns (IERC20Metadata);
 
-    function pool() external view returns (uint256);
-
-    function lake() external view returns (uint256);
+    function pool() external view returns (uint256 S, uint256 H);
 
     function heat(uint256 amount) external;
 
     function cool(uint256 amount) external;
-
-    function sells(uint256 x, uint256 X, uint256 Y) external pure returns (uint256 y);
 
     function sells(uint256 spokes) external view returns (uint256 hubs);
 
