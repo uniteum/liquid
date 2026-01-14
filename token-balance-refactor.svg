@@ -1,12 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" width="900" height="400">
   <defs>
-    <pattern id="stripe-green" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
-      <rect width="4" height="8" fill="#22c55e"/>
-      <rect x="4" width="4" height="8" fill="#16a34a"/>
-    </pattern>
-    <pattern id="stripe-blue" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
-      <rect width="4" height="8" fill="#3b82f6"/>
-      <rect x="4" width="4" height="8" fill="#2563eb"/>
+    <!-- Color-agnostic stripe pattern: color comes from 'color' on the element -->
+    <pattern id="stripe" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+      <rect width="4" height="8" fill="currentColor"/>
+      <rect x="4" width="4" height="8" fill="transparent"/>
     </pattern>
 
     <style>
@@ -31,43 +28,48 @@
 
   <!-- 1. Solid Spoke: 650 -->
   <g transform="translate(60, 190)">
-    <rect class="bar" width="120" height="130" rx="8" ry="8" fill="url(#stripe-green)"/>
+    <rect class="bar" width="120" height="130" rx="8" ry="8"
+          fill="url(#stripe)" color="#22c55e"/>
     <g class="barText" transform="translate(60, 0)">
       <text class="label" y="150">Solid Spoke</text>
       <text class="amount" y="170">650</text>
     </g>
   </g>
 
-  <!-- 2. Unpooled Liquid Spoke: 1100 -->
+  <!-- 2. Unpooled Spoke: 1100 -->
   <g transform="translate(200, 100)">
-    <rect class="bar" width="120" height="220" rx="8" ry="8" fill="#22c55e"/>
+    <rect class="bar" width="120" height="220" rx="8" ry="8"
+          fill="#22c55e"/>
     <g class="barText" transform="translate(60, 0)">
       <text class="label" y="240">Unpooled Spoke</text>
       <text class="amount" y="275">1100</text>
     </g>
   </g>
 
-  <!-- 3. Pooled Liquid Spoke: 1100 -->
+  <!-- 3. Pooled Spoke: 1100 -->
   <g transform="translate(340, 100)">
-    <rect class="bar" width="120" height="220" rx="8" ry="8" fill="url(#stripe-green)"/>
+    <rect class="bar" width="120" height="220" rx="8" ry="8"
+          fill="url(#stripe)" color="#22c55e"/>
     <g class="barText" transform="translate(60, 0)">
       <text class="label" y="240">Pooled Spoke</text>
       <text class="amount" y="275">1100</text>
     </g>
   </g>
 
-  <!-- 4. Pooled Liquid Hub: 1000 -->
+  <!-- 4. Pooled Hub: 1000 -->
   <g transform="translate(480, 120)">
-    <rect class="bar" width="120" height="200" rx="8" ry="8" fill="#3b82f6"/>
+    <rect class="bar" width="120" height="200" rx="8" ry="8"
+          fill="#3b82f6"/>
     <g class="barText" transform="translate(60, 0)">
       <text class="label" y="220">Pooled Hub</text>
       <text class="amount" y="255">1000</text>
     </g>
   </g>
 
-  <!-- 5. Unpooled Liquid Hub: 1000 -->
+  <!-- 5. Unpooled Hub: 1000 -->
   <g transform="translate(620, 120)">
-    <rect class="bar" width="120" height="200" rx="8" ry="8" fill="#3b82f6"/>
+    <rect class="bar" width="120" height="200" rx="8" ry="8"
+          fill="#3b82f6"/>
     <g class="barText" transform="translate(60, 0)">
       <text class="label" y="220">Unpooled Hub</text>
       <text class="amount" y="255">1000</text>
@@ -76,7 +78,8 @@
 
   <!-- 6. Solid Hub: 1250 -->
   <g transform="translate(760, 70)">
-    <rect class="bar" width="120" height="250" rx="8" ry="8" fill="url(#stripe-blue)"/>
+    <rect class="bar" width="120" height="250" rx="8" ry="8"
+          fill="url(#stripe)" color="#3b82f6"/>
     <g class="barText" transform="translate(60, 0)">
       <text class="label" y="270">Solid Hub</text>
       <text class="amount" y="290">1250</text>
