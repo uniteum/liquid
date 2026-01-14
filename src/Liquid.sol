@@ -42,37 +42,16 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         return solid.balanceOf(address(this));
     }
 
-    function heats(uint256 solids) public view returns (uint256 pools, uint256 senders) {
-        uint256 total = totalSupply() + 2 * solids;
-        uint256 pooled = pool() + solids;
-        uint256 unpooled = total - pooled;
-        pools = 2 * solids * pooled / total;
-        senders = 2 * solids * unpooled / total;
-    }
-
-    function heat(uint256 solids) external nonReentrant returns (uint256 pools, uint256 senders) {
+    function heat(uint256 solids) external nonReentrant {
         solid.safeTransferFrom(msg.sender, address(this), solids);
-        (pools, senders) = heats(solids);
-        emit Heat(this, solids, pools, senders);
-        _mint(address(this), pools);
-        _mint(msg.sender, senders);
+        emit Heat(this, solids);
+        _mint(msg.sender, solids);
     }
 
-    function cools(uint256 spokes) public view returns (uint256 solids, uint256 pools, uint256 senders) {
-        uint256 total = totalSupply();
-        uint256 pooled = pool();
-        uint256 unpooled = total - pooled;
-        pools = 2 * spokes * pooled / total;
-        senders = 2 * spokes * unpooled / total;
-        solids = spokes * mass() / unpooled;
-    }
-
-    function cool(uint256 spokes) external nonReentrant returns (uint256 solids, uint256 pools, uint256 senders) {
-        (solids, pools, senders) = cools(spokes);
-        emit Cool(this, spokes, solids, pools, senders);
-        _burn(address(this), pools);
-        _burn(msg.sender, senders);
-        solid.safeTransfer(msg.sender, solids);
+    function cool(uint256 spokes) external nonReentrant {
+        emit Cool(this, spokes);
+        _burn(msg.sender, spokes);
+        solid.safeTransfer(msg.sender, spokes);
     }
 
     function sells(uint256 x, uint256 X, uint256 Y) public pure returns (uint256 y) {

@@ -43,11 +43,8 @@ contract LiquidUser is User {
         U.heat(solid);
     }
 
-    function cool(ILiquid U, uint256 liquid) public logging("cool", U, liquid) returns (uint256 solid) {
-        uint256 pools;
-        uint256 senders;
-        (solid, pools, senders) = U.cool(liquid);
-        console.log("solid:", solid);
+    function cool(ILiquid U, uint256 liquid) public logging("cool", U, liquid) {
+        U.cool(liquid);
     }
 
     function sell(ILiquid U, uint256 liquid) public logging("sell", U, liquid) returns (uint256 water) {
@@ -70,9 +67,9 @@ contract LiquidUser is User {
         console.log("liquid:", liquid);
     }
 
-    function liquidate(ILiquid U) public returns (uint256 liquid, uint256 solid) {
+    function liquidate(ILiquid U) public returns (uint256 liquid) {
         liquid = U.balanceOf(address(this));
-        solid = cool(U, liquid);
+        cool(U, liquid);
         assertHasNo(U);
     }
 
