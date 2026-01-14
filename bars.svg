@@ -58,7 +58,8 @@
     <g transform="scale(1,-1)">
       <use href="#bar-shape" class="bar-blue" transform="scale(1,180)" />
     </g>
-    <use href="#legend-block" y="8" />
+      <text class="label"  x="60" y="20">Unpooled Spoke</text>
+      <text class="amount" x="60" y="40">1100</text>
   </g>
 
   <!-- BAR 2 -->
@@ -66,7 +67,8 @@
     <g transform="scale(1,-1)">
       <use href="#bar-shape" class="bar-blue" transform="scale(1,95)" />
     </g>
-    <use href="#legend-block" y="8" />
+      <text class="label"  x="60" y="20">Pooled Spoke</text>
+      <text class="amount" x="60" y="40">1100</text>
   </g>
 
   <!-- BAR 3 -->
@@ -74,7 +76,8 @@
     <g transform="scale(1,-1)">
       <use href="#bar-shape" class="bar-green" transform="scale(1,40)" />
     </g>
-    <use href="#legend-block-hub" y="8" />
+      <text class="label"  x="60" y="20">Pooled Hub</text>
+      <text class="amount" x="60" y="40">1100</text>
   </g>
 
 </svg>
