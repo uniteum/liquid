@@ -10,8 +10,6 @@ interface ILiquid is IERC20Metadata {
 
     function lake() external view returns (uint256);
 
-    function mass() external view returns (uint256);
-
     function heat(uint256 amount) external;
 
     function cool(uint256 amount) external;

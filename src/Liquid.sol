@@ -38,10 +38,6 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         return HUB.balanceOf(address(this));
     }
 
-    function mass() public view returns (uint256) {
-        return solid.balanceOf(address(this));
-    }
-
     function heat(uint256 solids) external nonReentrant {
         solid.safeTransferFrom(msg.sender, address(this), solids);
         emit Heat(this, solids);
