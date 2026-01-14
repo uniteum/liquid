@@ -7,77 +7,87 @@
 >
 
   <style>
-    .label, .amount {
-      font-size: 16px;
+    /* ---- BAR COLORS ---- */
+    .blue  { fill: #4da3ff; }
+    .green { fill: #6ad58b; }
+
+    /* ---- SEMANTIC VARIABLES ---- */
+    .solid    { --prefix: "Solid"; }
+    .pooled   { --prefix: "Pooled"; }
+    .unpooled { --prefix: "Unpooled"; }
+
+    .spoke { --suffix: "Spoke"; }
+    .hub   { --suffix: "Hub"; }
+
+    .a-1100 { --amount: "1100"; }
+    .a-400  { --amount: "400"; }
+
+    /* ---- TEXT STYLES ---- */
+    .label {
+      font-size: 12px;
       fill: #666;
       text-anchor: middle;
       font-family: system-ui, Arial, sans-serif;
     }
 
-    .axis {
-      stroke: #ccc;
-      stroke-width: 1;
-    }
-
-    /* bar colors */
-    .bar-blue {
-      fill: #4da3ff;
-    }
-
-    .bar-green {
-      fill: #6ad58b;
+    .amount {
+      font-size: 16px;
+      font-weight: 700;
+      fill: #111;
+      text-anchor: middle;
+      font-family: system-ui, Arial, sans-serif;
     }
   </style>
 
-  <!-- baseline -->
-  <line class="axis" x1="20" y1="300" x2="500" y2="300" />
-
   <defs>
-    <!-- bar shape -->
+    <!-- bar geometry (width defined once) -->
     <symbol id="bar-shape" overflow="visible">
       <rect x="0" y="0" width="120" height="1" />
     </symbol>
 
-    <!-- pooled spoke labels -->
-    <symbol id="legend-block">
-      <text class="label"  x="60" y="20">Pooled</text>
-      <text class="label"  x="60" y="36">Liquid Spoke</text>
-      <text class="amount" x="60" y="58">1100</text>
-    </symbol>
-
-    <!-- pooled hub labels -->
-    <symbol id="legend-block-hub">
-      <text class="label"  x="60" y="20">Pooled Hub</text>
-      <text class="label"  x="60" y="36">Liquid</text>
-      <text class="amount" x="60" y="58">400</text>
+    <!-- SINGLE legend definition -->
+    <symbol id="legend">
+      <text class="label" x="60" y="24">
+        <tspan class="prefix"></tspan>
+        <tspan> </tspan>
+        <tspan class="suffix"></tspan>
+      </text>
+      <text class="amount" x="60" y="48"></text>
     </symbol>
   </defs>
 
   <!-- BAR 1 -->
-  <g transform="translate(40 300)">
+  <g class="pooled spoke a-1100 blue" transform="translate(40 300)">
     <g transform="scale(1,-1)">
-      <use href="#bar-shape" class="bar-blue" transform="scale(1,180)" />
+      <use href="#bar-shape" transform="scale(1,180)" />
     </g>
-      <text class="label"  x="60" y="20">Unpooled Spoke</text>
-      <text class="amount" x="60" y="40">1100</text>
+    <use href="#legend" />
   </g>
 
   <!-- BAR 2 -->
-  <g transform="translate(200 300)">
+  <g class="unpooled spoke a-1100 blue" transform="translate(200 300)">
     <g transform="scale(1,-1)">
-      <use href="#bar-shape" class="bar-blue" transform="scale(1,95)" />
+      <use href="#bar-shape" transform="scale(1,95)" />
     </g>
-      <text class="label"  x="60" y="20">Pooled Spoke</text>
-      <text class="amount" x="60" y="40">1100</text>
+    <use href="#legend" />
   </g>
 
   <!-- BAR 3 -->
-  <g transform="translate(360 300)">
+  <g class="pooled hub a-400 green" transform="translate(360 300)">
     <g transform="scale(1,-1)">
-      <use href="#bar-shape" class="bar-green" transform="scale(1,40)" />
+      <use href="#bar-shape" transform="scale(1,40)" />
     </g>
-      <text class="label"  x="60" y="20">Pooled Hub</text>
-      <text class="amount" x="60" y="40">1100</text>
+    <use href="#legend" />
   </g>
+
+  <!-- VARIABLE BINDING -->
+  <style>
+    .prefix  { fill: #666; }
+    .suffix  { fill: #666; }
+
+    g > use + use .prefix  { content: var(--prefix); }
+    g > use + use .suffix  { content: var(--suffix); }
+    g > use + use + .amount { content: var(--amount); }
+  </style>
 
 </svg>
