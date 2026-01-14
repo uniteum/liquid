@@ -18,31 +18,45 @@
       stroke: #ccc;
       stroke-width: 1;
     }
+
+    /* bar colors */
+    .bar-blue {
+      fill: #4da3ff;
+    }
+
+    .bar-green {
+      fill: #6ad58b;
+    }
   </style>
 
   <!-- baseline -->
   <line class="axis" x1="20" y1="300" x2="500" y2="300" />
 
   <defs>
-    <!-- REFERENCED SHAPE: width is defined ONCE here -->
+    <!-- bar shape -->
     <symbol id="bar-shape" overflow="visible">
-      <!-- Unit height (1). We scale Y to set the bar height. -->
-      <rect class="bar" x="0" y="0" width="120" height="1" />
+      <rect x="0" y="0" width="120" height="1" />
     </symbol>
 
-    <!-- reusable label block -->
+    <!-- pooled spoke labels -->
     <symbol id="legend-block">
-      <text class="label"  x="60" y="20">Pooled Spoke</text>
-      <text class="amount" x="60" y="40">1100</text>
+      <text class="label"  x="60" y="20">Pooled</text>
+      <text class="label"  x="60" y="36">Liquid Spoke</text>
+      <text class="amount" x="60" y="58">1100</text>
+    </symbol>
+
+    <!-- pooled hub labels -->
+    <symbol id="legend-block-hub">
+      <text class="label"  x="60" y="20">Pooled Hub</text>
+      <text class="label"  x="60" y="36">Liquid</text>
+      <text class="amount" x="60" y="58">400</text>
     </symbol>
   </defs>
 
   <!-- BAR 1 -->
   <g transform="translate(40 300)">
-    <!-- flip y-axis for the bar only -->
     <g transform="scale(1,-1)">
-      <!-- only height changes: scaleY = barHeight -->
-      <use href="#bar-shape" fill="#4da3ff" transform="scale(1,180)" />
+      <use href="#bar-shape" class="bar-blue" transform="scale(1,180)" />
     </g>
     <use href="#legend-block" y="8" />
   </g>
@@ -50,7 +64,7 @@
   <!-- BAR 2 -->
   <g transform="translate(200 300)">
     <g transform="scale(1,-1)">
-      <use href="#bar-shape" fill="#6ad58b" transform="scale(1,95)" />
+      <use href="#bar-shape" class="bar-blue" transform="scale(1,95)" />
     </g>
     <use href="#legend-block" y="8" />
   </g>
@@ -58,9 +72,9 @@
   <!-- BAR 3 -->
   <g transform="translate(360 300)">
     <g transform="scale(1,-1)">
-      <use href="#bar-shape" fill="#ffb347" transform="scale(1,40)" />
+      <use href="#bar-shape" class="bar-green" transform="scale(1,40)" />
     </g>
-    <use href="#legend-block" y="8" />
+    <use href="#legend-block-hub" y="8" />
   </g>
 
 </svg>
