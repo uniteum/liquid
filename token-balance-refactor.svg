@@ -1,14 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" width="900" height="400">
-  <!--
-  Bar configuration (x, y, h, fill, label, amount):
-  1. Solid Spoke:           60, 190, 130, stripe-green, "Solid Spoke", 650
-  2. Unpooled Liquid Spoke: 200, 100, 220, #22c55e, "Unpooled" / "Liquid Spoke", 1100
-  3. Pooled Liquid Spoke:   340, 100, 220, #22c55e, "Pooled" / "Liquid Spoke", 1100
-  4. Pooled Liquid Hub:     480, 120, 200, #3b82f6, "Pooled" / "Liquid Hub", 1000
-  5. Unpooled Liquid Hub:   620, 120, 200, #3b82f6, "Unpooled" / "Liquid Hub", 1000
-  6. Solid Hub:             760, 70, 250, stripe-blue, "Solid Hub", 1250
-  -->
-
   <defs>
     <pattern id="stripe-green" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
       <rect width="4" height="8" fill="#22c55e"/>
