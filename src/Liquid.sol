@@ -35,10 +35,6 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         E = HUB.balanceOf(address(this));
     }
 
-    function lake() public view returns (uint256) {
-        return HUB.balanceOf(address(this));
-    }
-
     function mass() public view returns (uint256) {
         return solid.balanceOf(address(this));
     }
