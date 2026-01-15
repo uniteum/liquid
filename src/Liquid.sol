@@ -30,8 +30,9 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         return solid.decimals();
     }
 
-    function pool() public view returns (uint256) {
-        return balanceOf(address(this));
+    function pool() public view returns (uint256 S, uint256 E) {
+        S = balanceOf(address(this));
+        E = HUB.balanceOf(address(this));
     }
 
     function lake() public view returns (uint256) {
@@ -44,7 +45,8 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
 
     function heats(uint256 solids) public view returns (uint256 pools, uint256 senders) {
         uint256 total = totalSupply() + 2 * solids;
-        uint256 pooled = pool() + solids;
+        (uint256 pooled,) = pool();
+        pooled += solids;
         uint256 unpooled = total - pooled;
         pools = 2 * solids * pooled / total;
         senders = 2 * solids * unpooled / total;
@@ -60,7 +62,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
 
     function cools(uint256 spokes) public view returns (uint256 solids, uint256 pools, uint256 senders) {
         uint256 total = totalSupply();
-        uint256 pooled = pool();
+        (uint256 pooled,) = pool();
         uint256 unpooled = total - pooled;
         pools = 2 * spokes * pooled / total;
         senders = 2 * spokes * unpooled / total;
@@ -79,8 +81,9 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         y = Y - Y * X / (X + x);
     }
 
-    function sells(uint256 spokes) public view returns (uint256 hubs) {
-        hubs = sells(spokes, pool(), lake());
+    function sells(uint256 s) public view returns (uint256 e) {
+        (uint256 S, uint256 E) = pool();
+        e = E - (E * S + E - 1) / (S + s);
     }
 
     function sell(uint256 spokes) external returns (uint256 hubs) {
@@ -99,8 +102,9 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         Liquid(address(that)).__buy(thats, hubs);
     }
 
-    function buys(uint256 hubs) public view returns (uint256 spokes) {
-        spokes = sells(hubs, lake(), pool());
+    function buys(uint256 e) public view returns (uint256 s) {
+        (uint256 S, uint256 E) = pool();
+        s = S - S * E / (E + e);
     }
 
     function buy(uint256 hubs) external returns (uint256 spokes) {

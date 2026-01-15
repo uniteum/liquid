@@ -3,7 +3,7 @@
 pragma solidity ^0.8.30;
 
 import {Liquid, ILiquid} from "../src/Liquid.sol";
-import {BaseTest} from "./Base.t.sol";
+import {BaseTest, console} from "./Base.t.sol";
 import {LiquidUser, IERC20} from "./LiquidUser.sol";
 
 contract LiquidTest is BaseTest {
@@ -24,8 +24,11 @@ contract LiquidTest is BaseTest {
         alex = newUser("alex");
         beck = newUser("beck");
         W = new Liquid(owen.newToken("W", INITIAL_BALANCE));
+        console.log("setUp.1");
         owen.heat(W, INITIAL_BALANCE);
+        console.log("setUp.2");
         U = W.make(owen.newToken("U", INITIAL_BALANCE));
+        console.log("setUp.3");
         owen.give(address(U), U_WATER, W);
         V = W.make(owen.newToken("V", INITIAL_BALANCE));
         S = U.solid();
