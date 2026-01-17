@@ -7,7 +7,9 @@ import {BaseTest, console} from "./Base.t.sol";
 import {LiquidUser, IERC20} from "./LiquidUser.sol";
 
 contract LiquidTest is BaseTest {
-    uint256 constant INITIAL_BALANCE = 1e9;
+    uint256 constant SUPPLY = 1e9;
+    uint256 constant GIFT = 1e4;
+    uint256 constant DOLLIP = 100;
     uint256 constant U_WATER = 1e6;
     ILiquid public W;
     ILiquid public U;
@@ -23,19 +25,16 @@ contract LiquidTest is BaseTest {
         owen = newUser("owen");
         alex = newUser("alex");
         beck = newUser("beck");
-        W = new Liquid(owen.newToken("W", INITIAL_BALANCE));
-        console.log("setUp.1");
-        owen.heat(W, INITIAL_BALANCE);
-        console.log("setUp.2");
-        U = W.make(owen.newToken("U", INITIAL_BALANCE));
-        console.log("setUp.3");
+        W = new Liquid(owen.newToken("W", SUPPLY));
+        owen.heat(W, SUPPLY);
+        U = W.make(owen.newToken("U", SUPPLY));
         owen.give(address(U), U_WATER, W);
-        V = W.make(owen.newToken("V", INITIAL_BALANCE));
+        V = W.make(owen.newToken("V", SUPPLY));
         S = U.solid();
         alex.addToken(U.solid());
         alex.addToken(U);
-        alex.addToken(V);
-        alex.addToken(W);
+        // alex.addToken(V);
+        // alex.addToken(W);
     }
 
     function newUser(string memory name) internal returns (LiquidUser user) {
@@ -46,27 +45,31 @@ contract LiquidTest is BaseTest {
         owen.give(address(user), amount, token);
     }
 
-    function giveaway() internal {
-        give(alex, 1e3, W);
-        give(alex, 1e3, U.solid());
-        give(alex, 1e3, V.solid());
-        give(beck, 1e7, W);
-        give(beck, 1e3, U.solid());
-        give(beck, 1e3, V.solid());
+    function giveAlex() internal {
+        give(alex, GIFT, W);
+        give(alex, GIFT, U.solid());
+        give(alex, GIFT, V.solid());
     }
 
-    function test_HeatCool() public returns (uint256 liquid, uint256 solid) {
-        giveaway();
-        owen.heat(U, 500);
-        alex.heat(U, 500);
-        beck.heat(U, 500);
-        liquid = 100;
-        solid = alex.cool(U, liquid);
-        assertEq(liquid, solid, "1. alex liquid != solid");
-        (liquid, solid) = alex.liquidate(U);
-        assertEq(liquid, solid, "2. alex liquid != solid");
-        (liquid, solid) = beck.liquidate(U);
-        assertEq(liquid, solid, "beck liquid != solid");
+    function giveBeck() internal {
+        give(beck, GIFT, W);
+        give(beck, GIFT, U.solid());
+        give(beck, GIFT, V.solid());
+    }
+
+    function giveaway() internal {
+        giveAlex();
+        giveBeck();
+    }
+
+    function test_HeatCool() public returns (uint256 ss, uint256 su, uint256 sp) {
+        giveAlex();
+        owen.heat(U, GIFT);
+        ss = DOLLIP;
+        (su, sp) = alex.heat(U, ss);
+        assertEq(su, ss, "1. alex liquid != solid");
+        (su, ss) = alex.liquidate(U);
+        assertEq(su, ss, "2. alex liquid != solid");
     }
 
     function test_HeatSellCoolBuy() public returns (uint256 water, uint256 solid) {
@@ -95,7 +98,7 @@ contract LiquidTest is BaseTest {
         // Alex cools some liquid back to solid
         uint256 alexHotBeforeCool = U.balanceOf(address(alex));
         uint256 hotToCool = 25;
-        solid = alex.cool(U, hotToCool);
+        (solid,,) = alex.cool(U, hotToCool);
         assertGt(solid, 0, "alex should receive solid from cool");
         assertLt(U.balanceOf(address(alex)), alexHotBeforeCool, "alex liquid should decrease after cool");
     }

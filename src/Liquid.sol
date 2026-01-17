@@ -39,38 +39,40 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         return solid.balanceOf(address(this));
     }
 
-    function heats(uint256 solids) public view returns (uint256 pools, uint256 senders) {
-        uint256 total = totalSupply() + 2 * solids;
-        (uint256 pooled,) = pool();
-        pooled += solids;
-        uint256 unpooled = total - pooled;
-        pools = 2 * solids * pooled / total;
-        senders = 2 * solids * unpooled / total;
+    function heats(uint256 s) public view returns (uint256 su, uint256 sp) {
+        uint256 St = totalSupply();
+        uint256 Sp = balanceOf(address(this));
+        if (St == 0) {
+            sp = s;
+            su = s;
+        } else {
+            sp = 2 * s * Sp / St;
+            su = 2 * s - sp;
+        }
     }
 
-    function heat(uint256 solids) external nonReentrant returns (uint256 pools, uint256 senders) {
-        solid.safeTransferFrom(msg.sender, address(this), solids);
-        (pools, senders) = heats(solids);
-        emit Heat(this, solids, pools, senders);
-        _mint(address(this), pools);
-        _mint(msg.sender, senders);
+    function heat(uint256 s) external nonReentrant returns (uint256 su, uint256 sp) {
+        solid.safeTransferFrom(msg.sender, address(this), s);
+        (sp, su) = heats(s);
+        emit Heat(this, s, sp, su);
+        _mint(address(this), sp);
+        _mint(msg.sender, su);
     }
 
-    function cools(uint256 spokes) public view returns (uint256 solids, uint256 pools, uint256 senders) {
-        uint256 total = totalSupply();
-        (uint256 pooled,) = pool();
-        uint256 unpooled = total - pooled;
-        pools = 2 * spokes * pooled / total;
-        senders = 2 * spokes * unpooled / total;
-        solids = spokes * mass() / unpooled;
+    function cools(uint256 sl) public view returns (uint256 s, uint256 su, uint256 sp) {
+        uint256 St = totalSupply();
+        uint256 Sp = balanceOf(address(this));
+        sp = 2 * sl * Sp / St;
+        su = 2 * sl - sp;
+        s = sl * mass() / Sp;
     }
 
-    function cool(uint256 spokes) external nonReentrant returns (uint256 solids, uint256 pools, uint256 senders) {
-        (solids, pools, senders) = cools(spokes);
-        emit Cool(this, spokes, solids, pools, senders);
-        _burn(address(this), pools);
-        _burn(msg.sender, senders);
-        solid.safeTransfer(msg.sender, solids);
+    function cool(uint256 sl) external nonReentrant returns (uint256 ss, uint256 su, uint256 sp) {
+        (ss, su, sp) = cools(sl);
+        emit Cool(this, sl, ss, sp, su);
+        _burn(address(this), sp);
+        _burn(msg.sender, su);
+        solid.safeTransfer(msg.sender, ss);
     }
 
     function sells(uint256 x, uint256 X, uint256 Y) public pure returns (uint256 y) {
