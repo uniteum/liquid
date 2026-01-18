@@ -5,6 +5,7 @@ import {ILiquid} from "iliquid/ILiquid.sol";
 import {ERC20, IERC20Metadata} from "erc20/ERC20.sol";
 import {SafeERC20} from "erc20/SafeERC20.sol";
 import {Clones} from "clones/Clones.sol";
+import {Math} from "math/Math.sol";
 import {ReentrancyGuardTransient} from "reentrancy/ReentrancyGuardTransient.sol";
 
 contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
@@ -23,7 +24,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
     }
 
     function symbol() public view virtual override(ERC20, IERC20Metadata) returns (string memory) {
-        return solid.symbol();
+        return string.concat("l", solid.symbol());
     }
 
     function decimals() public view virtual override(ERC20, IERC20Metadata) returns (uint8) {
@@ -39,44 +40,73 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         return solid.balanceOf(address(this));
     }
 
-    function heats(uint256 s) public view returns (uint256 su, uint256 sp) {
-        uint256 St = totalSupply();
-        uint256 Sp = balanceOf(address(this));
-        if (St == 0) {
-            sp = s;
-            su = s;
+    function heats(uint256 ss) public view returns (uint256 su) {
+        if (this == HUB) {
+            su = ss;
         } else {
-            sp = 2 * s * Sp / St;
-            su = 2 * s - sp;
+            su = heats(ss, 0);
         }
     }
 
-    function heat(uint256 s) external nonReentrant returns (uint256 su, uint256 sp) {
-        solid.safeTransferFrom(msg.sender, address(this), s);
-        (sp, su) = heats(s);
-        emit Heat(this, s, sp, su);
-        _mint(address(this), sp);
+    function heat(uint256 ss) external returns (uint256 su) {
+        if (this == HUB) {
+            su = ss;
+            emit Heat(this, ss, 0, su);
+            _mint(msg.sender, su);
+        } else {
+            su = heat(ss, 0);
+        }
+    }
+
+    // @param su is the amount of unpooled Spoke returned to the user
+    function heats(uint256 ss, uint256 e) public view notHub returns (uint256 su) {
+        (uint256 S, uint256 E) = pool();
+        su = Math.sqrt(S * e + ss * (E + e));
+    }
+
+    function heat(uint256 s, uint256 e) public nonReentrant returns (uint256 su) {
+        su = heats(s, e);
+        emit Heat(this, s, e, su);
+        if (s > 0) solid.safeTransferFrom(msg.sender, address(this), s);
+        if (e > 0) HUB.update(msg.sender, address(this), e);
+        _mint(address(this), su);
         _mint(msg.sender, su);
     }
 
-    function cools(uint256 sl) public view returns (uint256 s, uint256 su, uint256 sp) {
-        uint256 St = totalSupply();
-        uint256 Sp = balanceOf(address(this));
-        sp = 2 * sl * Sp / St;
-        su = 2 * sl - sp;
-        s = sl * mass() / Sp;
+    function cools(uint256 su) external view returns (uint256 ss) {
+        if (this == HUB) {
+            su = ss;
+        } else {
+            su = cools(ss, 0);
+        }
     }
 
-    function cool(uint256 sl) external nonReentrant returns (uint256 ss, uint256 su, uint256 sp) {
-        (ss, su, sp) = cools(sl);
-        emit Cool(this, sl, ss, sp, su);
-        _burn(address(this), sp);
+    function cool(uint256 su) external returns (uint256 ss) {
+        if (this == HUB) {
+            su = ss;
+            emit Cool(this, ss, 0, su);
+            _burn(msg.sender, su);
+            solid.safeTransfer(msg.sender, ss);
+        } else {
+            su = heat(ss, 0);
+        }
+    }
+
+    function cools(uint256 su, uint256 e) public view notHub returns (uint256 ss) {
+        (uint256 S, uint256 E) = pool();
+        su = Math.sqrt(S * e + ss * (E + e));
+    }
+
+    function cool(uint256 su, uint256 e) external returns (uint256 ss) {
+        ss = cools(su, e);
+        emit Cool(this, su, e, ss);
+        _burn(address(this), su);
         _burn(msg.sender, su);
         solid.safeTransfer(msg.sender, ss);
     }
 
     function sells(uint256 x, uint256 X, uint256 Y) public pure returns (uint256 y) {
-        y = Y - Y * X / (X + x);
+        y = Y - (Y * X) / (X + x);
     }
 
     function sells(uint256 s) public view returns (uint256 e) {
@@ -102,7 +132,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
 
     function buys(uint256 e) public view returns (uint256 s) {
         (uint256 S, uint256 E) = pool();
-        s = S - S * E / (E + e);
+        s = S - (S * E) / (E + e);
     }
 
     function buy(uint256 hubs) external returns (uint256 spokes) {
@@ -159,6 +189,17 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         }
     }
 
+    modifier notHub() {
+        _notHub();
+        _;
+    }
+
+    function _notHub() private view {
+        if (msg.sender == address(HUB)) {
+            revert HubNotPool();
+        }
+    }
+
     modifier onlyLiquid() {
         _onlyLiquid();
         _;
@@ -166,7 +207,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
 
     function _onlyLiquid() private view {
         (, address home,) = HUB.made(Liquid(msg.sender).solid());
-        if (msg.sender != home) {
+        if (msg.sender != address(HUB) && msg.sender != home) {
             revert Unauthorized();
         }
     }

@@ -38,23 +38,23 @@ contract LiquidUser is User {
         console.log(string.concat(name, " ", method, " ", amount.toString(), " ", U.name(), " ", water.toString()));
     }
 
-    function heat(ILiquid U, uint256 solid) public logging("heat", U, solid) returns (uint256 su, uint256 sp) {
-        U.solid().approve(address(U), solid);
-        (su, sp) = U.heat(solid);
+    function heat(ILiquid U, uint256 s) public logging("heat", U, s) returns (uint256 su) {
+        U.solid().approve(address(U), s);
+        su = U.heat(s);
     }
 
-    function cool(ILiquid U, uint256 liquid)
-        public
-        logging("cool", U, liquid)
-        returns (uint256 s, uint256 su, uint256 sp)
-    {
-        (s, su, sp) = U.cool(liquid);
-        console.log("s:", s);
+    function heat(ILiquid U, uint256 s, uint256 e) public logging("heat", U, s) returns (uint256 su) {
+        U.solid().approve(address(U), s);
+        su = U.heat(s, e);
+    }
+
+    function cool(ILiquid U, uint256 su) public logging("cool", U, su) returns (uint256 ss) {
+        ss = U.cool(su);
     }
 
     function liquidate(ILiquid U) public returns (uint256 liquid, uint256 solid) {
         liquid = U.balanceOf(address(this));
-        (solid,,) = cool(U, liquid);
+        solid = cool(U, liquid);
         assertHasNo(U);
     }
 
@@ -76,25 +76,5 @@ contract LiquidUser is User {
     function buy(ILiquid U, uint256 water) public waterlog("buy", U, 0, water) returns (uint256 liquid) {
         liquid = U.buy(water);
         console.log("liquid:", liquid);
-    }
-
-    function rndUnits(ILiquid U) public returns (int256 liquid) {
-        int256 min = -int256(U.balanceOf(address(this)));
-        // forge-lint: disable-next-line(unsafe-typecast)
-        int256 max = int256(WATER.balanceOf(address(this)));
-        liquid = rnd(min, max);
-    }
-
-    function rndForge(ILiquid U) public returns (int256 liquid) {
-        liquid = rndUnits(U);
-        if (liquid < -int256(WATER.balanceOf(address(this)))) {
-            console.log("forge not called because insufficient balance");
-        } else if (liquid < 0) {
-            // forge-lint: disable-next-line(unsafe-typecast)
-            cool(U, uint256(-liquid));
-        } else {
-            // forge-lint: disable-next-line(unsafe-typecast)
-            heat(U, uint256(liquid));
-        }
     }
 }

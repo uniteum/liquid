@@ -10,13 +10,21 @@ interface ILiquid is IERC20Metadata {
 
     function mass() external view returns (uint256);
 
-    function heats(uint256 solids) external view returns (uint256 pools, uint256 senders);
+    function heats(uint256 ss) external view returns (uint256 su);
 
-    function heat(uint256 solids) external returns (uint256 pools, uint256 senders);
+    function heat(uint256 ss) external returns (uint256 su);
 
-    function cools(uint256 spokes) external view returns (uint256 solids, uint256 pools, uint256 senders);
+    function heats(uint256 ss, uint256 e) external view returns (uint256 su);
 
-    function cool(uint256 spokes) external returns (uint256 solids, uint256 pools, uint256 senders);
+    function heat(uint256 ss, uint256 e) external returns (uint256 su);
+
+    function cools(uint256 su) external view returns (uint256 ss);
+
+    function cool(uint256 su) external returns (uint256 ss);
+
+    function cools(uint256 su, uint256 e) external view returns (uint256 ss);
+
+    function cool(uint256 su, uint256 e) external returns (uint256 ss);
 
     function sells(uint256 spokes) external view returns (uint256 hubs);
 
@@ -35,11 +43,12 @@ interface ILiquid is IERC20Metadata {
     function make(IERC20Metadata backing) external returns (ILiquid liquid);
 
     event Heat(ILiquid indexed liquid, uint256 solids, uint256 pools, uint256 senders);
-    event Cool(ILiquid indexed liquid, uint256 liquids, uint256 solids, uint256 pools, uint256 senders);
+    event Cool(ILiquid indexed liquid, uint256 liquids, uint256 hubs, uint256 solids);
     event Buy(ILiquid indexed liquid, uint256 liquids, uint256 hubs);
     event Sell(ILiquid indexed liquid, uint256 liquids, uint256 hubs);
     event Make(ILiquid indexed liquid, IERC20Metadata indexed solid);
 
+    error HubNotPool();
     error Nothing();
     error Unauthorized();
 }
