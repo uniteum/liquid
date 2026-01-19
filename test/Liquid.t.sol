@@ -68,7 +68,7 @@ contract LiquidTest is BaseTest {
         giveAlex();
         owen.heat(U, GIFT, GIFT);
         ss = DOLLIP;
-        su = alex.heat(U, ss, ss);
+        su = alex.heat(U, ss);
         assertEq(su, ss, "1. alex liquid != solid");
         (su, ss) = alex.liquidate(U);
         assertEq(su, ss, "2. alex liquid != solid");

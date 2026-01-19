@@ -45,6 +45,8 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
             su = ss;
         } else {
             su = heats(ss, 0);
+            su = ss;
+            //su = Math.sqrt(ss * E);
         }
     }
 
@@ -54,14 +56,16 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
             emit Heat(this, ss, 0, su);
             _mint(msg.sender, su);
         } else {
-            su = heat(ss, 0);
+            su = heats(ss);
+            _mint(msg.sender, su);
+            _mint(address(this), 2 * ss - su);
         }
     }
 
     // @param su is the amount of unpooled Spoke returned to the user
     function heats(uint256 ss, uint256 e) public view notHub returns (uint256 su) {
         (uint256 S, uint256 E) = pool();
-        su = Math.sqrt(S * e + ss * (E + e));
+        su = Math.sqrt((S + ss) * (E + e)) - Math.sqrt(S * E);
     }
 
     function heat(uint256 s, uint256 e) public nonReentrant returns (uint256 su) {
