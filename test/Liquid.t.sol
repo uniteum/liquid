@@ -64,11 +64,11 @@ contract LiquidTest is BaseTest {
 
     function test_SetUp() public returns (uint256 ss, uint256 su) {}
 
-    function test_HeatCool() public returns (uint256 ss, uint256 su) {
+    function test_HeatCool() public returns (uint256 ss, uint256 su, uint256 sp) {
         giveAlex();
         owen.heat(U, GIFT, GIFT);
         ss = DOLLIP;
-        su = alex.heat(U, ss);
+        (su, sp) = alex.heat(U, ss);
         assertEq(su, ss, "1. alex liquid != solid");
         (su, ss) = alex.liquidate(U);
         assertEq(su, ss, "2. alex liquid != solid");

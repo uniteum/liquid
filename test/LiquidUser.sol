@@ -38,18 +38,18 @@ contract LiquidUser is User {
         console.log(string.concat(name, " ", method, " ", amount.toString(), " ", U.name(), " ", water.toString()));
     }
 
-    function heat(ILiquid U, uint256 s) public logging("heat", U, s) returns (uint256 su) {
+    function heat(ILiquid U, uint256 s) public logging("heat", U, s) returns (uint256 su, uint256 sp) {
         U.solid().approve(address(U), s);
-        su = U.heat(s);
+        (su, sp) = U.heat(s);
     }
 
-    function heat(ILiquid U, uint256 s, uint256 e) public logging("heat", U, s) returns (uint256 su) {
+    function heat(ILiquid U, uint256 s, uint256 e) public logging("heat", U, s) returns (uint256 su, uint256 sp) {
         U.solid().approve(address(U), s);
-        su = U.heat(s, e);
+        (su, sp) = U.heat(s, e);
     }
 
-    function cool(ILiquid U, uint256 su) public logging("cool", U, su) returns (uint256 ss) {
-        ss = U.cool(su);
+    function cool(ILiquid U, uint256 su) public logging("cool", U, su) returns (uint256 ss, uint256 sp) {
+        (ss, sp) = U.cool(su);
         console.log("ss:", ss);
     }
 
@@ -59,7 +59,7 @@ contract LiquidUser is User {
         returns (uint256 liquid, uint256 solid)
     {
         liquid = U.balanceOf(address(this));
-        solid = cool(U, liquid);
+        (solid,) = cool(U, liquid);
         assertHasNo(U);
     }
 

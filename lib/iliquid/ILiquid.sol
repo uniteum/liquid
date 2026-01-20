@@ -10,21 +10,21 @@ interface ILiquid is IERC20Metadata {
 
     function mass() external view returns (uint256);
 
-    function heats(uint256 ss) external view returns (uint256 su);
+    function heats(uint256 ss) external view returns (uint256 su, uint256 sp);
 
-    function heat(uint256 ss) external returns (uint256 su);
+    function heat(uint256 ss) external returns (uint256 su, uint256 sp);
 
-    function heats(uint256 ss, uint256 e) external view returns (uint256 su);
+    function heats(uint256 ss, uint256 e) external view returns (uint256 su, uint256 sp);
 
-    function heat(uint256 ss, uint256 e) external returns (uint256 su);
+    function heat(uint256 ss, uint256 e) external returns (uint256 su, uint256 sp);
 
-    function cools(uint256 su) external view returns (uint256 ss);
+    function cools(uint256 su) external view returns (uint256 ss, uint256 sp);
 
-    function cool(uint256 su) external returns (uint256 ss);
+    function cool(uint256 su) external returns (uint256 ss, uint256 sp);
 
-    function cools(uint256 su, uint256 e) external view returns (uint256 ss);
+    function cools(uint256 su, uint256 e) external view returns (uint256 ss, uint256 sp);
 
-    function cool(uint256 su, uint256 e) external returns (uint256 ss);
+    function cool(uint256 su, uint256 e) external returns (uint256 ss, uint256 sp);
 
     function sells(uint256 spokes) external view returns (uint256 hubs);
 

@@ -40,36 +40,37 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         return solid.balanceOf(address(this));
     }
 
-    function heats(uint256 ss) public view returns (uint256 su) {
+    function heats(uint256 ss) public view returns (uint256 su, uint256 sp) {
         if (this == HUB) {
             su = ss;
         } else {
-            su = heats(ss, 0);
+            (su, sp) = heats(ss, 0);
             su = ss;
             //su = Math.sqrt(ss * E);
         }
     }
 
-    function heat(uint256 ss) external returns (uint256 su) {
+    function heat(uint256 ss) external returns (uint256 su, uint256 sp) {
         if (this == HUB) {
             su = ss;
             emit Heat(this, ss, 0, su);
             _mint(msg.sender, su);
         } else {
-            su = heats(ss);
+            (su, sp) = heats(ss);
             _mint(msg.sender, su);
             _mint(address(this), 2 * mass() - su);
         }
     }
 
     // @param su is the amount of unpooled Spoke returned to the user
-    function heats(uint256 ss, uint256 e) public view notHub returns (uint256 su) {
+    function heats(uint256 ss, uint256 e) public view notHub returns (uint256 su, uint256 sp) {
+        sp;
         (uint256 S, uint256 E) = pool();
         su = Math.sqrt((S + ss) * (E + e)) - Math.sqrt(S * E);
     }
 
-    function heat(uint256 s, uint256 e) public nonReentrant returns (uint256 su) {
-        su = heats(s, e);
+    function heat(uint256 s, uint256 e) public nonReentrant returns (uint256 su, uint256 sp) {
+        (su, sp) = heats(s, e);
         emit Heat(this, s, e, su);
         if (s > 0) solid.safeTransferFrom(msg.sender, address(this), s);
         if (e > 0) HUB.update(msg.sender, address(this), e);
@@ -77,7 +78,8 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         _mint(address(this), 2 * mass() - su);
     }
 
-    function cools(uint256 su) public view returns (uint256 ss) {
+    function cools(uint256 su) public view returns (uint256 ss, uint256 sp) {
+        sp;
         if (this == HUB) {
             ss = su;
         } else {
@@ -85,26 +87,27 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         }
     }
 
-    function cool(uint256 su) external returns (uint256 ss) {
+    function cool(uint256 su) external returns (uint256 ss, uint256 sp) {
         if (this == HUB) {
             ss = su;
             emit Cool(this, ss, 0, su);
             _burn(msg.sender, su);
             solid.safeTransfer(msg.sender, ss);
         } else {
-            ss = cools(su);
+            (ss, sp) = cools(su);
             _burn(msg.sender, ss);
             _burn(address(this), 2 * mass() - ss);
         }
     }
 
-    function cools(uint256 su, uint256 e) public view notHub returns (uint256 ss) {
+    function cools(uint256 su, uint256 e) public view notHub returns (uint256 ss, uint256 sp) {
+        sp;
         (uint256 S, uint256 E) = pool();
         su = Math.sqrt(S * e + ss * (E + e));
     }
 
-    function cool(uint256 su, uint256 e) external returns (uint256 ss) {
-        ss = cools(su, e);
+    function cool(uint256 su, uint256 e) external returns (uint256 ss, uint256 sp) {
+        (ss, sp) = cools(su, e);
         emit Cool(this, su, e, ss);
         solid.safeTransfer(msg.sender, ss);
         _burn(msg.sender, su);
