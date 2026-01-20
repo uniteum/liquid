@@ -114,10 +114,6 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         _burn(address(this), 2 * mass() - u);
     }
 
-    function sells(uint256 x, uint256 X, uint256 Y) public pure returns (uint256 y) {
-        y = Y - (Y * X) / (X + x);
-    }
-
     function sells(uint256 s) public view returns (uint256 e) {
         (uint256 S, uint256 E) = pool();
         e = E - (E * S + E - 1) / (S + s);
