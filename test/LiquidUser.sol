@@ -50,9 +50,14 @@ contract LiquidUser is User {
 
     function cool(ILiquid U, uint256 su) public logging("cool", U, su) returns (uint256 ss) {
         ss = U.cool(su);
+        console.log("ss:", ss);
     }
 
-    function liquidate(ILiquid U) public returns (uint256 liquid, uint256 solid) {
+    function liquidate(ILiquid U)
+        public
+        logging("liquidate", U, U.balanceOf(address(this)))
+        returns (uint256 liquid, uint256 solid)
+    {
         liquid = U.balanceOf(address(this));
         solid = cool(U, liquid);
         assertHasNo(U);

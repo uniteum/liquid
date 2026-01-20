@@ -58,7 +58,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         } else {
             su = heats(ss);
             _mint(msg.sender, su);
-            _mint(address(this), 2 * ss - su);
+            _mint(address(this), 2 * mass() - su);
         }
     }
 
@@ -77,22 +77,24 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         _mint(msg.sender, su);
     }
 
-    function cools(uint256 su) external view returns (uint256 ss) {
+    function cools(uint256 su) public view returns (uint256 ss) {
         if (this == HUB) {
-            su = ss;
+            ss = su;
         } else {
-            su = cools(ss, 0);
+            ss = su;
         }
     }
 
     function cool(uint256 su) external returns (uint256 ss) {
         if (this == HUB) {
-            su = ss;
+            ss = su;
             emit Cool(this, ss, 0, su);
             _burn(msg.sender, su);
             solid.safeTransfer(msg.sender, ss);
         } else {
-            su = heat(ss, 0);
+            ss = cools(su);
+            _burn(msg.sender, ss);
+            _burn(address(this), 2 * mass() - ss);
         }
     }
 
