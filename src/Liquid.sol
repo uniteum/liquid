@@ -40,78 +40,78 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         return solid.balanceOf(address(this));
     }
 
-    function heats(uint256 ss) public view returns (uint256 su, uint256 sp) {
+    function heats(uint256 s) public view returns (uint256 u, uint256 p) {
         if (this == HUB) {
-            su = ss;
+            u = s;
         } else {
-            (su, sp) = heats(ss, 0);
-            su = ss;
-            //su = Math.sqrt(ss * E);
+            (u, p) = heats(s, 0);
+            u = s;
+            //u = Math.sqrt(s * E);
         }
     }
 
-    function heat(uint256 ss) external returns (uint256 su, uint256 sp) {
+    function heat(uint256 s) external returns (uint256 u, uint256 p) {
         if (this == HUB) {
-            su = ss;
-            emit Heat(this, ss, 0, su);
-            _mint(msg.sender, su);
+            u = s;
+            emit Heat(this, s, 0, u);
+            _mint(msg.sender, u);
         } else {
-            (su, sp) = heats(ss);
-            _mint(msg.sender, su);
-            _mint(address(this), 2 * mass() - su);
+            (u, p) = heats(s);
+            _mint(msg.sender, u);
+            _mint(address(this), 2 * mass() - u);
         }
     }
 
-    // @param su is the amount of unpooled Spoke returned to the user
-    function heats(uint256 ss, uint256 e) public view notHub returns (uint256 su, uint256 sp) {
-        sp;
+    // @param u is the amount of unpooled Spoke returned to the user
+    function heats(uint256 s, uint256 e) public view notHub returns (uint256 u, uint256 p) {
+        p;
         (uint256 S, uint256 E) = pool();
-        su = Math.sqrt((S + ss) * (E + e)) - Math.sqrt(S * E);
+        u = Math.sqrt((S + s) * (E + e)) - Math.sqrt(S * E);
     }
 
-    function heat(uint256 s, uint256 e) public nonReentrant returns (uint256 su, uint256 sp) {
-        (su, sp) = heats(s, e);
-        emit Heat(this, s, e, su);
+    function heat(uint256 s, uint256 e) public nonReentrant returns (uint256 u, uint256 p) {
+        (u, p) = heats(s, e);
+        emit Heat(this, s, e, u);
         if (s > 0) solid.safeTransferFrom(msg.sender, address(this), s);
         if (e > 0) HUB.update(msg.sender, address(this), e);
-        _mint(msg.sender, su);
-        _mint(address(this), 2 * mass() - su);
+        _mint(msg.sender, u);
+        _mint(address(this), 2 * mass() - u);
     }
 
-    function cools(uint256 su) public view returns (uint256 ss, uint256 sp) {
-        sp;
+    function cools(uint256 u) public view returns (uint256 s, uint256 p) {
+        p;
         if (this == HUB) {
-            ss = su;
+            s = u;
         } else {
-            ss = su;
+            s = u;
         }
     }
 
-    function cool(uint256 su) external returns (uint256 ss, uint256 sp) {
+    function cool(uint256 u) external returns (uint256 s, uint256 p) {
         if (this == HUB) {
-            ss = su;
-            emit Cool(this, ss, 0, su);
-            _burn(msg.sender, su);
-            solid.safeTransfer(msg.sender, ss);
+            s = u;
+            emit Cool(this, s, 0, u);
+            _burn(msg.sender, u);
+            solid.safeTransfer(msg.sender, s);
         } else {
-            (ss, sp) = cools(su);
-            _burn(msg.sender, ss);
-            _burn(address(this), 2 * mass() - ss);
+            (s, p) = cools(u);
+            _burn(msg.sender, s);
+            _burn(address(this), 2 * mass() - s);
         }
     }
 
-    function cools(uint256 su, uint256 e) public view notHub returns (uint256 ss, uint256 sp) {
-        sp;
+    function cools(uint256 u, uint256 e) public view notHub returns (uint256 s, uint256 p) {
+        p;
         (uint256 S, uint256 E) = pool();
-        su = Math.sqrt(S * e + ss * (E + e));
+        u = Math.sqrt(S * e + s * (E + e));
     }
 
-    function cool(uint256 su, uint256 e) external returns (uint256 ss, uint256 sp) {
-        (ss, sp) = cools(su, e);
-        emit Cool(this, su, e, ss);
-        solid.safeTransfer(msg.sender, ss);
-        _burn(msg.sender, su);
-        _burn(address(this), 2 * mass() - su);
+    function cool(uint256 u, uint256 e) external returns (uint256 s, uint256 p) {
+        (s, p) = cools(u, e);
+        emit Cool(this, u, e, s);
+        solid.safeTransfer(msg.sender, s);
+        _burn(msg.sender, u);
+        _burn(address(this), 2 * mass() - u);
     }
 
     function sells(uint256 x, uint256 X, uint256 Y) public pure returns (uint256 y) {
