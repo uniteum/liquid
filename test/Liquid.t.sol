@@ -72,7 +72,9 @@ contract LiquidTest is BaseTest {
         s = DOLLIP;
         (u, p) = alex.heat(U, s);
         assertEq(u, s, "1. alex liquid != solid");
+        assertEq(p, s, "1. pool liquid != solid");
         (u, s) = alex.liquidate(U);
         assertEq(u, s, "2. alex liquid != solid");
+        assertEq(p, s, "2. pool liquid != solid");
     }
 }
