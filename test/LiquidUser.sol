@@ -38,24 +38,24 @@ contract LiquidUser is User {
         console.log(string.concat(name, " ", method, " ", amount.toString(), " ", U.name(), " ", water.toString()));
     }
 
-    function heat(ILiquid U, uint256 s) public logging("heat", U, s) returns (uint256 su, uint256 sp) {
+    function heat(ILiquid U, uint256 s) public logging("heat", U, s) returns (uint256 u, uint256 p) {
         U.solid().approve(address(U), s);
-        (su, sp) = U.heat(s);
+        (u, p) = U.heat(s);
     }
 
-    function heat(ILiquid U, uint256 s, uint256 e) public logging("heat", U, s) returns (uint256 su, uint256 sp) {
+    function heat(ILiquid U, uint256 s, uint256 e) public logging("heat", U, s) returns (uint256 u, uint256 p) {
         U.solid().approve(address(U), s);
-        (su, sp) = U.heats(s, e);
-        console.log("su:", su);
-        console.log("sp:", sp);
-        (su, sp) = U.heat(s, e);
+        (u, p) = U.heats(s, e);
+        console.log("u:", u);
+        console.log("p:", p);
+        (u, p) = U.heat(s, e);
     }
 
-    function cool(ILiquid U, uint256 su) public logging("cool", U, su) returns (uint256 ss, uint256 sp) {
-        (ss, sp) = U.cools(su);
-        console.log("ss:", ss);
-        console.log("sp:", sp);
-        (ss, sp) = U.cool(su);
+    function cool(ILiquid U, uint256 u) public logging("cool", U, u) returns (uint256 s, uint256 p) {
+        (s, p) = U.cools(u);
+        console.log("s:", s);
+        console.log("p:", p);
+        (s, p) = U.cool(u);
     }
 
     function liquidate(ILiquid U)
