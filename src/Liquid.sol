@@ -31,8 +31,8 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         return solid.decimals();
     }
 
-    function pool() public view returns (uint256 S, uint256 E) {
-        S = balanceOf(address(this));
+    function pool() public view returns (uint256 P, uint256 E) {
+        P = balanceOf(address(this));
         E = HUB.balanceOf(address(this));
     }
 
@@ -44,9 +44,10 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         if (this == HUB) {
             u = s;
         } else {
-            (u, p) = heats(s, 0);
-            u = s;
-            //u = Math.sqrt(s * E);
+            uint256 T = totalSupply();
+            uint256 P = balanceOf(address(this));
+            p = 2 * s * P / T;
+            u = 2 * s - p;
         }
     }
 
@@ -58,15 +59,15 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         } else {
             (u, p) = heats(s);
             _mint(msg.sender, u);
-            _mint(address(this), 2 * mass() - u);
+            _mint(address(this), p);
         }
     }
 
     // @param u is the amount of unpooled Spoke returned to the user
     function heats(uint256 s, uint256 e) public view notHub returns (uint256 u, uint256 p) {
-        p;
-        (uint256 S, uint256 E) = pool();
-        u = Math.sqrt((S + s) * (E + e)) - Math.sqrt(S * E);
+        (uint256 P, uint256 E) = pool();
+        u = Math.sqrt((P + s) * (E + e)) - Math.sqrt(P * E);
+        p = u;
     }
 
     function heat(uint256 s, uint256 e) public nonReentrant returns (uint256 u, uint256 p) {
@@ -75,15 +76,18 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         if (s > 0) solid.safeTransferFrom(msg.sender, address(this), s);
         if (e > 0) HUB.update(msg.sender, address(this), e);
         _mint(msg.sender, u);
-        _mint(address(this), 2 * mass() - u);
+        _mint(address(this), p);
     }
 
     function cools(uint256 u) public view returns (uint256 s, uint256 p) {
-        p;
         if (this == HUB) {
             s = u;
         } else {
-            s = u;
+            uint256 T = totalSupply();
+            uint256 P = balanceOf(address(this));
+            uint256 U = T - P;
+            s = u * T / U / 2;
+            p = 2 * s - u;
         }
     }
 
@@ -95,8 +99,9 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
             solid.safeTransfer(msg.sender, s);
         } else {
             (s, p) = cools(u);
-            _burn(msg.sender, s);
-            _burn(address(this), 2 * mass() - s);
+            solid.safeTransfer(msg.sender, s);
+            _burn(msg.sender, u);
+            _burn(address(this), p);
         }
     }
 

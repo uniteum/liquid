@@ -45,12 +45,17 @@ contract LiquidUser is User {
 
     function heat(ILiquid U, uint256 s, uint256 e) public logging("heat", U, s) returns (uint256 su, uint256 sp) {
         U.solid().approve(address(U), s);
+        (su, sp) = U.heats(s, e);
+        console.log("su:", su);
+        console.log("sp:", sp);
         (su, sp) = U.heat(s, e);
     }
 
     function cool(ILiquid U, uint256 su) public logging("cool", U, su) returns (uint256 ss, uint256 sp) {
-        (ss, sp) = U.cool(su);
+        (ss, sp) = U.cools(su);
         console.log("ss:", ss);
+        console.log("sp:", sp);
+        (ss, sp) = U.cool(su);
     }
 
     function liquidate(ILiquid U)

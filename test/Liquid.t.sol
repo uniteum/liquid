@@ -28,7 +28,6 @@ contract LiquidTest is BaseTest {
         W = new Liquid(owen.newToken("W", SUPPLY));
         owen.heat(W, SUPPLY);
         U = W.make(owen.newToken("U", SUPPLY));
-        owen.give(address(U), U_WATER, W);
         V = W.make(owen.newToken("V", SUPPLY));
         S = U.solid();
         alex.addToken(U.solid());
@@ -67,6 +66,9 @@ contract LiquidTest is BaseTest {
     function test_HeatCool() public returns (uint256 ss, uint256 su, uint256 sp) {
         giveAlex();
         owen.heat(U, GIFT, GIFT);
+        (uint256 P, uint256 E) = U.pool();
+        assertEq(P, GIFT, "Pool had unexpected U");
+        assertEq(E, GIFT, "Pool had unexpected E");
         ss = DOLLIP;
         (su, sp) = alex.heat(U, ss);
         assertEq(su, ss, "1. alex liquid != solid");
