@@ -63,7 +63,8 @@ contract LiquidTest is BaseTest {
 
     function test_SetUp() public returns (uint256 s, uint256 u) {}
 
-    function test_HeatCool() public returns (uint256 s, uint256 u, uint256 p) {
+    function test_SimpleHeatCool(uint256 s) public returns (uint256 u, uint256 p) {
+        s = s % (GIFT - 1) + 1;
         giveAlex();
         owen.heat(U, GIFT, GIFT);
         (uint256 P, uint256 E) = U.pool();
