@@ -76,5 +76,8 @@ contract LiquidTest is BaseTest {
         (u, s) = alex.liquidate(U);
         assertEq(u, s, "2. alex liquid != solid");
         assertEq(p, s, "2. pool liquid != solid");
+        (uint256 P2, uint256 E2) = U.pool();
+        assertEq(P2, P, "Pool should have starting U");
+        assertEq(E2, E, "Pool should have starting E");
     }
 }
