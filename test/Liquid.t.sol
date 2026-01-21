@@ -61,18 +61,18 @@ contract LiquidTest is BaseTest {
         giveBeck();
     }
 
-    function test_SetUp() public returns (uint256 ss, uint256 su) {}
+    function test_SetUp() public returns (uint256 s, uint256 u) {}
 
-    function test_HeatCool() public returns (uint256 ss, uint256 su, uint256 sp) {
+    function test_HeatCool() public returns (uint256 s, uint256 u, uint256 p) {
         giveAlex();
         owen.heat(U, GIFT, GIFT);
         (uint256 P, uint256 E) = U.pool();
         assertEq(P, GIFT, "Pool had unexpected U");
         assertEq(E, GIFT, "Pool had unexpected E");
-        ss = DOLLIP;
-        (su, sp) = alex.heat(U, ss);
-        assertEq(su, ss, "1. alex liquid != solid");
-        (su, ss) = alex.liquidate(U);
-        assertEq(su, ss, "2. alex liquid != solid");
+        s = DOLLIP;
+        (u, p) = alex.heat(U, s);
+        assertEq(u, s, "1. alex liquid != solid");
+        (u, s) = alex.liquidate(U);
+        assertEq(u, s, "2. alex liquid != solid");
     }
 }
