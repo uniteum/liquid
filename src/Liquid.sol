@@ -68,6 +68,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
     function heats(uint256 s, uint256 e) public view notHub returns (uint256 u, uint256 p) {
         (uint256 P, uint256 E) = pool();
         s = Math.sqrt((P + s) * (E + e)) - Math.sqrt(P * E);
+        s = s * (P + s) / (E + e);
         uint256 T = totalSupply();
         if (T == 0) {
             p = s;

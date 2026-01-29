@@ -43,7 +43,7 @@ contract LiquidUser is User {
         (u, p) = U.heat(s);
     }
 
-    function heat(ILiquid U, uint256 s, uint256 e) public logging("heat", U, s) returns (uint256 u, uint256 p) {
+    function heat(ILiquid U, uint256 s, uint256 e) public waterlog("heat", U, s, e) returns (uint256 u, uint256 p) {
         U.solid().approve(address(U), s);
         (u, p) = U.heats(s, e);
         console.log("u:", u);

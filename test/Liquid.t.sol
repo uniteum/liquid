@@ -63,7 +63,7 @@ contract LiquidTest is BaseTest {
 
     function test_SetUp() public returns (uint256 s, uint256 u) {}
 
-    function test_SimpleHeatCool(uint256 s) public returns (uint256 u, uint256 p) {
+    function test_FixedHeatCool(uint256 s) public returns (uint256 u, uint256 p) {
         s = s % (GIFT - 1) + 1;
         giveAlex();
         owen.heat(U, GIFT, GIFT);
@@ -78,6 +78,29 @@ contract LiquidTest is BaseTest {
         assertEq(u, s, "2. alex liquid != solid");
         assertEq(p, s, "2. pool liquid != solid");
         (uint256 P2, uint256 E2) = U.pool();
+        assertEq(P2, P, "Pool should have starting U");
+        assertEq(E2, E, "Pool should have starting E");
+    }
+
+    function ftest_SimpleHeatCool(uint256 P, uint256 s, uint256 E) public returns (uint256 u, uint256 p) {
+        P = P % (GIFT - 1) + 1;
+        E = E % (SUPPLY - 1) + 1;
+        s = s % (P - 1) + 1;
+        giveAlex();
+        (u, p) = U.heats(P, E);
+        console.log("u:", u);
+        console.log("p:", p);
+        (u, p) = owen.heat(U, P, E);
+        (uint256 P2, uint256 E2) = U.pool();
+        assertEq(P2, P, "Pool had unexpected U");
+        assertEq(E2, E, "Pool had unexpected E");
+        (u, p) = alex.heat(U, s);
+        assertEq(u, s, "1. alex liquid != solid");
+        assertEq(p, s, "1. pool liquid != solid");
+        (u, s) = alex.liquidate(U);
+        assertEq(u, s, "2. alex liquid != solid");
+        assertEq(p, s, "2. pool liquid != solid");
+        (P2, E2) = U.pool();
         assertEq(P2, P, "Pool should have starting U");
         assertEq(E2, E, "Pool should have starting E");
     }
