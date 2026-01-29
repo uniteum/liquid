@@ -82,10 +82,10 @@ contract LiquidTest is BaseTest {
         assertEq(E2, E, "Pool should have starting E");
     }
 
-    function ftest_SimpleHeatCool(uint256 P, uint256 s, uint256 E) public returns (uint256 u, uint256 p) {
+    function test_SimpleHeatCool(uint256 P, uint256 s, uint256 E) public returns (uint256 u, uint256 p) {
         P = P % (GIFT - 1) + 1;
         E = E % (SUPPLY - 1) + 1;
-        s = s % (P - 1) + 1;
+        s = s % P;
         giveAlex();
         (u, p) = U.heats(P, E);
         console.log("u:", u);
