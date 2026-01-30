@@ -43,8 +43,9 @@ contract User is Random, Test {
         }
     }
 
-    function balance(IERC20 token) public view returns (uint256 value) {
+    function balance(IERC20Metadata token) public view returns (uint256 value) {
         value = token.balanceOf(address(this));
+        console.log("%s has %s %s", name, value, token.symbol());
     }
 
     function give(address to, uint256 value, IERC20 token) public {

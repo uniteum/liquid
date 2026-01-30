@@ -2,13 +2,13 @@
 
 pragma solidity ^0.8.30;
 
-import {User, TestToken, IERC20, console} from "./User.sol";
+import {User, TestToken, IERC20Metadata, console} from "./User.sol";
 import {ILiquid} from "iliquid/ILiquid.sol";
 import {SafeERC20} from "erc20/SafeERC20.sol";
 import {Strings} from "strings/Strings.sol";
 
 contract LiquidUser is User {
-    using SafeERC20 for IERC20;
+    using SafeERC20 for IERC20Metadata;
     using Strings for uint256;
 
     ILiquid public immutable WATER;

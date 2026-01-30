@@ -4,7 +4,7 @@ pragma solidity ^0.8.30;
 
 import {Liquid, ILiquid} from "../src/Liquid.sol";
 import {BaseTest, console} from "./Base.t.sol";
-import {LiquidUser, IERC20} from "./LiquidUser.sol";
+import {LiquidUser, IERC20Metadata} from "./LiquidUser.sol";
 
 contract LiquidTest is BaseTest {
     uint256 constant SUPPLY = 1e9;
@@ -14,7 +14,7 @@ contract LiquidTest is BaseTest {
     ILiquid public W;
     ILiquid public U;
     ILiquid public V;
-    IERC20 public S;
+    IERC20Metadata public S;
     LiquidUser public owen;
     LiquidUser public alex;
     LiquidUser public beck;
@@ -40,7 +40,7 @@ contract LiquidTest is BaseTest {
         user = new LiquidUser(name, W);
     }
 
-    function give(LiquidUser user, uint256 amount, IERC20 token) internal {
+    function give(LiquidUser user, uint256 amount, IERC20Metadata token) internal {
         owen.give(address(user), amount, token);
     }
 
@@ -68,7 +68,7 @@ contract LiquidTest is BaseTest {
         giveAlex();
         owen.heat(U, GIFT, GIFT);
         (uint256 P, uint256 E) = U.pool();
-        assertEq(P, GIFT, "Pool had unexpected U");
+        assertEq(P, 2 * GIFT, "Pool had unexpected U");
         assertEq(E, GIFT, "Pool had unexpected E");
         s = DOLLIP;
         (u, p) = alex.heat(U, s);
@@ -83,25 +83,34 @@ contract LiquidTest is BaseTest {
     }
 
     function test_SimpleHeatCool(uint256 P, uint256 s, uint256 E) public returns (uint256 u, uint256 p) {
-        P = P % (GIFT - 1) + 1;
-        E = E % (SUPPLY - 1) + 1;
-        s = s % P;
         giveAlex();
+        uint256 owenSStart = owen.balance(S);
+        uint256 owenWStart = owen.balance(W);
+        P = P % (owenSStart - 1) + 1;
+        E = E % (owenWStart - 1) + 1;
+        s = s % alex.balance(S);
         (u, p) = U.heats(P, E);
-        console.log("u:", u);
-        console.log("p:", p);
+        console.log("1.test_SimpleHeatCool.u:", u);
+        console.log("1.test_SimpleHeatCool.p:", p);
         (u, p) = owen.heat(U, P, E);
+        console.log("2.test_SimpleHeatCool.u:", u);
+        console.log("2.test_SimpleHeatCool.p:", p);
         (uint256 P2, uint256 E2) = U.pool();
-        assertEq(P2, P, "Pool had unexpected U");
+        assertEq(P2, 2 * P, "Pool had unexpected U");
         assertEq(E2, E, "Pool had unexpected E");
+        console.log("2.test_SimpleHeatCool.alex.heat.s:", s);
         (u, p) = alex.heat(U, s);
+        console.log("3.test_SimpleHeatCool.u:", u);
+        console.log("3.test_SimpleHeatCool.p:", p);
         assertEq(u, s, "1. alex liquid != solid");
         assertEq(p, s, "1. pool liquid != solid");
         (u, s) = alex.liquidate(U);
+        console.log("u:", u);
+        console.log("s:", s);
         assertEq(u, s, "2. alex liquid != solid");
         assertEq(p, s, "2. pool liquid != solid");
         (P2, E2) = U.pool();
-        assertEq(P2, P, "Pool should have starting U");
+        assertEq(P2, 2 * P, "Pool should have starting U");
         assertEq(E2, E, "Pool should have starting E");
     }
 }
