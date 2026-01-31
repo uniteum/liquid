@@ -256,4 +256,40 @@ contract LiquidTest is BaseTest {
         uint256 beckLoss = beckWStart - beckWEnd;
         assertApproxEqRel(alexGain, beckLoss, 0.02e18, "Alex's gain approximately equals beck's loss");
     }
+
+    /**
+     * @notice Test that cools(u, e) returns sensible values.
+     *
+     * This test exposes bugs in cools(uint256 u, uint256 e):
+     * 1. s is used before initialization (always 0)
+     * 2. Result assigned to u instead of return value s
+     * 3. Return values s and p are never set (always 0)
+     */
+    function test_CoolsWithHub(uint256 poolSolid, uint256 poolHub) public {
+        // Constrain pool sizes
+        uint256 minSize = 1000;
+        uint256 maxPoolSolid = owen.balance(S) / 2;
+        uint256 maxPoolHub = owen.balance(W) / 2;
+        poolSolid = poolSolid % (maxPoolSolid - minSize) + minSize;
+        poolHub = poolHub % (maxPoolHub - minSize) + minSize;
+
+        // Owen creates pool
+        owen.heat(U, poolSolid, poolHub);
+
+        // Get pool state
+        (uint256 P, uint256 E) = U.pool();
+        assertGt(P, 0, "Pool should have U");
+        assertGt(E, 0, "Pool should have W");
+
+        // Test cools(u, e) - the two-parameter version
+        uint256 testU = poolSolid / 10;
+        uint256 testE = poolHub / 10;
+
+        // Call cools(u, e) and check it returns non-zero values
+        (uint256 s, uint256 p) = U.cools(testU, testE);
+
+        // These assertions will FAIL if cools is broken (returns 0)
+        assertGt(s, 0, "cools(u,e) should return non-zero solid");
+        // p might legitimately be 0 in some cases, but s should not be
+    }
 }

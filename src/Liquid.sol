@@ -114,9 +114,18 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
     }
 
     function cools(uint256 u, uint256 e) public view notHub returns (uint256 s, uint256 p) {
-        p;
-        (uint256 S, uint256 E) = pool();
-        u = Math.sqrt(S * e + s * (E + e));
+        (uint256 P, uint256 E) = pool();
+        uint256 T = totalSupply();
+        uint256 U = T - P;
+
+        // Base solid from liquid (same as cools(u))
+        s = u * T / U / 2;
+        p = 2 * s - u;
+
+        // Add hub contribution: hub converts to solid at mass()/E rate
+        if (e > 0 && E > 0) {
+            s = s + e * mass() / E;
+        }
     }
 
     function cool(uint256 u, uint256 e) external returns (uint256 s, uint256 p) {
