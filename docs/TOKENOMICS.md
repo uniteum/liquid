@@ -118,44 +118,55 @@ Only **buy** and **sell** operations can break the P/T = 1/2 equilibrium:
 | heat | increases | increases | P/T preserved |
 | cool | decreases | decreases | P/T preserved |
 
-### How Equilibrium Restores
+### Arbitrage Starting with Only Solid
 
-Arbitrageurs profit by making the **opposite trade** that restores equilibrium:
+An arbitrager who holds only the backing token (solid) can still profit from disequilibrium. The key insight is that **heat gives them liquid to trade with**, and the favorable/unfavorable rates create profit opportunities.
 
-**Scenario 1: After a Buy**
+**Scenario 1: Pool Undersupplied (P/T < 1/2)**
+
+After someone buys liquid, the pool has less liquid than equilibrium:
+
 ```
-1. Trader buys liquid with hub
-   → P decreases, P/T < 1/2
-   → Pool has less liquid, more hub
+1. Arbitrageur heats solid S
+   → Gets u > s liquid (favorable! heat bonus)
+   → Pool has scarce liquid, so liquid is "expensive"
 
 2. Arbitrageur sells liquid for hub
+   → Liquid fetches premium price in hub
    → P increases back toward equilibrium
-   → Arbitrageur profits from price difference
+
+3. Profit realized:
+   → Received bonus liquid from heating (u > s)
+   → Sold at inflated pool price
+   → Net gain in hub value
 ```
 
-**Scenario 2: After a Sell**
-```
-1. Trader sells liquid for hub
-   → P increases, P/T > 1/2
-   → Pool has more liquid, less hub
+**Scenario 2: Pool Oversupplied (P/T > 1/2)**
 
-2. Arbitrageur buys liquid with hub
+After someone sells liquid, the pool has more liquid than equilibrium:
+
+```
+1. Arbitrageur heats solid S
+   → Gets u < s liquid (unfavorable, but necessary)
+   → Pool has excess liquid, so liquid is "cheap"
+
+2. Arbitrageur buys more liquid with hub
+   → Liquid is discounted due to oversupply
    → P decreases back toward equilibrium
-   → Arbitrageur profits from price difference
+
+3. Arbitrageur cools all liquid
+   → At restored equilibrium, s = u (fair exchange)
+   → Profit from buying cheap liquid, cooling at fair value
 ```
 
-### Profit Source
+### Why This Works
 
-The arbitrageur's profit equals the trader's slippage loss:
+The arbitrageur's profit comes from the **asymmetry between heat/cool rates and pool prices**:
 
-```
-Trader pays: tradeSize hub for beckU liquid
-Fair value:  beckU * (E₀/P₀) hub
-Slippage:    tradeSize - fairValue
+- When P/T < 1/2: Heat is favorable (u > s), AND pool price is high
+- When P/T > 1/2: Cool is favorable (s > u), AND pool price is low
 
-Arbitrageur receives: ~tradeSize hub for beckU liquid
-Profit:              alexW - fairValue ≈ slippage
-```
+These conditions are complementary—the same disequilibrium that makes one operation favorable also makes the corresponding trade profitable.
 
 ## Invariants
 
@@ -180,6 +191,26 @@ Heat and cool preserve whatever P/T ratio exists:
 After heat: P'/T' = P/T
 After cool: P'/T' = P/T
 ```
+
+**Proof for heat:**
+```
+Given:  p = 2*s*P/T,  u = 2*s - p
+After:  P' = P + p,   T' = T + 2*s
+
+P'/T' = (P + 2*s*P/T) / (T + 2*s)
+      = P(T + 2*s)/T / (T + 2*s)
+      = P/T  ✓
+```
+
+**Why ratio preservation matters:**
+
+1. **Separates liquidity from trading**: Heat/cool are for entering/exiting the system. They don't create arbitrage opportunities by themselves—only buy/sell can break equilibrium.
+
+2. **Prevents drain exploits**: If heat/cool could shift the ratio, users could repeatedly heat/cool to extract value. Ratio preservation ensures immediate round-trip returns exactly what was deposited.
+
+3. **Economic fairness**: At equilibrium (P/T = 1/2), both operations are fair (1:1). Deviations affect heat and cool symmetrically—one becomes favorable while the other becomes unfavorable by the same degree.
+
+4. **Liquidity providers can't arbitrage each other**: Only traders (buy/sell) can create arbitrage opportunities. This cleanly separates the roles of liquidity provision and price discovery.
 
 ### 4. Equilibrium Value
 
