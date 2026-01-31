@@ -286,11 +286,10 @@ contract LiquidTest is BaseTest {
         uint256 testE = poolHub / 10;
 
         // Call cools(u, e) and check it returns non-zero values
-        (uint256 s, uint256 p) = U.cools(testU, testE);
+        (uint256 s,) = U.cools(testU, testE);
 
         // These assertions will FAIL if cools is broken (returns 0)
         assertGt(s, 0, "cools(u,e) should return non-zero solid");
-        // p might legitimately be 0 in some cases, but s should not be
     }
 
     /**
@@ -301,12 +300,12 @@ contract LiquidTest is BaseTest {
      * 2. When P/T = 1/2, heats(s) returns u = s and cools(u) returns s = u
      * 3. Both heat and cool preserve the P/T ratio
      *
-     * This means arbitrage keeps u ≈ s because:
+     * This means arbitrage keeps u = s because:
      * - If P > T/2: cooling is favorable (s > u), people cool, reducing P
      * - If P < T/2: heating is favorable (u > s), people heat, increasing P
      * - At equilibrium P = T/2: u = s, no arbitrage opportunity
      */
-    function test_HeatCoolEquilibrium(uint256 poolSolid, uint256 poolHub, uint256 tradeAmount) public {
+    function test_HeatCoolEquilibrium(uint256 poolSolid, uint256 poolHub, uint256) public {
         // Constrain inputs
         uint256 minSize = 1000;
         uint256 maxPoolSolid = owen.balance(S) / 4;
@@ -318,7 +317,7 @@ contract LiquidTest is BaseTest {
         owen.heat(U, poolSolid, poolHub);
 
         // Verify initial state: P = T/2 (pool holds half the supply)
-        (uint256 P0, uint256 E0) = U.pool();
+        (uint256 P0,) = U.pool();
         uint256 T0 = U.totalSupply();
         assertEq(P0 * 2, T0, "Initial pool should hold half the supply (P = T/2)");
 
@@ -412,5 +411,205 @@ contract LiquidTest is BaseTest {
         (uint256 s_final,) = U.cools(1000);
         assertEq(u_final, 1000, "After all operations: heat still gives u = s");
         assertEq(s_final, 1000, "After all operations: cool still gives s = u");
+    }
+
+    /**
+     * @notice Test that buy/sell break the P/T equilibrium, creating heat/cool arbitrage.
+     *
+     * Buy/sell transfer tokens between pool and users without mint/burn:
+     * - buy(hub): P decreases, E increases, T unchanged → P/T < 1/2
+     * - sell(liquid): P increases, E decreases, T unchanged → P/T > 1/2
+     *
+     * This creates arbitrage opportunities:
+     * - After buy (P/T < 1/2): heating is favorable (u > s)
+     * - After sell (P/T > 1/2): cooling is favorable (s > u)
+     */
+    function test_BuySellBreaksEquilibrium(uint256 poolSolid, uint256 poolHub, uint256 tradeSize) public {
+        // Constrain inputs
+        uint256 minSize = 1000;
+        uint256 maxPoolSolid = owen.balance(S) / 4;
+        uint256 maxPoolHub = owen.balance(W) / 4;
+        poolSolid = poolSolid % (maxPoolSolid - minSize) + minSize;
+        poolHub = poolHub % (maxPoolHub - minSize) + minSize;
+
+        // Owen creates initial balanced pool
+        owen.heat(U, poolSolid, poolHub);
+
+        // Verify starting equilibrium: P = T/2, so u = s
+        (uint256 P0, uint256 E0) = U.pool();
+        uint256 T0 = U.totalSupply();
+        assertEq(P0 * 2, T0, "Should start at equilibrium P = T/2");
+
+        (uint256 u_before,) = U.heats(1000);
+        (uint256 s_before,) = U.cools(1000);
+        assertEq(u_before, 1000, "Before trade: u = s for heat");
+        assertEq(s_before, 1000, "Before trade: s = u for cool");
+
+        // Limit trade size to avoid exhausting pool
+        tradeSize = tradeSize % (poolHub / 4) + minSize;
+
+        // Alex buys liquid with hub (P decreases, T unchanged → P/T < 1/2)
+        give(alex, tradeSize, W);
+        uint256 liquidBought = alex.buy(U, tradeSize);
+
+        // Verify P decreased but T unchanged
+        (uint256 P1, uint256 E1) = U.pool();
+        uint256 T1 = U.totalSupply();
+        assertLt(P1, P0, "Buy should decrease pool liquid (P)");
+        assertGt(E1, E0, "Buy should increase pool hub (E)");
+        assertEq(T1, T0, "Buy should not change total supply");
+
+        // Now P/T < 1/2, so heating should be favorable (u > s)
+        (uint256 u_after_buy,) = U.heats(1000);
+        (uint256 s_after_buy,) = U.cools(1000);
+        assertGt(u_after_buy, 1000, "After buy: heating favorable, u > s");
+        assertLt(s_after_buy, 1000, "After buy: cooling unfavorable, s < u");
+
+        // Alex sells liquid back (P increases, T unchanged → P/T moves toward 1/2)
+        alex.sell(U, liquidBought);
+
+        // Verify P increased back
+        (uint256 P2,) = U.pool();
+        uint256 T2 = U.totalSupply();
+        assertGt(P2, P1, "Sell should increase pool liquid (P)");
+        assertEq(T2, T0, "Sell should not change total supply");
+
+        // P should be approximately restored (may have small rounding)
+        assertApproxEqRel(P2, P0, 0.01e18, "P should be approximately restored after round-trip");
+
+        // u = s should be approximately restored
+        (uint256 u_after_sell,) = U.heats(1000);
+        assertApproxEqAbs(u_after_sell, 1000, 10, "After sell: u approx s restored");
+    }
+
+    /**
+     * @notice Test that heat captures arbitrage profit after buy creates imbalance.
+     *
+     * Key insight: heat/cool PRESERVE P/T ratio, they don't restore it to 1/2.
+     * The arbitrage profit is in the favorable RATE (u > s), not in changing the ratio.
+     *
+     * Scenario:
+     * 1. Pool starts balanced (P = T/2)
+     * 2. Beck buys liquid → P/T < 1/2 → heating favorable (u > s)
+     * 3. Alex heats to capture arbitrage profit (gets more liquid than solid)
+     * 4. P/T ratio is preserved (not restored) but alex profited from favorable rate
+     */
+    function test_HeatArbitrageAfterBuy(uint256 poolSolid, uint256 poolHub, uint256 tradeSize) public {
+        // Constrain inputs
+        uint256 minSize = 1000;
+        uint256 maxPoolSolid = owen.balance(S) / 4;
+        uint256 maxPoolHub = owen.balance(W) / 4;
+        poolSolid = poolSolid % (maxPoolSolid - minSize) + minSize;
+        poolHub = poolHub % (maxPoolHub - minSize) + minSize;
+
+        // Owen creates initial balanced pool
+        owen.heat(U, poolSolid, poolHub);
+
+        // Verify starting equilibrium
+        uint256 T0 = U.totalSupply();
+        (uint256 P0,) = U.pool();
+        assertEq(P0 * 2, T0, "Should start at equilibrium");
+
+        // Limit trade size
+        tradeSize = tradeSize % (poolHub / 4) + minSize;
+
+        // Beck buys liquid (creates imbalance: P/T < 1/2)
+        give(beck, tradeSize, W);
+        beck.buy(U, tradeSize);
+
+        // Verify imbalance: P/T < 1/2
+        (uint256 P1,) = U.pool();
+        uint256 T1 = U.totalSupply();
+        assertLt(P1 * 2, T1, "After buy: P/T < 1/2");
+
+        // Check heating is now favorable (u > s)
+        (uint256 u_imbalanced,) = U.heats(1000);
+        assertGt(u_imbalanced, 1000, "Imbalanced pool: heating gives u > s");
+
+        // Alex heats to capture arbitrage (gets more liquid than solid deposited)
+        uint256 alexSolid = poolSolid / 10;
+        give(alex, alexSolid, U.solid());
+        (uint256 alexLiquid,) = alex.heat(U, alexSolid);
+
+        // Alex got more liquid than solid (arbitrage profit)
+        assertGt(alexLiquid, alexSolid, "Alex arbitrage: received more liquid than solid deposited");
+
+        // IMPORTANT: P/T ratio is PRESERVED by heat, not restored to 1/2
+        (uint256 P2,) = U.pool();
+        uint256 T2 = U.totalSupply();
+        uint256 ratio_before = P1 * 1e18 / T1;
+        uint256 ratio_after = P2 * 1e18 / T2;
+        assertApproxEqRel(ratio_after, ratio_before, 0.001e18, "Heat preserves P/T ratio");
+    }
+
+    /**
+     * @notice Test that cool captures arbitrage profit after sell creates imbalance.
+     *
+     * Key insight: heat/cool PRESERVE P/T ratio, they don't restore it to 1/2.
+     * The arbitrage profit is in the favorable RATE (s > u), not in changing the ratio.
+     *
+     * Scenario:
+     * 1. Pool starts balanced (P = T/2)
+     * 2. Beck sells liquid → P/T > 1/2 → cooling favorable (s > u)
+     * 3. Alex cools to capture arbitrage profit (gets more solid than liquid burned)
+     * 4. P/T ratio is preserved (not restored) but alex profited from favorable rate
+     */
+    function test_CoolArbitrageAfterSell(uint256 poolSolid, uint256 poolHub, uint256 tradeSize) public {
+        // Constrain inputs
+        uint256 minSize = 1000;
+        uint256 maxPoolSolid = owen.balance(S) / 4;
+        uint256 maxPoolHub = owen.balance(W) / 4;
+        poolSolid = poolSolid % (maxPoolSolid - minSize) + minSize;
+        poolHub = poolHub % (maxPoolHub - minSize) + minSize;
+
+        // Owen creates initial balanced pool
+        owen.heat(U, poolSolid, poolHub);
+
+        // Beck needs liquid to sell - heat some first
+        uint256 beckSolid = poolSolid / 2;
+        give(beck, beckSolid, U.solid());
+        (uint256 beckLiquid,) = beck.heat(U, beckSolid);
+
+        // Verify still at equilibrium after beck's heat
+        uint256 T0 = U.totalSupply();
+        (uint256 P0,) = U.pool();
+        assertEq(P0 * 2, T0, "Should still be at equilibrium after beck heat");
+
+        // Trade size must be significant to create observable imbalance
+        // Minimum 10% of beck's liquid to ensure s > u is detectable
+        uint256 minTrade = beckLiquid / 10;
+        uint256 maxTrade = beckLiquid / 2;
+        tradeSize = tradeSize % (maxTrade - minTrade) + minTrade;
+
+        // Beck sells liquid (creates imbalance: P/T > 1/2)
+        beck.sell(U, tradeSize);
+
+        // Verify imbalance: P/T > 1/2
+        (uint256 P1,) = U.pool();
+        uint256 T1 = U.totalSupply();
+        assertGt(P1 * 2, T1, "After sell: P/T > 1/2");
+
+        // Check cooling is now favorable (s > u)
+        (uint256 s_imbalanced,) = U.cools(1000);
+        assertGt(s_imbalanced, 1000, "Imbalanced pool: cooling gives s > u");
+
+        // Alex needs liquid to cool - get some from owen who has liquid from initial heat
+        // Note: owen has liquid from heat(poolSolid, poolHub)
+        uint256 alexLiquid = poolSolid / 10;
+        // Owen gives alex some liquid tokens directly
+        give(alex, alexLiquid, U);
+
+        // Now alex cools to capture arbitrage
+        (uint256 alexSolidGained,) = alex.cool(U, alexLiquid);
+
+        // At P/T > 1/2, cooling gives s > u, so alex gets more solid than liquid burned
+        assertGt(alexSolidGained, alexLiquid, "Alex arbitrage: received more solid than liquid burned");
+
+        // IMPORTANT: P/T ratio is PRESERVED by cool, not restored to 1/2
+        (uint256 P2,) = U.pool();
+        uint256 T2 = U.totalSupply();
+        uint256 ratio_before = P1 * 1e18 / T1;
+        uint256 ratio_after = P2 * 1e18 / T2;
+        assertApproxEqRel(ratio_after, ratio_before, 0.001e18, "Cool preserves P/T ratio");
     }
 }
