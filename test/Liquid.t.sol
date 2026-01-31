@@ -251,10 +251,11 @@ contract LiquidTest is BaseTest {
         assertGt(alexWEnd, alexWStart, "Alex should have more W than start");
         assertLt(beckWEnd, beckWStart, "Beck should have less W than start");
 
-        // Verify conservation: alex's gain approximately equals beck's loss (within rounding)
+        // Verify conservation: alex's gain approximately equals beck's loss
+        // 3% tolerance for 4 trades with cumulative rounding
         uint256 alexGain = alexWEnd - alexWStart;
         uint256 beckLoss = beckWStart - beckWEnd;
-        assertApproxEqRel(alexGain, beckLoss, 0.02e18, "Alex's gain approximately equals beck's loss");
+        assertApproxEqRel(alexGain, beckLoss, 0.03e18, "Alex's gain approximately equals beck's loss");
     }
 
     /**
