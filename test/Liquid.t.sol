@@ -105,4 +105,61 @@ contract LiquidTest is BaseTest {
         assertEq(P2, 2 * P, "Pool should have starting U");
         assertEq(E2, E, "Pool should have starting E");
     }
+
+    /**
+     * @notice Test that arbitrage is profitable when trading against a noise trader.
+     *
+     * Scenario:
+     * 1. Owen creates a balanced pool and seeds alex/beck with equal funds
+     * 2. Alex heats solid to acquire U tokens for arbitrage
+     * 3. Beck (trader) buys U with W, moving the price unfavorably
+     * 4. Alex (arbitrager) sells U for W, restoring the pool to balance
+     * 5. Result: Pool returns to original state, alex profits, beck loses
+     */
+    function test_ArbitrageProfit() public {
+        // Owen creates pool with equal solid and hub contributions
+        owen.heat(U, GIFT, GIFT);
+
+        // Alex heats solid to get U tokens for arbitrage
+        give(alex, GIFT, U.solid());
+        alex.heat(U, GIFT);
+
+        // Record pool state after setup (this is the "balanced" state)
+        (uint256 P0, uint256 E0) = U.pool();
+
+        // Seed beck with W to trade
+        uint256 tradeSize = GIFT / 2;
+        give(beck, tradeSize, W);
+
+        // Beck buys U with W (noise trade that moves the price)
+        uint256 beckU = beck.buy(U, tradeSize);
+
+        // Pool is now unbalanced
+        (uint256 Pmid, uint256 Emid) = U.pool();
+        assertLt(Pmid, P0, "Beck's buy should decrease pool U");
+        assertGt(Emid, E0, "Beck's buy should increase pool W");
+
+        // Alex sells exactly what beck bought to restore pool balance
+        uint256 alexW = alex.sell(U, beckU);
+
+        // Pool should be restored to original state
+        (uint256 P1, uint256 E1) = U.pool();
+        assertEq(P1, P0, "Pool U should be restored");
+        assertEq(E1, E0, "Pool W should be restored");
+
+        // Calculate fair value of beckU at the balanced pool price (E0/P0)
+        uint256 fairValue = beckU * E0 / P0;
+
+        // Beck lost money: paid tradeSize W for beckU U worth only fairValue W
+        assertLt(fairValue, tradeSize, "Beck overpaid due to slippage");
+
+        // Alex made money: sold beckU U (worth fairValue) but received alexW W
+        assertGt(alexW, fairValue, "Alex received more than fair value");
+        assertEq(alexW, tradeSize, "Alex captured beck's full trade amount");
+
+        // Verify the profit equals the slippage loss
+        uint256 slippage = tradeSize - fairValue;
+        uint256 profit = alexW - fairValue;
+        assertEq(profit, slippage, "Alex's profit equals beck's slippage loss");
+    }
 }
