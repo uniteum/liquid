@@ -162,4 +162,70 @@ contract LiquidTest is BaseTest {
         uint256 profit = alexW - fairValue;
         assertEq(profit, slippage, "Alex's profit equals beck's slippage loss");
     }
+
+    /**
+     * @notice Test arbitrage with round-trip trades - no FMV computation needed.
+     *
+     * Scenario:
+     * 1. Owen creates pool and seeds alex/beck with equal W
+     * 2. Beck buys U with W, then sells U back (round trip)
+     * 3. Alex sells U, then buys U back (opposite round trip)
+     * 4. Result: Both have same U as start, but alex gained W and beck lost W
+     */
+    function test_ArbitrageProfitRoundTrip() public {
+        // Owen creates pool with equal solid and hub contributions
+        owen.heat(U, GIFT, GIFT);
+
+        // Alex heats solid to get U tokens for arbitrage
+        give(alex, GIFT, U.solid());
+        alex.heat(U, GIFT);
+
+        // Record pool state after setup
+        (uint256 P0, uint256 E0) = U.pool();
+
+        // Seed alex and beck with equal W (hub tokens)
+        uint256 startingW = GIFT / 2;
+        give(alex, startingW, W);
+        give(beck, startingW, W);
+
+        // Record starting balances
+        uint256 alexWStart = alex.balance(W);
+        uint256 alexUStart = alex.balance(U);
+        uint256 beckWStart = beck.balance(W);
+        uint256 beckUStart = beck.balance(U);
+
+        // Step 1: Beck buys U with all his W (moves price up)
+        uint256 beckU = beck.buy(U, startingW);
+
+        // Step 2: Alex sells same amount of U (captures high price)
+        alex.sell(U, beckU);
+
+        // Step 3: Beck sells his U back (at lower price now)
+        uint256 beckW = beck.sell(U, beckU);
+
+        // Step 4: Alex buys back U with same W that beck received
+        alex.buy(U, beckW);
+
+        // Verify pool restored to original state
+        (uint256 P1, uint256 E1) = U.pool();
+        assertEq(P1, P0, "Pool U should be restored");
+        assertEq(E1, E0, "Pool W should be restored");
+
+        // Verify both have same U as they started
+        uint256 alexUEnd = alex.balance(U);
+        uint256 beckUEnd = beck.balance(U);
+        assertEq(beckUEnd, beckUStart, "Beck should have same U as start");
+        assertEq(alexUEnd, alexUStart, "Alex should have same U as start");
+
+        // Verify beck lost W and alex gained W
+        uint256 alexWEnd = alex.balance(W);
+        uint256 beckWEnd = beck.balance(W);
+        assertGt(alexWEnd, alexWStart, "Alex should have more W than start");
+        assertLt(beckWEnd, beckWStart, "Beck should have less W than start");
+
+        // Verify conservation: alex's gain equals beck's loss
+        uint256 alexGain = alexWEnd - alexWStart;
+        uint256 beckLoss = beckWStart - beckWEnd;
+        assertEq(alexGain, beckLoss, "Alex's gain equals beck's loss");
+    }
 }
