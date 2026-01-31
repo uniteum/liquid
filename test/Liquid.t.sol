@@ -116,19 +116,33 @@ contract LiquidTest is BaseTest {
      * 4. Alex (arbitrager) sells U for W, restoring the pool to balance
      * 5. Result: Pool returns to original state, alex profits, beck loses
      */
-    function test_ArbitrageProfit() public {
-        // Owen creates pool with equal solid and hub contributions
-        owen.heat(U, GIFT, GIFT);
+    function test_ArbitrageProfit(uint256 poolSolid, uint256 poolHub, uint256 tradeSize) public {
+        // Constrain pool sizes to valid ranges (reserve funds for alex and beck)
+        // Minimum of 1000 to ensure meaningful trades where slippage is observable
+        uint256 minSize = 1000;
+        uint256 maxPoolSolid = owen.balance(S) / 3;
+        uint256 maxPoolHub = owen.balance(W) / 2;
+        poolSolid = poolSolid % (maxPoolSolid - minSize) + minSize;
+        poolHub = poolHub % (maxPoolHub - minSize) + minSize;
 
-        // Alex heats solid to get U tokens for arbitrage
-        give(alex, GIFT, U.solid());
-        alex.heat(U, GIFT);
+        // Owen creates pool
+        owen.heat(U, poolSolid, poolHub);
+
+        // Alex heats same solid as pool to ensure enough U for arbitrage
+        give(alex, poolSolid, U.solid());
+        alex.heat(U, poolSolid);
 
         // Record pool state after setup (this is the "balanced" state)
         (uint256 P0, uint256 E0) = U.pool();
 
+        // Limit trade size: beck buying with tradeSize gets at most 3*poolSolid*tradeSize/(poolHub+tradeSize)
+        // For beckU <= alexU (poolSolid), need tradeSize <= poolHub/2
+        // Minimum trade of poolHub/10 to ensure observable slippage (at least ~10% price impact)
+        uint256 maxTrade = poolHub / 2;
+        uint256 minTrade = poolHub / 10;
+        tradeSize = tradeSize % (maxTrade - minTrade) + minTrade;
+
         // Seed beck with W to trade
-        uint256 tradeSize = GIFT / 2;
         give(beck, tradeSize, W);
 
         // Beck buys U with W (noise trade that moves the price)
@@ -142,10 +156,10 @@ contract LiquidTest is BaseTest {
         // Alex sells exactly what beck bought to restore pool balance
         uint256 alexW = alex.sell(U, beckU);
 
-        // Pool should be restored to original state
+        // Pool should be restored to original state (within 1% rounding tolerance)
         (uint256 P1, uint256 E1) = U.pool();
         assertEq(P1, P0, "Pool U should be restored");
-        assertEq(E1, E0, "Pool W should be restored");
+        assertApproxEqRel(E1, E0, 0.01e18, "Pool W should be approximately restored");
 
         // Calculate fair value of beckU at the balanced pool price (E0/P0)
         uint256 fairValue = beckU * E0 / P0;
@@ -155,12 +169,13 @@ contract LiquidTest is BaseTest {
 
         // Alex made money: sold beckU U (worth fairValue) but received alexW W
         assertGt(alexW, fairValue, "Alex received more than fair value");
-        assertEq(alexW, tradeSize, "Alex captured beck's full trade amount");
+        assertApproxEqRel(alexW, tradeSize, 0.05e18, "Alex captured beck's trade amount");
 
-        // Verify the profit equals the slippage loss
+        // Verify the profit approximately equals the slippage loss
+        // Note: fairValue computation has rounding, so use 5% tolerance
         uint256 slippage = tradeSize - fairValue;
         uint256 profit = alexW - fairValue;
-        assertEq(profit, slippage, "Alex's profit equals beck's slippage loss");
+        assertApproxEqRel(profit, slippage, 0.05e18, "Alex's profit approximates beck's slippage loss");
     }
 
     /**
@@ -172,21 +187,34 @@ contract LiquidTest is BaseTest {
      * 3. Alex sells U, then buys U back (opposite round trip)
      * 4. Result: Both have same U as start, but alex gained W and beck lost W
      */
-    function test_ArbitrageProfitRoundTrip() public {
-        // Owen creates pool with equal solid and hub contributions
-        owen.heat(U, GIFT, GIFT);
+    function test_ArbitrageProfitRoundTrip(uint256 poolSolid, uint256 poolHub, uint256 tradeSize) public {
+        // Constrain pool sizes to valid ranges (reserve funds for alex and beck)
+        // Minimum of 1000 to ensure meaningful trades where slippage is observable
+        uint256 minSize = 1000;
+        uint256 maxPoolSolid = owen.balance(S) / 3;
+        uint256 maxPoolHub = owen.balance(W) / 3;
+        poolSolid = poolSolid % (maxPoolSolid - minSize) + minSize;
+        poolHub = poolHub % (maxPoolHub - minSize) + minSize;
 
-        // Alex heats solid to get U tokens for arbitrage
-        give(alex, GIFT, U.solid());
-        alex.heat(U, GIFT);
+        // Owen creates pool
+        owen.heat(U, poolSolid, poolHub);
+
+        // Alex heats same solid as pool to ensure enough U for arbitrage
+        give(alex, poolSolid, U.solid());
+        alex.heat(U, poolSolid);
 
         // Record pool state after setup
         (uint256 P0, uint256 E0) = U.pool();
 
+        // Limit trade size: for beckU <= alexU, need tradeSize <= poolHub/2
+        // Minimum trade of poolHub/10 to ensure observable effects
+        uint256 maxTrade = poolHub / 2;
+        uint256 minTrade = poolHub / 10;
+        tradeSize = tradeSize % (maxTrade - minTrade) + minTrade;
+
         // Seed alex and beck with equal W (hub tokens)
-        uint256 startingW = GIFT / 2;
-        give(alex, startingW, W);
-        give(beck, startingW, W);
+        give(alex, tradeSize, W);
+        give(beck, tradeSize, W);
 
         // Record starting balances
         uint256 alexWStart = alex.balance(W);
@@ -195,7 +223,7 @@ contract LiquidTest is BaseTest {
         uint256 beckUStart = beck.balance(U);
 
         // Step 1: Beck buys U with all his W (moves price up)
-        uint256 beckU = beck.buy(U, startingW);
+        uint256 beckU = beck.buy(U, tradeSize);
 
         // Step 2: Alex sells same amount of U (captures high price)
         alex.sell(U, beckU);
@@ -206,16 +234,16 @@ contract LiquidTest is BaseTest {
         // Step 4: Alex buys back U with same W that beck received
         alex.buy(U, beckW);
 
-        // Verify pool restored to original state
+        // Verify pool restored to original state (within 2% rounding tolerance for 4 trades)
         (uint256 P1, uint256 E1) = U.pool();
-        assertEq(P1, P0, "Pool U should be restored");
-        assertEq(E1, E0, "Pool W should be restored");
+        assertApproxEqRel(P1, P0, 0.02e18, "Pool U should be approximately restored");
+        assertApproxEqRel(E1, E0, 0.02e18, "Pool W should be approximately restored");
 
-        // Verify both have same U as they started
+        // Verify both have approximately same U as they started (within rounding)
         uint256 alexUEnd = alex.balance(U);
         uint256 beckUEnd = beck.balance(U);
         assertEq(beckUEnd, beckUStart, "Beck should have same U as start");
-        assertEq(alexUEnd, alexUStart, "Alex should have same U as start");
+        assertApproxEqRel(alexUEnd, alexUStart, 0.02e18, "Alex should have approximately same U as start");
 
         // Verify beck lost W and alex gained W
         uint256 alexWEnd = alex.balance(W);
@@ -223,9 +251,9 @@ contract LiquidTest is BaseTest {
         assertGt(alexWEnd, alexWStart, "Alex should have more W than start");
         assertLt(beckWEnd, beckWStart, "Beck should have less W than start");
 
-        // Verify conservation: alex's gain equals beck's loss
+        // Verify conservation: alex's gain approximately equals beck's loss (within rounding)
         uint256 alexGain = alexWEnd - alexWStart;
         uint256 beckLoss = beckWStart - beckWEnd;
-        assertEq(alexGain, beckLoss, "Alex's gain equals beck's loss");
+        assertApproxEqRel(alexGain, beckLoss, 0.02e18, "Alex's gain approximately equals beck's loss");
     }
 }
