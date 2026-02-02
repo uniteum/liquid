@@ -1,0 +1,17 @@
+{%- comment -%}
+Wrapper for etherscan.html that defaults to token (/token/) links.
+
+Usage:
+  {% include token.html address="0x..." %}
+  {% include token.html address="0x..." text="View Token" %}
+  {% include token.html address="0x..." network="sepolia" %}
+
+Parameters:
+  - address (required): Token address
+  - network (optional): "mainnet" (default) or "sepolia"
+  - text (optional): Link text (defaults to address)
+
+Note: Token links don't use section anchors, so the 'section' parameter is not supported.
+{%- endcomment -%}
+
+{% include etherscan.html address=include.address network=include.network text=include.text type="token" %}

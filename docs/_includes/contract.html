@@ -1,0 +1,17 @@
+{%- comment -%}
+Wrapper for etherscan.html that defaults to contract (/address/) links.
+
+Usage:
+  {% include contract.html address="0x..." %}
+  {% include contract.html address="0x..." section="code" %}
+  {% include contract.html address="0x..." section="writeContract" text="View Contract" %}
+  {% include contract.html address="0x..." network="sepolia" section="readContract" %}
+
+Parameters:
+  - address (required): Contract address
+  - network (optional): "mainnet" (default) or "sepolia"
+  - section (optional): Etherscan section anchor ("code", "writeContract", "readContract", "events")
+  - text (optional): Link text (defaults to address)
+{%- endcomment -%}
+
+{% include etherscan.html address=include.address network=include.network section=include.section text=include.text %}

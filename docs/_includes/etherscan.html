@@ -1,0 +1,40 @@
+{%- comment -%}
+Reusable include for Etherscan links that open in new tabs
+
+Parameters:
+  address (required) - Contract address
+  network (optional) - "mainnet" (default) or "sepolia"
+  section (optional) - Etherscan section anchor (e.g., "code", "writeContract", "readContract")
+  text (optional) - Link text (defaults to address)
+  type (optional) - "address" (default) or "tx" for transaction links
+
+Usage:
+  {% include etherscan.html address="0x9df9..." %}
+  {% include etherscan.html address="0x9df9..." section="code" %}
+  {% include etherscan.html address="0x9df9..." section="writeContract" text="Uniteum Contract" %}
+  {% include etherscan.html address="0x9df9..." network="sepolia" section="code" %}
+  {% include etherscan.html address="0xabcd..." type="tx" text="View transaction" %}
+{%- endcomment -%}
+
+{%- if include.network == "sepolia" -%}
+  {%- assign base_url = "https://sepolia.etherscan.io" -%}
+{%- else -%}
+  {%- assign base_url = "https://etherscan.io" -%}
+{%- endif -%}
+
+{%- if include.type == "tx" -%}
+  {%- assign full_url = base_url | append: "/tx/" | append: include.address -%}
+{%- else -%}
+  {%- assign full_url = base_url | append: "/address/" | append: include.address -%}
+  {%- if include.section -%}
+    {%- assign full_url = full_url | append: "#" | append: include.section -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- if include.text -%}
+  {%- assign link_text = include.text -%}
+{%- else -%}
+  {%- assign link_text = include.address -%}
+{%- endif -%}
+
+<a href="{{ full_url }}" target="_blank" rel="noopener noreferrer">{{ link_text }}</a>
