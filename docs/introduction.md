@@ -1,3 +1,9 @@
+---
+layout: default
+title: Introduction
+nav_order: 2
+---
+
 # Introduction to Liquid Protocol
 
 > A simple guide to using tokenized liquidity on Ethereum
@@ -573,9 +579,9 @@ Use the appropriate network explorer (e.g., arbiscan.io for Arbitrum, basescan.o
 
 ## Getting Help
 
-- Read the code: [src/Liquid.sol](src/Liquid.sol) (189 lines, well-commented)
-- Technical documentation: [CLAUDE.md](CLAUDE.md)
-- Development setup: [README.md](README.md)
+- Read the code: [src/Liquid.sol](https://github.com/uniteum/liquid/blob/main/src/Liquid.sol) (189 lines, well-commented)
+- Technical documentation: [CLAUDE.md](https://github.com/uniteum/liquid/blob/main/CLAUDE.md)
+- Development setup: [README.md](https://github.com/uniteum/liquid/blob/main/README.md)
 
 ## Summary
 
@@ -588,7 +594,3 @@ Using Liquid via Etherscan is straightforward:
 5. **Cross-swap** = Trade one liquid for another using water as intermediary
 
 All operations available through Etherscan's Contract → Write Contract interface. No special tools needed.
-
----
-
-*Last updated: 2026-01-01*

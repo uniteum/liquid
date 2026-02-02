@@ -1,3 +1,9 @@
+---
+layout: default
+title: Vision
+nav_order: 4
+---
+
 # The Trillion-Dollar Vision: Liquid as Global Financial Infrastructure
 
 > How a simple, fee-free liquidity protocol could become the backbone of tokenized finance
@@ -270,4 +276,3 @@ The question is: **What protocol could possibly scale better?**
 ---
 
 *This document is speculative analysis. Not financial advice. DYOR.*
-*Last updated: 2025-12-31*

@@ -1,3 +1,9 @@
+---
+layout: default
+title: Tokenomics
+nav_order: 6
+---
+
 # Liquid Protocol Tokenomics
 
 This document describes the economic mechanics that ensure **1 liquid = 1 solid** at equilibrium.

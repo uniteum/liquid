@@ -4,60 +4,100 @@ title: Home
 nav_order: 1
 ---
 
-# Solid Protocol
+# Liquid Protocol
 
-Solids are Ethereum tokens that have uniquely powerful properties:
-- **Instantly Tradeable** - Each Solid has its own ETH liquidity pool with buy and sell functions
-- **Fair Launch** - 100% of supply goes to the liquidity pool upon creation
-- **Price Floor** - Virtual 1 ETH ensures tokens always have minimum value
-- **Permissionless** - Anyone can make a new Solid: no exchange, operator, or custom UI is required
-- **Easy to Make** - Anyone can make their own token in a few simple steps using major block explorers
-- **Inexpensive** - Each token is deployed as a minimal proxy contract (clone), needing little gas
-- **Deterministic** - Token addresses are predictable via CREATE2 based on name and symbol
+Liquid is a protocol that allows any ERC-20 token to become "liquid" — wrapped with built-in liquidity pools. Every liquid token is both:
 
-## Why Use Solids?
+- **A standard ERC-20 token** you can hold and transfer
+- **Its own automated market maker (AMM)** with instant swap capability
 
-Solids are useful when you need transparent, trustless value transfer without intermediaries. Examples so far include:
+Key properties:
 
-- **Personal gift certificates** - Back tokens with ETH to create gifts that gently encourage spending through curve dynamics
-- **Game currencies** - Model energy, life, time, and reputation as explicit economic resources rather than hard-coded rules
-
-These are just the beginning. See [Use Cases]({{ site.baseurl }}/use-cases) for details and emerging applications.
+- **Zero Fees** - The protocol charges no fees on any operation
+- **Automatic Liquidity** - Every deposit creates tradeable liquidity via the 2x mint pattern
+- **Universal Connectivity** - All liquid tokens connect through Hub, enabling cross-pool swaps
+- **Permissionless** - Anyone can wrap any ERC-20 token into a liquid token
+- **Immutable** - No governance, no admin keys, no protocol updates
+- **Deterministic** - Token addresses are predictable via CREATE2
 
 ## How It Works
 
-Each Solid token is an ERC-20 with a built-in constant-product AMM. All functions can be called directly through block explorers like [Etherscan](https://etherscan.io){:target="_blank"} or [Blockscout](https://eth.blockscout.com){:target="_blank"}—no custom interface required.
+Each liquid token wraps a backing ERC-20 (solid) and maintains a constant-product AMM pool connected to the Hub token.
 
-### Write Operations
+### Core Operations
 
-1. **make** - Call [make(name, symbol)](https://etherscan.io/token/{{site.data.tokens.NOTHING.address}}#writeContract#F3){:target="_blank"} on any Solid to create a new one
-2. **buy** - Send ETH when calling [buy()](https://etherscan.io/token/{{site.data.tokens.1.address}}#writeContract#F2){:target="_blank"} to receive Solid tokens from the pool
-3. **sell** - Call [sell(amount)](https://etherscan.io/token/{{site.data.tokens.1.address}}#writeContract#F4){:target="_blank"} to exchange Solid tokens back for ETH
-4. **sellFor** - Call [sellFor(solid, amount)](https://etherscan.io/token/{{site.data.tokens.1.address}}#writeContract#F5){:target="_blank"} to swap one Solid for another in a single transaction (no approval needed)
+1. **heat** - Deposit solid tokens, receive liquid tokens (creates pool liquidity)
+2. **cool** - Burn liquid tokens, withdraw solid backing tokens
+3. **sell** - Trade liquid tokens for Hub tokens
+4. **buy** - Trade Hub tokens for liquid tokens
+5. **Cross-swap** - Trade between any two liquid tokens in a single transaction
 
-### Read Operations
+### The Temperature Metaphor
 
-1. **pool** - Call [pool()](https://etherscan.io/token/{{site.data.tokens.1.address}}#readContract#F9){:target="_blank"} to get the current pool state (Solid balance, virtual ETH balance)
-2. **buys** - Call [buys(ethAmount)](https://etherscan.io/token/{{site.data.tokens.1.address}}#readContract#F5){:target="_blank"} to preview how many tokens you'd receive for a given ETH amount
-3. **sells** - Call [sells(solidAmount)](https://etherscan.io/token/{{site.data.tokens.1.address}}#readContract#F10){:target="_blank"} to preview how much ETH you'd receive for selling tokens
-4. **sellsFor** - Call [sellsFor(solid, amount)](https://etherscan.io/token/{{site.data.tokens.1.address}}#readContract#F11){:target="_blank"} to preview a Solid-to-Solid swap
-5. **made** - Call [made(name, symbol)](https://etherscan.io/token/{{site.data.tokens.NOTHING.address}}#readContract#F7){:target="_blank"} to check if a Solid exists and get its address
+| Term | Meaning |
+|:-----|:--------|
+| **Solid** | The backing ERC-20 token (USDC, DAI, etc.) |
+| **Liquid** | The wrapped version with built-in liquidity |
+| **Hub** | The base Liquid instance used for cross-pool routing |
+| **Pool** | Liquid tokens held by the contract |
+| **Lake** | Hub tokens held by the contract |
+| **Mass** | Backing token balance held by the contract |
 
-The protocol uses the constant product formula (`x * y = k`) for pricing, ensuring liquidity is always available.
+## Why Liquid?
 
-The example links above point to [Uniteum 1 (1)](https://etherscan.io/token/{{site.data.tokens.1.address}}){:target="_blank"}—to interact with a different Solid, navigate to that token's page on the block explorer. If you'd like to support continued development of this protocol, buying some 1 is a simple way to do so.
+### n pools instead of n²
 
-## Key Properties
+Traditional AMMs need separate pools for every token pair. With 100 tokens, that's ~5,000 pairs. With 1,000 tokens, that's ~500,000 pairs.
 
-| Property | Value |
-|:---------|:------|
-| Total Supply | 6.02214076 × 10²³ (Avogadro's number) |
-| Starting Price | ~602,214 tokens per ETH |
-| Price Floor | Guaranteed by virtual 1 ETH |
-| Decimals | 18 |
+Liquid uses a star topology: every token connects through Hub.
+- 100 tokens = 100 pools
+- 1,000 tokens = 1,000 pools
+
+### Automatic Liquidity
+
+When you heat 1,000 solid tokens:
+- You receive 1,000 liquid tokens (to hold/trade)
+- The pool receives 1,000 liquid tokens (instant liquidity)
+
+No separate LP tokens. No staking. Every deposit creates tradeable depth.
+
+### Zero Fees Forever
+
+The protocol charges zero fees on all operations. This is hardcoded—no governance can add fees later. Developers monetized through initial Hub token allocation, not perpetual rent-seeking.
+
+## Using Liquid via Block Explorers
+
+All operations can be performed through Etherscan's "Write Contract" interface. No custom frontend required.
+
+### Creating a Liquid Token
+
+1. Go to the Hub contract on Etherscan
+2. Use `liquify(address stuff)` with your ERC-20 token address
+3. The new liquid token address is in the transaction logs
+
+### Adding Liquidity
+
+1. Approve the liquid contract to spend your backing tokens
+2. Call `heat(amount)` on the liquid contract
+3. Receive liquid tokens (you get N, pool gets N)
+
+### Trading
+
+- Call `sell(amount)` to trade liquid for Hub
+- Call `buy(amount)` to trade Hub for liquid
+- Call `sell(amount, otherLiquid)` to cross-swap between liquid tokens
+
+### Checking Prices
+
+Use the read functions before trading:
+- `sells(amount)` - Preview Hub received for selling liquid
+- `buys(amount)` - Preview liquid received for spending Hub
 
 ## Resources
 
+- [Introduction]({{ site.baseurl }}/introduction) - Detailed user guide
+- [Design]({{ site.baseurl }}/design) - Mathematical specification
+- [Vision]({{ site.baseurl }}/vision) - The trillion-dollar thesis
+- [Use Cases]({{ site.baseurl }}/use-cases) - Practical applications
+- [Tokenomics]({{ site.baseurl }}/TOKENOMICS) - Economic mechanics
 - [GitHub Repository](https://github.com/uniteum/liquid)
-- [Foundry Book](https://book.getfoundry.sh/)
-- [EIP-1167 Clones](https://eips.ethereum.org/EIPS/eip-1167)

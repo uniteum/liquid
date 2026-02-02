@@ -6,15 +6,15 @@ permalink: /use-cases/game-currencies
 nav_order: 2
 ---
 
-Games already run on currencies. Not just gold or gems, but *life*, *energy*, *time*, *risk*, *reputation*, and *control*. These resources are scarce, spent, replenished, exchanged, and priced against one another. **Solids** provide a clean way to model these mechanics as explicit, composable currencies rather than hard‑coded rules.
+Games already run on currencies. Not just gold or gems, but *life*, *energy*, *time*, *risk*, *reputation*, and *control*. These resources are scarce, spent, replenished, exchanged, and priced against one another. **Liquids** provide a clean way to model these mechanics as explicit, composable currencies rather than hard‑coded rules.
 
-This page describes how common game resources map naturally onto Solids, and why that matters.
+This page describes how common game resources map naturally onto Liquids, and why that matters.
 
 ## The Core Idea
 
-A Solid is a token with a deterministic, monotonic pricing curve. Early units are cheap; later units cost more. There is no free minting, no arbitrary issuance, and no need for an external market maker. Price *is* the mechanism.
+A Liquid is a token with built-in AMM liquidity. Heat creates tokens and pool depth; cool burns tokens and returns backing. The constant-product curve prices exchanges automatically. There is no free minting, no arbitrary issuance, and no need for an external market maker. Price *is* the mechanism.
 
-Games already use this structure implicitly. Solids make it explicit.
+Games already use this structure implicitly. Liquids make it explicit.
 
 ## Energy as a Currency
 
@@ -26,10 +26,10 @@ Typical properties:
 * Caps actions per interval
 * Can sometimes be stored or boosted
 
-As a Solid:
+As a Liquid:
 
-* The base mint represents natural regeneration
-* Buying additional energy increases marginal cost
+* The base heat represents natural regeneration
+* Buying additional energy from the pool increases marginal cost
 * Hoarding energy becomes expensive
 
 Result:
@@ -50,7 +50,7 @@ Typical properties:
 * Can be sacrificed for power
 * Loss imposes penalties or resets
 
-As a Solid:
+As a Liquid:
 
 * Life can be explicitly staked
 * Risky actions consume or lock life
@@ -75,10 +75,10 @@ Examples:
 * Daily caps
 * Waiting to regenerate energy
 
-As a Solid:
+As a Liquid:
 
-* Time-delayed minting replaces timers
-* Players may accelerate at a rising cost
+* Time-delayed heating replaces timers
+* Players may accelerate by buying from the pool at a rising cost
 * Skipping time is never free, only priced
 
 Result:
@@ -91,7 +91,7 @@ Result:
 
 Failure is often treated as a binary event: success or death.
 
-With Solids:
+With Liquids:
 
 * Risk can be fractional
 * Partial losses are priced continuously
@@ -109,10 +109,10 @@ Risk becomes *tradeable*.
 
 Reputation systems gate content but are usually opaque.
 
-As Solids:
+As Liquids:
 
-* Reputation is earned by paying opportunity cost
-* Losing reputation has real, increasing cost
+* Reputation is earned by paying opportunity cost (heating backing tokens)
+* Losing reputation has real, increasing cost (cooling returns less)
 * Grinding reputation faces diminishing returns
 
 Result:
@@ -125,7 +125,7 @@ Result:
 
 Map control and territory generate ongoing value.
 
-As Solids:
+As Liquids:
 
 * Territory tokens accrue value over time
 * Defending territory has opportunity cost
@@ -146,7 +146,7 @@ The most interesting gameplay emerges when currencies convert:
 * Time → Energy (waiting)
 * Reputation → Access → Rewards
 
-Solids make these exchange rates *explicit and inspectable*.
+Cross-liquid swaps make these exchange rates *explicit and inspectable*.
 
 Designers no longer guess balance constants; they choose curve shapes.
 
@@ -159,7 +159,7 @@ Traditional game economies rely on:
 * Constant retuning
 * Manual inflation control
 
-Solids replace this with:
+Liquids replace this with:
 
 * Transparent pricing
 * Automatic throttling
@@ -170,7 +170,7 @@ Games become **economic systems**, not rule forests.
 
 ## Summary
 
-Life, energy, time, risk, reputation, and control already act like currencies. Solids let games model them honestly.
+Life, energy, time, risk, reputation, and control already act like currencies. Liquids let games model them honestly.
 
 Instead of asking *"Is this balanced?"*, designers ask:
 
@@ -180,7 +180,7 @@ That shift unlocks deeper, fairer, and more expressive game worlds.
 
 ## See also
 
-* Bonding curves
+* Constant-product AMMs
 * Game economy inflation control
 * Risk‑reward design
 * Deterministic pricing systems

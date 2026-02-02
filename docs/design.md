@@ -1,3 +1,9 @@
+---
+layout: default
+title: Design
+nav_order: 3
+---
+
 # Liquid Protocol Design
 
 A mathematical and architectural specification of the Liquid automated market maker protocol.
