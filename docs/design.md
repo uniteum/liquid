@@ -27,10 +27,10 @@ The wrapped token inherits the metadata (name, symbol, decimals) of its backing 
 
 The protocol maintains two balance pools per wrapped token instance:
 
-- **Token Pool**: Wrapped tokens held by the protocol
-- **Water Pool**: Base currency tokens held by the protocol
+- **Token Pool**: Wrapped tokens (spoke tokens) held by the protocol
+- **Hub Pool**: Hub tokens held by the protocol
 
-The base currency is itself a wrapped token instance, creating a unified token system where all wrapped tokens share a common denominator for pricing and exchange.
+The Hub is itself a wrapped token instance (wrapping "Uniteum 1", symbol "1"), creating a unified token system where all spoke tokens share a common denominator for pricing and exchange. Spoke tokens are any liquid tokens other than the Hub.
 
 ## Mathematical Model
 
@@ -43,8 +43,8 @@ pool × lake = k
 ```
 
 Where:
-- `pool` = wrapped token balance held by protocol
-- `lake` = water token balance held by protocol
+- `pool` = wrapped token (spoke) balance held by protocol
+- `lake` = hub token balance held by protocol
 - `k` = constant (changes only during wrap/unwrap operations)
 
 This is the classical constant-product formula used in automated market makers, providing deterministic price discovery through supply and demand dynamics.
@@ -85,38 +85,38 @@ When a user unwraps `n` wrapped tokens from their balance `held`:
 
 ### Trading Operations
 
-#### Buy (Water → Wrapped)
+#### Buy (Hub → Spoke)
 
-To purchase `h` wrapped tokens:
+To purchase `h` spoke tokens:
 
 ```
 pool' = pool - h
 lake' = (pool × lake) / pool'
-water_cost = lake' - lake
+hub_cost = lake' - lake
 ```
 
 **Transfer**:
-- `h` wrapped tokens: protocol → user
-- `water_cost` water tokens: user → protocol
+- `h` spoke tokens: protocol → user
+- `hub_cost` hub tokens: user → protocol
 
 **Properties**:
 - Price increases as more tokens are bought (pool decreases)
 - Invariant preserved: `pool' × lake' = pool × lake`
 - Slippage increases non-linearly with trade size
 
-#### Sell (Wrapped → Water)
+#### Sell (Spoke → Hub)
 
-To sell `h` wrapped tokens:
+To sell `h` spoke tokens:
 
 ```
 pool' = pool + h
 lake' = (pool × lake) / pool'
-water_received = lake - lake'
+hub_received = lake - lake'
 ```
 
 **Transfer**:
-- `h` wrapped tokens: user → protocol
-- `water_received` water tokens: protocol → user
+- `h` spoke tokens: user → protocol
+- `hub_received` hub tokens: protocol → user
 
 **Properties**:
 - Price decreases as more tokens are sold (pool increases)
@@ -125,28 +125,28 @@ water_received = lake - lake'
 
 #### Inverse Operations
 
-**BuyWith**: Specify water input amount, calculate wrapped output
+**BuyWith**: Specify hub input amount, calculate spoke output
 ```
-lake' = lake + water
+lake' = lake + hub
 pool' = (pool × lake) / lake'
-hot_received = pool - pool'
+spoke_received = pool - pool'
 ```
 
-**SellFor**: Specify desired water output, calculate required wrapped input
+**SellFor**: Specify desired hub output, calculate required spoke input
 ```
-lake' = lake - water
+lake' = lake - hub
 pool' = (pool × lake) / lake'
-hot_required = pool' - pool
+spoke_required = pool' - pool
 ```
 
 All four operations (buy, sell, buyWith, sellFor) maintain the constant-product invariant while offering different user experience trade-offs.
 
 ### Cross-Instance Swaps
 
-To swap between two different wrapped tokens A and B:
+To swap between two different spoke tokens A and B:
 
-1. Execute operation on instance A (sell A for water, or buy A with water)
-2. Execute inverse operation on instance B (buy B with water, or sell B for water)
+1. Execute operation on instance A (sell A for hub, or buy A with hub)
+2. Execute inverse operation on instance B (buy B with hub, or sell B for hub)
 3. Both operations atomic within single transaction
 4. Each instance maintains its own constant-product invariant
 
@@ -158,9 +158,9 @@ To swap between two different wrapped tokens A and B:
 
 **Mathematical composition**:
 ```
-A → Water: Standard sell/buy operation on instance A
-Water → B: Standard buy/sell operation on instance B
-Net effect: A ↔ B swap with water as intermediary
+A → Hub: Standard sell/buy operation on instance A
+Hub → B: Standard buy/sell operation on instance B
+Net effect: A ↔ B swap with hub as intermediary
 ```
 
 ## Architectural Design
@@ -183,14 +183,14 @@ The deterministic addressing allows users to independently verify that a wrapped
 
 ### Factory Pattern
 
-The base water instance serves as the factory for creating new wrapped instances:
+The Hub instance serves as the factory for creating new spoke instances:
 
 ```
-function create_instance(backing_token) → wrapped_instance
+function create_instance(backing_token) → spoke_instance
 ```
 
 **Constraints**:
-- Only the designated water instance can create new wrapped instances
+- Only the Hub instance can create new spoke instances
 - Centralizes instance registry while keeping protocol permissionless
 - Creates single source of truth for valid instances
 
@@ -199,10 +199,10 @@ function create_instance(backing_token) → wrapped_instance
 ### Access Control Model
 
 **Public Operations** (universally accessible):
-- Wrap backing tokens into wrapped tokens
-- Unwrap wrapped tokens into backing tokens
-- Trade wrapped tokens for water
-- Trade water for wrapped tokens
+- Wrap backing tokens into spoke tokens
+- Unwrap spoke tokens into backing tokens
+- Trade spoke tokens for hub
+- Trade hub for spoke tokens
 - Cross-instance swaps
 
 **Protected Operations** (only callable by verified instances):
@@ -217,7 +217,7 @@ function create_instance(backing_token) → wrapped_instance
 
 ### Price Discovery
 
-Price of wrapped token in water terms:
+Price of spoke token in hub terms:
 
 ```
 price = lake / pool
@@ -238,7 +238,7 @@ slippage = (marginal_price - average_price) / average_price
 
 where:
   marginal_price = lake / (pool - h)
-  average_price = water_cost / h
+  average_price = hub_cost / h
 ```
 
 **Properties**:
@@ -257,7 +257,7 @@ TVL = pool × price + lake
     = 2 × lake
 ```
 
-**Implication**: Total liquidity depth is exactly twice the water pool size, regardless of the wrapped token price. This creates a predictable relationship between water deposits and available liquidity.
+**Implication**: Total liquidity depth is exactly twice the hub pool size, regardless of the spoke token price. This creates a predictable relationship between hub deposits and available liquidity.
 
 ### Arbitrage Resistance
 
@@ -299,24 +299,24 @@ This eliminates the bootstrapping problem where new tokens cannot trade until so
 ### Network Structure
 
 ```
-                    WATER (base instance)
+                      HUB (wraps Uniteum 1)
                          |
          +---------------+---------------+
          |               |               |
-    Instance A      Instance B      Instance C
+      Spoke A        Spoke B         Spoke C
    (wraps USDC)    (wraps DAI)    (wraps WETH)
 ```
 
 **Topology properties**:
-- Star topology with water at center
-- All instances independent except during cross-swaps
+- Star topology with Hub at center
+- All spoke instances independent except during cross-swaps
 - No global state synchronization required
 - Scales to arbitrary number of instances without increasing complexity
 
 ### Routing Mechanics
 
-**Direct trade**: `Token ↔ Water` (single hop)
-**Cross-instance**: `Token A ↔ Water ↔ Token B` (two hops)
+**Direct trade**: `Spoke ↔ Hub` (single hop)
+**Cross-instance**: `Spoke A ↔ Hub ↔ Spoke B` (two hops)
 
 **Maximum path length**: 2 hops for any token-to-token swap
 
@@ -463,7 +463,7 @@ The protocol charges no fees on any operation:
 
 | Property | Liquid | Balancer |
 |----------|--------|----------|
-| Pools | Binary (token + water) | N-ary (multiple tokens) |
+| Pools | Binary (spoke + hub) | N-ary (multiple tokens) |
 | Weights | 50/50 fixed | Arbitrary weights |
 | Complexity | Low | High |
 | Liquidity | Automatic | Manual provision |
@@ -492,10 +492,10 @@ The protocol charges no fees on any operation:
 Non-state-changing functions that return expected trade results without executing trades:
 
 ```
-buy_quote(amount) → water_cost
-sell_quote(amount) → water_received
-buy_with_quote(water) → amount_received
-sell_for_quote(water) → amount_to_sell
+buy_quote(amount) → hub_cost
+sell_quote(amount) → hub_received
+buy_with_quote(hub) → amount_received
+sell_for_quote(hub) → amount_to_sell
 ```
 
 **Purpose**: Enable off-chain price discovery, UI integration, and trade simulation without blockchain interaction.
@@ -607,7 +607,7 @@ Therefore: cold_received ≤ n ✓
 **Proof sketch**:
 ```
 1. Heat n: Receive n tokens, pool grows by n
-2. Sell n: Receive water W < n × price (due to slippage)
+2. Sell n: Receive hub H < n × price (due to slippage)
 3. Buy with W: Receive tokens T < n (due to slippage)
 4. Cool T: Receive backing < T (due to proportional burn)
 
@@ -644,7 +644,7 @@ price = lake / pool  (integer division)
 - Can wrap (creates initial pool)
 
 **Empty lake** (`lake = 0`):
-- Cannot sell (no water available)
+- Cannot sell (no hub available)
 - Can buy (adds to lake via cross-swap)
 - Requires seeding via cross-instance swap
 
@@ -655,14 +655,14 @@ price = lake / pool  (integer division)
 ### Deployment Considerations
 
 **Initial state**:
-- New instance has zero pool, zero lake
+- New spoke instance has zero pool, zero lake
 - First wrap creates initial pool
 - Initial lake requires cross-instance swap or direct transfer
 
 **Bootstrapping**:
-1. Deploy water instance with initial backing
-2. Wrap backing into water (creates initial pool)
-3. Deploy additional instances as needed
+1. Deploy Hub instance with initial backing (Uniteum 1)
+2. Wrap backing into hub (creates initial pool)
+3. Deploy additional spoke instances as needed
 4. Cross-swaps automatically seed lakes
 
 ## Conclusion

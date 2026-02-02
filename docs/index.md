@@ -38,8 +38,9 @@ Each liquid token wraps a backing ERC-20 (solid) and maintains a constant-produc
 |:-----|:--------|
 | **Solid** | The backing ERC-20 token (USDC, DAI, etc.) |
 | **Liquid** | The wrapped version with built-in liquidity |
-| **Hub** | The base Liquid instance used for cross-pool routing |
-| **Pool** | Liquid tokens held by the contract |
+| **Hub** | The central Liquid token (wraps "Uniteum 1", symbol "1") used for cross-pool routing |
+| **Spoke** | Any Liquid token paired with Hub, forming a liquidity pool |
+| **Pool** | Spoke tokens held by the contract |
 | **Lake** | Hub tokens held by the contract |
 | **Mass** | Backing token balance held by the contract |
 

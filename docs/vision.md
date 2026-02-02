@@ -34,7 +34,7 @@ When every real estate property, every corporate bond, every government security
 
 Liquid solves this with mathematical elegance: **n pools instead of n² pairs**.
 
-Every token gets wrapped into a liquid token with its own pool. All pools connect through Water, the universal intermediary.
+Every token gets wrapped into a spoke token with its own pool. All pools connect through Hub, the universal intermediary.
 
 - 100 tokens = 100 pools (not 5,000 pairs)
 - 1,000 tokens = 1,000 pools (not 500,000 pairs)
@@ -56,7 +56,7 @@ In tokenized finance, these costs compress into smart contract calls. Uniswap ch
 
 **Liquid charges zero. Forever.**
 
-This isn't altruism. It's hardcoded mathematics. No governance can add fees later. No DAO controls the protocol. The developers monetized through initial Water token allocation, not perpetual rent-seeking.
+This isn't altruism. It's hardcoded mathematics. No governance can add fees later. No DAO controls the protocol. The developers monetized through initial Hub token allocation, not perpetual rent-seeking.
 
 ### The Compounding Effect
 
@@ -107,7 +107,7 @@ Carbon credits from a reforestation project in Indonesia? Tradeable immediately.
 
 ### Phase 3: Mainstream Integration ($1T)
 - Tokenized treasuries default to Liquid pools
-- Cross-border payment networks route through Water
+- Cross-border payment networks route through Hub
 - Decentralized exchanges integrate Liquid as backend
 
 **Trigger**: Regulatory clarity + major DEX (Uniswap, Curve) adds Liquid as liquidity layer to reduce costs.
@@ -155,27 +155,27 @@ Liquid at **$250B TVL** would be **larger than the entire DeFi ecosystem at its 
 - Comparable to SWIFT's annual message value ($150T, but Liquid would handle a growing share)
 - Top 3 financial infrastructure globally
 
-## Water: The Global Reserve Currency of Tokenized Finance
+## Hub: The Global Reserve Currency of Tokenized Finance
 
-In this vision, Water doesn't just connect pools. It becomes:
+In this vision, Hub doesn't just connect pools. It becomes:
 
 ### 1. Universal Settlement Layer
-All cross-asset swaps route through Water. Like SWIFT for tokenized assets, but:
+All cross-asset swaps route through Hub. Like SWIFT for tokenized assets, but:
 - Instant settlement (not T+2)
 - Zero fees (not basis points)
 - Permissionless (not gated)
 
 ### 2. Neutral Reserve Asset
-Because Water is backed by a solid token (the original Ice) but also serves as universal intermediary:
-- Central banks could hold Water for CBDC interoperability
-- Institutions could denominate cross-border contracts in Water
-- DeFi protocols could use Water as neutral collateral
+Because Hub is backed by a solid token (Uniteum 1) but also serves as universal intermediary:
+- Central banks could hold Hub for CBDC interoperability
+- Institutions could denominate cross-border contracts in Hub
+- DeFi protocols could use Hub as neutral collateral
 
 ### 3. Programmable Money
-Water is ERC-20. This means:
-- Smart contracts can hold and transfer Water
-- Automated market makers can rebalance using Water
-- DAOs can use Water for treasury management
+Hub is ERC-20. This means:
+- Smart contracts can hold and transfer Hub
+- Automated market makers can rebalance using Hub
+- DAOs can use Hub for treasury management
 
 ## Why This Could Actually Happen
 
@@ -240,14 +240,14 @@ Liquid is live. Audited. Battle-tested. Ready.
 
 **"But Liquid has no token to capture value. How could it be worth trillions?"**
 
-Liquid *doesn't* capture value in a traditional sense. There's no Liquid token to invest in (beyond Water, which is just the base instance).
+Liquid *doesn't* capture value in a traditional sense. There's no Liquid token to invest in (beyond Hub, which is just the base instance).
 
 **But that misses the point.**
 
 The value isn't in owning Liquid. The value is in:
-- **Water tokens**: If Water becomes the universal intermediary, holding Water is like holding the reserve currency of tokenized finance
+- **Hub tokens**: If Hub becomes the universal intermediary, holding Hub is like holding the reserve currency of tokenized finance
 - **Ecosystem effects**: Projects that build on Liquid (frontends, aggregators, analytics) could be worth billions
-- **Developer allocation**: The protocol creators reserved Water tokens, which could be worth billions if Water becomes essential infrastructure
+- **Developer allocation**: The protocol creators reserved Hub tokens, which could be worth billions if Hub becomes essential infrastructure
 
 Think of Liquid like **TCP/IP**. No one "owns" the internet protocol. But the companies built on it—Google, Amazon, Meta—are worth trillions.
 

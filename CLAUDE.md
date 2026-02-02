@@ -70,7 +70,7 @@ This file provides context for AI assistants (primarily Claude) to understand th
 
 - **Solid** = Backing token
 - **Liquid** = Wrapped token with AMM liquidity
-- **Hub** = Central Liquid token used for cross-pool swaps
+- **Hub** = Central Liquid token (wraps "Uniteum 1", symbol "1") used for cross-pool swaps
 - **Spoke** = Liquid token paired with Hub token forming a liquidity pool
 - **Mass** = Solid backing tokens held by contract
 - **Pool** = Spoke tokens held by contract
