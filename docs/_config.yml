@@ -1,4 +1,4 @@
-title: Liquid Protocol
+title: Liquid
 description: A constant-product AMM protocol on Ethereum where any ERC-20 token can be wrapped into a liquid token with built-in liquidity.
 baseurl: "/liquid"
 url: "https://uniteum.github.io"
