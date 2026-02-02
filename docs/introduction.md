@@ -20,18 +20,16 @@ You can interact with the entire protocol through Etherscan contract interaction
 
 The protocol uses an intuitive temperature metaphor:
 
-- **Substance** = Your original ERC-20 token (USDC, DAI, etc.)
-  - State variable in code: `substance`
-  - Each liquid has its own substance (e.g., USDC is the substance for liquid-USDC)
-- **Solid** = Amount of backing token (parameter: `solid`)
+- **Solid** = Your original ERC-20 token (USDC, DAI, etc.)
+  - State variable in code: `solid`
+  - Each liquid has its own solid (e.g., USDC is the solid for liquid-USDC)
 - **Liquid** = The wrapped version with built-in liquidity (liquid-USDC, liquid-DAI)
   - Variable name in code: `liquid`
   - Also called "fluids" when referring to other liquids in cross-swaps
 - **Hub** = The central Liquid instance (wraps "Uniteum 1", symbol "1") used for cross-pool trading
 - **Spoke** = Any Liquid token paired with Hub, forming a liquidity pool
-- **Pool** = Spoke tokens held by the contract
-- **Lake** = Hub tokens held by the contract
-- **Mass** = Backing token balance held by contract
+- **Pool** = `pool()` returns `(uint256 P, uint256 E)` where P is spoke balance, E is hub balance
+- **Mass** = Backing token balance held by contract (`mass()`)
 
 ## How to Use Liquid (via Etherscan)
 
@@ -132,9 +130,9 @@ The 2x burn (from you and pool) maintains symmetry with the 2x mint in heat.
 **Example:** Swap liquid-USDC for liquid-DAI
 
 **To swap:**
-1. On the first liquid contract (e.g., liquid-USDC), find the `sell` function with two parameters: `(uint256 liquid, Liquid fluid)`
-2. Enter the amount of liquid-USDC you want to sell
-3. Enter the address of the target liquid contract (e.g., liquid-DAI address)
+1. On the first liquid contract (e.g., liquid-USDC), find the `sellFor` function with parameters: `(ILiquid that, uint256 spokes)`
+2. Enter the address of the target liquid contract (e.g., liquid-DAI address)
+3. Enter the amount of liquid-USDC you want to sell
 4. Click "Write" and confirm the transaction
 
 **What happens:**
@@ -144,16 +142,15 @@ The 2x burn (from you and pool) maintains symmetry with the 2x mint in heat.
 
 **To check the result before swapping:**
 - Use the "Read Contract" tab
-- Call `sells(uint256,Liquid)` with the amount and target liquid address
+- Call `sellsFor(ILiquid,uint256)` with the target liquid address and amount
 - This shows hub used and how much fluids (of the other liquid) you'll receive
 
 ### Step 7: Check Pool State
 
 **To see pool liquidity:**
 1. Go to "Read Contract" tab
-2. Call `pool()` to see spoke tokens in the pool
-3. Call `lake()` to see hub tokens in the lake
-4. Call `mass()` to see backing token balance
+2. Call `pool()` - returns `(uint256 P, uint256 E)` where P is spoke balance and E is hub balance
+3. Call `mass()` to see backing token balance
 
 **Alternative method:**
 1. Call `balanceOf` with the liquid contract's own address
@@ -164,7 +161,7 @@ The 2x burn (from you and pool) maintains symmetry with the 2x mint in heat.
 ### Workflow 1: Create Liquidity for Your Token
 
 1. Go to the Hub contract on Etherscan
-2. Use `liquify(address stuff)` function (the factory function)
+2. Use `make(IERC20Metadata backing)` function (the factory function)
 3. Enter your ERC-20 token address
 4. Confirm transaction → new spoke token created
 5. Find the new liquid contract address from the transaction logs
@@ -174,9 +171,9 @@ The 2x burn (from you and pool) maintains symmetry with the 2x mint in heat.
 
 **Example:** Trade liquid-USDC → liquid-DAI
 
-1. On liquid-USDC contract, use `sell(uint256 liquid, Liquid fluid)`
-2. Enter amount of liquid-USDC you want to sell
-3. Enter liquid-DAI contract address
+1. On liquid-USDC contract, use `sellFor(ILiquid that, uint256 spokes)`
+2. Enter liquid-DAI contract address
+3. Enter amount of liquid-USDC you want to sell
 4. Confirm transaction
 5. Receive liquid-DAI directly
 
@@ -223,15 +220,15 @@ The 2x burn (from you and pool) maintains symmetry with the 2x mint in heat.
 - Call `decimals()` (matches backing token)
 
 **What's the backing token?**
-- Call `substance()` returns the backing token address
+- Call `solid()` returns the backing token address
 
 ### Check if Address is a Liquid
 
 1. Go to the Hub contract
-2. Call `liquified(address stuff)` with a backing token address
-3. Returns `(address predicted, bytes32 salt)`
-4. The `predicted` address is where that spoke is (or will be) deployed
-5. Check if code exists at that address to see if it's already created
+2. Call `made(IERC20Metadata backing)` with a backing token address
+3. Returns `(bool cloned, address home, bytes32 salt)`
+4. The `home` address is where that spoke is (or will be) deployed
+5. The `cloned` boolean indicates if it's already created
 
 ## Understanding Prices and Impact
 
@@ -245,10 +242,9 @@ The constant-product formula means:
 ### Checking Quotes
 
 Always use quote functions before trading:
-- `sells(liquid)` - Shows hub return from selling liquid
-- `buys(hub)` - Shows liquid received for spending hub
-- `sells(liquid, otherLiquid)` - Shows hub used and fluids received for cross-spoke swap
-- `buys(liquid, otherLiquid)` - Shows hub used and liquid received for cross-spoke swap
+- `sells(spokes)` - Shows hub return from selling spokes
+- `buys(hubs)` - Shows spokes received for spending hub
+- `sellsFor(otherLiquid, spokes)` - Shows hub used and fluids received for cross-spoke swap
 
 These are read-only calls (no gas cost, no transaction needed).
 
@@ -266,17 +262,18 @@ The AMM formula automatically adjusts based on current pool state.
 ### Before Interacting with a Liquid
 
 ✅ **Verify the backing token:**
-- Call `substance()` to see what backing token this liquid wraps
+- Call `solid()` to see what backing token this liquid wraps
 - Check that backing token is legitimate
 
 ✅ **Verify the liquid is authentic (extra paranoid):**
 - Go to the verified Hub contract on Etherscan
-- Call `liquified(address stuff)` with the backing token address
-- Confirm the returned predicted address matches the liquid contract you're interacting with
+- Call `made(IERC20Metadata backing)` with the backing token address
+- Confirm the returned `home` address matches the liquid contract you're interacting with
 - This ensures the liquid is legitimately created by the official Hub contract
 
 ✅ **Check pool liquidity:**
-- Call `pool()`, `lake()`, and `mass()` to see pool state
+- Call `pool()` to see `(P, E)` - spoke and hub balances
+- Call `mass()` to see backing token balance
 - Larger pools generally have better prices
 
 ✅ **Use quote functions:**
@@ -388,7 +385,7 @@ Liquid improves on traditional AMM designs in several key ways:
 ### How do I create a liquid for my token?
 
 1. Go to the Hub contract on Etherscan
-2. Use the `liquify(address stuff)` factory function
+2. Use the `make(IERC20Metadata backing)` factory function
 3. Enter your token's address
 4. Confirm the transaction
 5. The new spoke address is in the transaction logs
@@ -430,7 +427,7 @@ The constant-product formula prevents complete drainage. As pool liquidity decre
 
 1. Go to the Hub contract on Etherscan
 2. Check the "Events" tab
-3. Filter for `Liquify(IERC20Metadata,Liquid)` events (the factory event)
+3. Filter for `Make(ILiquid,IERC20Metadata)` events (the factory event)
 4. Each event shows a new spoke and its backing token
 
 ### How are prices determined?
@@ -495,9 +492,9 @@ Think of it like wrapping + being an LP simultaneously. Your share of solid back
 - Carol has 5,000 liquid-USDC
 
 **Carol's actions on Etherscan:**
-1. liquid-USDC contract → Read → `sells(1000e6, liquidDAI_address)`
+1. liquid-USDC contract → Read → `sellsFor(liquidDAI_address, 1000e6)`
    - Check hub used and fluids (liquid-DAI) received
-2. liquid-USDC contract → Write → `sell(1000e6, liquidDAI_address)`
+2. liquid-USDC contract → Write → `sellFor(liquidDAI_address, 1000e6)`
 
 **Result:**
 - Carol's liquid-USDC sold for hub
@@ -529,8 +526,8 @@ Liquid uses deterministic addresses. Same backing token → same liquid address 
 **To predict a liquid address before creation:**
 1. Go to the Hub contract on Etherscan
 2. Use the "Read Contract" tab
-3. Call `liquified(address stuff)` with the backing token address
-4. Returns `(address predicted, bytes32 salt)` - the future spoke contract address (works even if not created yet)
+3. Call `made(IERC20Metadata backing)` with the backing token address
+4. Returns `(bool cloned, address home, bytes32 salt)` - `home` is the spoke contract address (works even if not created yet)
 
 ### Batch Operations
 
@@ -544,24 +541,23 @@ Etherscan doesn't support batch transactions directly, but you can:
 To see all activity on a liquid:
 1. Go to "Events" tab on Etherscan
 2. Filter by event type:
-   - `Heat(Liquid,uint256)` - Deposits (heating solid → liquid)
-   - `Cool(Liquid,uint256,uint256)` - Withdrawals (cooling liquid → solid)
-   - `Buy(Liquid,uint256,uint256)` - Purchases from pool
-   - `Sell(Liquid,uint256,uint256)` - Sales to pool
-   - `Liquify(IERC20Metadata,Liquid)` - New liquid created (factory event)
+   - `Heat(ILiquid,uint256,uint256,uint256)` - Deposits (heating solid → liquid)
+   - `Cool(ILiquid,uint256,uint256,uint256)` - Withdrawals (cooling liquid → solid)
+   - `Buy(ILiquid,uint256,uint256)` - Purchases from pool
+   - `Sell(ILiquid,uint256,uint256)` - Sales to pool
+   - `Make(ILiquid,IERC20Metadata)` - New liquid created (factory event)
 
 ### Monitoring Pool Health
 
 **Key metrics:**
-1. Pool size: `pool()` - spoke tokens in pool
-2. Lake size: `lake()` - hub in lake
-3. Mass: `mass()` - backing tokens held
-4. Total supply: `totalSupply()` shows all spoke tokens
+1. Pool state: `pool()` - returns `(P, E)` where P is spoke tokens in pool and E is hub tokens
+2. Mass: `mass()` - backing tokens held
+3. Total supply: `totalSupply()` shows all spoke tokens
 
 **Health indicators:**
-- Large pool + lake = good liquidity
-- Very small pool = high price impact
-- Zero lake = can't sell (but can still cool)
+- Large P + E = good liquidity
+- Very small P = high price impact
+- Zero E = can't sell (but can still cool)
 
 ## Network Information
 
@@ -579,7 +575,7 @@ Use the appropriate network explorer (e.g., arbiscan.io for Arbitrum, basescan.o
 
 ## Getting Help
 
-- Read the code: [src/Liquid.sol](https://github.com/uniteum/liquid/blob/main/src/Liquid.sol) (189 lines, well-commented)
+- Read the code: [src/Liquid.sol](https://github.com/uniteum/liquid/blob/main/src/Liquid.sol) (241 lines, well-commented)
 - Technical documentation: [CLAUDE.md](https://github.com/uniteum/liquid/blob/main/CLAUDE.md)
 - Development setup: [README.md](https://github.com/uniteum/liquid/blob/main/README.md)
 

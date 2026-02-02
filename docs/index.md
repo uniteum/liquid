@@ -73,7 +73,7 @@ All operations can be performed through Etherscan's "Write Contract" interface. 
 ### Creating a Liquid Token
 
 1. Go to the Hub contract on Etherscan
-2. Use `liquify(address stuff)` with your ERC-20 token address
+2. Use `make(IERC20Metadata backing)` with your ERC-20 token address
 3. The new liquid token address is in the transaction logs
 
 ### Adding Liquidity
@@ -86,7 +86,7 @@ All operations can be performed through Etherscan's "Write Contract" interface. 
 
 - Call `sell(amount)` to trade liquid for Hub
 - Call `buy(amount)` to trade Hub for liquid
-- Call `sell(amount, otherLiquid)` to cross-swap between liquid tokens
+- Call `sellFor(otherLiquid, amount)` to cross-swap between liquid tokens
 
 ### Checking Prices
 
