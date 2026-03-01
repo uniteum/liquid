@@ -1,0 +1,24 @@
+[submodule "lib/forge-std"]
+	path = lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "lib/reentrancy"]
+	path = lib/reentrancy
+	url = https://github.com/uniteum/reentrancy.git
+[submodule "lib/erc20"]
+	path = lib/erc20
+	url = https://github.com/uniteum/erc20.git
+[submodule "lib/ierc20"]
+	path = lib/ierc20
+	url = https://github.com/uniteum/ierc20.git
+[submodule "lib/clones"]
+	path = lib/clones
+	url = https://github.com/uniteum/clones.git
+[submodule "lib/math"]
+	path = lib/math
+	url = https://github.com/uniteum/math.git
+[submodule "lib/strings"]
+	path = lib/strings
+	url = https://github.com/uniteum/strings.git
+[submodule "lib/panic"]
+	path = lib/panic
+	url = https://github.com/uniteum/panic.git

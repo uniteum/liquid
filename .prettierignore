@@ -1,0 +1,6 @@
+# Ignore Solidity files - use forge fmt instead
+*.sol
+
+# Foundry output
+out/
+cache/
