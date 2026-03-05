@@ -175,20 +175,20 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         _buy(s, e);
     }
 
-    function __buy(uint256 spokes, uint256 hubs) external onlyLiquid {
-        _buy(spokes, hubs);
+    function __buy(uint256 s, uint256 e) external onlyLiquid {
+        _buy(s, e);
     }
 
-    function _buy(uint256 spokes, uint256 hubs) private {
-        HUB.update(msg.sender, address(this), hubs);
-        emit Buy(this, spokes, hubs);
-        _update(address(this), msg.sender, spokes);
+    function _buy(uint256 s, uint256 e) private {
+        HUB.update(msg.sender, address(this), e);
+        emit Buy(this, s, e);
+        _update(address(this), msg.sender, s);
     }
 
-    function _sell(uint256 spokes, uint256 hubs) private {
-        HUB.update(address(this), msg.sender, hubs);
-        emit Sell(this, spokes, hubs);
-        _update(msg.sender, address(this), spokes);
+    function _sell(uint256 s, uint256 e) private {
+        HUB.update(address(this), msg.sender, e);
+        emit Sell(this, s, e);
+        _update(msg.sender, address(this), s);
     }
 
     function update(address from, address to, uint256 amount) external onlyLiquid {

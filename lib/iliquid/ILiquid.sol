@@ -80,8 +80,8 @@ interface ILiquid is IERC20Metadata {
 
     /// @notice Sell spoke tokens for hub tokens via the constant-product AMM.
     /// @param s Amount of spoke tokens to sell.
-    /// @return hubs Hub tokens received.
-    function sell(uint256 s) external returns (uint256 hubs);
+    /// @return e Hub tokens received.
+    function sell(uint256 s) external returns (uint256 e);
 
     /// @notice Quote a cross-spoke swap: sell this spoke's tokens for another's.
     /// @param that The target spoke to buy into.
