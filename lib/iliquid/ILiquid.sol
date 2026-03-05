@@ -21,57 +21,57 @@ interface ILiquid is IERC20Metadata {
     function mass() external view returns (uint256);
 
     /// @notice Quote a heat: how many tokens the caller and pool would receive.
-    /// @param s Amount of backing (solid) tokens to deposit.
+    /// @param m Amount of backing (solid) tokens to deposit (mass).
     /// @return u Liquid tokens the caller would receive.
     /// @return p Liquid tokens the pool would receive.
-    function heats(uint256 s) external view returns (uint256 u, uint256 p);
+    function heats(uint256 m) external view returns (uint256 u, uint256 p);
 
     /// @notice Deposit backing tokens, mint liquid tokens. The 2× mint splits
     /// newly minted tokens between the caller and the pool, seeding AMM liquidity.
-    /// @param s Amount of backing (solid) tokens to deposit.
+    /// @param m Amount of backing (solid) tokens to deposit (mass).
     /// @return u Liquid tokens minted to the caller.
     /// @return p Liquid tokens minted to the pool.
-    function heat(uint256 s) external returns (uint256 u, uint256 p);
+    function heat(uint256 m) external returns (uint256 u, uint256 p);
 
     /// @notice Quote a heat with an explicit hub-token deposit.
-    /// @param s Amount of backing (solid) tokens to deposit.
+    /// @param m Amount of backing (solid) tokens to deposit (mass).
     /// @param e Amount of hub tokens to deposit into the pool's lake.
     /// @return u Liquid tokens the caller would receive.
     /// @return p Liquid tokens the pool would receive.
-    function heats(uint256 s, uint256 e) external view returns (uint256 u, uint256 p);
+    function heats(uint256 m, uint256 e) external view returns (uint256 u, uint256 p);
 
     /// @notice Deposit backing tokens and hub tokens, mint liquid tokens.
-    /// @param s Amount of backing (solid) tokens to deposit.
+    /// @param m Amount of backing (solid) tokens to deposit (mass).
     /// @param e Amount of hub tokens to deposit into the pool's lake.
     /// @return u Liquid tokens minted to the caller.
     /// @return p Liquid tokens minted to the pool.
-    function heat(uint256 s, uint256 e) external returns (uint256 u, uint256 p);
+    function heat(uint256 m, uint256 e) external returns (uint256 u, uint256 p);
 
     /// @notice Quote a cool: how many backing tokens and pool burns result.
     /// @param u Amount of liquid tokens to burn.
-    /// @return s Backing (solid) tokens the caller would receive.
+    /// @return m Backing (solid) tokens the caller would receive (mass).
     /// @return p Liquid tokens that would be burned from the pool.
-    function cools(uint256 u) external view returns (uint256 s, uint256 p);
+    function cools(uint256 u) external view returns (uint256 m, uint256 p);
 
     /// @notice Burn liquid tokens and redeem proportional backing tokens.
     /// @param u Amount of liquid tokens to burn from the caller.
-    /// @return s Backing (solid) tokens returned to the caller.
+    /// @return m Backing (solid) tokens returned to the caller (mass).
     /// @return p Liquid tokens burned from the pool.
-    function cool(uint256 u) external returns (uint256 s, uint256 p);
+    function cool(uint256 u) external returns (uint256 m, uint256 p);
 
     /// @notice Quote a cool with an explicit hub-token withdrawal.
     /// @param u Amount of liquid tokens to burn.
     /// @param e Amount of hub tokens to withdraw from the pool's lake.
-    /// @return s Backing (solid) tokens the caller would receive.
+    /// @return m Backing (solid) tokens the caller would receive (mass).
     /// @return p Liquid tokens that would be burned from the pool.
-    function cools(uint256 u, uint256 e) external view returns (uint256 s, uint256 p);
+    function cools(uint256 u, uint256 e) external view returns (uint256 m, uint256 p);
 
     /// @notice Burn liquid tokens and redeem backing tokens plus hub tokens.
     /// @param u Amount of liquid tokens to burn from the caller.
     /// @param e Amount of hub tokens to withdraw from the pool's lake.
-    /// @return s Backing (solid) tokens returned to the caller.
+    /// @return m Backing (solid) tokens returned to the caller (mass).
     /// @return p Liquid tokens burned from the pool.
-    function cool(uint256 u, uint256 e) external returns (uint256 s, uint256 p);
+    function cool(uint256 u, uint256 e) external returns (uint256 m, uint256 p);
 
     /// @notice Quote a sell: how many hub tokens would be received.
     /// @param s Amount of spoke tokens to sell into the pool.

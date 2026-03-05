@@ -40,101 +40,101 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         return solid.balanceOf(address(this));
     }
 
-    function heats(uint256 s) public view returns (uint256 u, uint256 p) {
+    function heats(uint256 m) public view returns (uint256 u, uint256 p) {
         if (this == HUB) {
-            u = s;
+            u = m;
         } else {
             uint256 T = totalSupply();
             uint256 P = balanceOf(address(this));
-            p = (2 * s * P) / T;
-            u = 2 * s - p;
+            p = (2 * m * P) / T;
+            u = 2 * m - p;
         }
     }
 
-    function heat(uint256 s) external nonReentrant returns (uint256 u, uint256 p) {
+    function heat(uint256 m) external nonReentrant returns (uint256 u, uint256 p) {
         if (this == HUB) {
-            u = s;
-            emit Heat(this, s, 0, u);
+            u = m;
+            emit Heat(this, m, 0, u);
             _mint(msg.sender, u);
         } else {
-            (u, p) = heats(s);
-            emit Heat(this, s, p, u);
-            solid.safeTransferFrom(msg.sender, address(this), s);
+            (u, p) = heats(m);
+            emit Heat(this, m, p, u);
+            solid.safeTransferFrom(msg.sender, address(this), m);
             _mint(msg.sender, u);
             _mint(address(this), p);
         }
     }
 
     // @param u is the amount of unpooled Spoke returned to the user
-    function heats(uint256 s, uint256 e) public view notHub returns (uint256 u, uint256 p) {
+    function heats(uint256 m, uint256 e) public view notHub returns (uint256 u, uint256 p) {
         (uint256 P, uint256 E) = pool();
-        s = s + (e * (P + s)) / (E + e);
+        m = m + (e * (P + m)) / (E + e);
         uint256 T = totalSupply();
         if (T == 0) {
-            p = s;
+            p = m;
         } else {
-            p = (2 * s * P) / T;
+            p = (2 * m * P) / T;
         }
-        u = 2 * s - p;
+        u = 2 * m - p;
         p = u;
     }
 
-    function heat(uint256 s, uint256 e) public nonReentrant returns (uint256 u, uint256 p) {
-        (u, p) = heats(s, e);
-        emit Heat(this, s, e, u);
-        if (s > 0) solid.safeTransferFrom(msg.sender, address(this), s);
+    function heat(uint256 m, uint256 e) public nonReentrant returns (uint256 u, uint256 p) {
+        (u, p) = heats(m, e);
+        emit Heat(this, m, e, u);
+        if (m > 0) solid.safeTransferFrom(msg.sender, address(this), m);
         if (e > 0) HUB.update(msg.sender, address(this), e);
         _mint(msg.sender, u);
         _mint(address(this), p);
     }
 
-    function cools(uint256 u) public view returns (uint256 s, uint256 p) {
+    function cools(uint256 u) public view returns (uint256 m, uint256 p) {
         if (this == HUB) {
-            s = u;
+            m = u;
         } else {
             uint256 T = totalSupply();
             uint256 P = balanceOf(address(this));
             uint256 U = T - P;
-            s = (u * T) / U / 2;
-            p = 2 * s - u;
+            m = (u * T) / U / 2;
+            p = 2 * m - u;
         }
     }
 
-    function cool(uint256 u) external nonReentrant returns (uint256 s, uint256 p) {
+    function cool(uint256 u) external nonReentrant returns (uint256 m, uint256 p) {
         if (this == HUB) {
-            s = u;
-            emit Cool(this, s, 0, u);
+            m = u;
+            emit Cool(this, m, 0, u);
             _burn(msg.sender, u);
-            solid.safeTransfer(msg.sender, s);
+            solid.safeTransfer(msg.sender, m);
         } else {
-            (s, p) = cools(u);
-            emit Cool(this, u, 0, s);
-            solid.safeTransfer(msg.sender, s);
+            (m, p) = cools(u);
+            emit Cool(this, u, 0, m);
+            solid.safeTransfer(msg.sender, m);
             _burn(msg.sender, u);
             _burn(address(this), p);
         }
     }
 
-    function cools(uint256 u, uint256 e) public view notHub returns (uint256 s, uint256 p) {
+    function cools(uint256 u, uint256 e) public view notHub returns (uint256 m, uint256 p) {
         (uint256 P, uint256 E) = pool();
         uint256 T = totalSupply();
         uint256 U = T - P;
 
         // Base solid from liquid (same as cools(u))
-        s = (u * T) / U / 2;
-        p = 2 * s - u;
+        m = (u * T) / U / 2;
+        p = 2 * m - u;
 
         // Add hub contribution: hub converts to solid at mass()/E rate
         if (e > 0 && E > 0) {
-            s = s + (e * mass()) / E;
+            m = m + (e * mass()) / E;
         }
     }
 
-    function cool(uint256 u, uint256 e) external nonReentrant returns (uint256 s, uint256 p) {
-        (s, p) = cools(u, e);
-        emit Cool(this, u, e, s);
+    function cool(uint256 u, uint256 e) external nonReentrant returns (uint256 m, uint256 p) {
+        (m, p) = cools(u, e);
+        emit Cool(this, u, e, m);
         if (e > 0) HUB.update(address(this), msg.sender, e);
-        solid.safeTransfer(msg.sender, s);
+        solid.safeTransfer(msg.sender, m);
         _burn(msg.sender, u);
         _burn(address(this), p);
     }
