@@ -24,7 +24,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
     }
 
     function symbol() public view virtual override(ERC20, IERC20Metadata) returns (string memory) {
-        return string.concat("l", solid.symbol());
+        return solid.symbol();
     }
 
     function decimals() public view virtual override(ERC20, IERC20Metadata) returns (uint8) {
@@ -46,7 +46,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         } else {
             uint256 T = totalSupply();
             uint256 P = balanceOf(address(this));
-            p = 2 * s * P / T;
+            p = (2 * s * P) / T;
             u = 2 * s - p;
         }
     }
@@ -67,12 +67,12 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
     // @param u is the amount of unpooled Spoke returned to the user
     function heats(uint256 s, uint256 e) public view notHub returns (uint256 u, uint256 p) {
         (uint256 P, uint256 E) = pool();
-        s = s + e * (P + s) / (E + e);
+        s = s + (e * (P + s)) / (E + e);
         uint256 T = totalSupply();
         if (T == 0) {
             p = s;
         } else {
-            p = 2 * s * P / T;
+            p = (2 * s * P) / T;
         }
         u = 2 * s - p;
         p = u;
@@ -94,7 +94,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
             uint256 T = totalSupply();
             uint256 P = balanceOf(address(this));
             uint256 U = T - P;
-            s = u * T / U / 2;
+            s = (u * T) / U / 2;
             p = 2 * s - u;
         }
     }
@@ -119,12 +119,12 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         uint256 U = T - P;
 
         // Base solid from liquid (same as cools(u))
-        s = u * T / U / 2;
+        s = (u * T) / U / 2;
         p = 2 * s - u;
 
         // Add hub contribution: hub converts to solid at mass()/E rate
         if (e > 0 && E > 0) {
-            s = s + e * mass() / E;
+            s = s + (e * mass()) / E;
         }
     }
 
