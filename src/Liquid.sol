@@ -24,7 +24,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
     }
 
     function symbol() public view virtual override(ERC20, IERC20Metadata) returns (string memory) {
-        return solid.symbol();
+        return string.concat("l", solid.symbol());
     }
 
     function decimals() public view virtual override(ERC20, IERC20Metadata) returns (uint8) {
@@ -141,20 +141,20 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         e = E - (E * S + E - 1) / (S + s);
     }
 
-    function sell(uint256 spokes) external returns (uint256 hubs) {
-        hubs = sells(spokes);
-        _sell(spokes, hubs);
+    function sell(uint256 s) external returns (uint256 e) {
+        e = sells(s);
+        _sell(s, e);
     }
 
-    function sellsFor(ILiquid that, uint256 spokes) public view returns (uint256 hubs, uint256 thats) {
-        hubs = sells(spokes);
-        thats = that.buys(hubs);
+    function sellsFor(ILiquid that, uint256 s) public view returns (uint256 e, uint256 thats) {
+        e = sells(s);
+        thats = that.buys(e);
     }
 
-    function sellFor(ILiquid that, uint256 spokes) external returns (uint256 hubs, uint256 thats) {
-        (hubs, thats) = sellsFor(that, spokes);
-        _sell(spokes, hubs);
-        Liquid(address(that)).__buy(thats, hubs);
+    function sellFor(ILiquid that, uint256 s) external returns (uint256 e, uint256 thats) {
+        (e, thats) = sellsFor(that, s);
+        _sell(s, e);
+        Liquid(address(that)).__buy(thats, e);
     }
 
     function buys(uint256 e) public view returns (uint256 s) {
@@ -162,9 +162,9 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         s = S - (S * E) / (E + e);
     }
 
-    function buy(uint256 hubs) external returns (uint256 spokes) {
-        spokes = buys(hubs);
-        _buy(spokes, hubs);
+    function buy(uint256 e) external returns (uint256 s) {
+        s = buys(e);
+        _buy(s, e);
     }
 
     function __buy(uint256 spokes, uint256 hubs) external onlyLiquid {
