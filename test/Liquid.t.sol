@@ -77,9 +77,9 @@ contract LiquidTest is BaseTest {
         (u, s) = alex.liquidate(U);
         assertEq(u, s, "2. alex liquid != solid");
         assertEq(p, s, "2. pool liquid != solid");
-        (uint256 P2, uint256 E2) = U.pool();
-        assertEq(P2, P, "Pool should have starting U");
-        assertEq(E2, E, "Pool should have starting E");
+        (uint256 p2, uint256 e2) = U.pool();
+        assertEq(p2, P, "Pool should have starting U");
+        assertEq(e2, E, "Pool should have starting E");
     }
 
     function test_SimpleHeatCool(uint256 P, uint256 s, uint256 E) public returns (uint256 u, uint256 p) {
@@ -91,9 +91,9 @@ contract LiquidTest is BaseTest {
         s = s % alex.balance(S);
         (u, p) = U.heats(P, E);
         (u, p) = owen.heat(U, P, E);
-        (uint256 P2, uint256 E2) = U.pool();
-        assertEq(P2, 2 * P, "Pool had unexpected U");
-        assertEq(E2, E, "Pool had unexpected E");
+        (uint256 p2, uint256 e2) = U.pool();
+        assertEq(p2, 2 * P, "Pool had unexpected U");
+        assertEq(e2, E, "Pool had unexpected E");
         console.log("2.test_SimpleHeatCool.alex.heat.s:", s);
         (u, p) = alex.heat(U, s);
         assertEq(u, s, "1. alex liquid != solid");
@@ -101,9 +101,9 @@ contract LiquidTest is BaseTest {
         (u, s) = alex.liquidate(U);
         assertEq(u, s, "2. alex liquid != solid");
         assertEq(p, s, "2. pool liquid != solid");
-        (P2, E2) = U.pool();
-        assertEq(P2, 2 * P, "Pool should have starting U");
-        assertEq(E2, E, "Pool should have starting E");
+        (p2, e2) = U.pool();
+        assertEq(p2, 2 * P, "Pool should have starting U");
+        assertEq(e2, E, "Pool should have starting E");
     }
 
     /**
@@ -133,7 +133,7 @@ contract LiquidTest is BaseTest {
         alex.heat(U, poolSolid);
 
         // Record pool state after setup (this is the "balanced" state)
-        (uint256 P0, uint256 E0) = U.pool();
+        (uint256 p0, uint256 e0) = U.pool();
 
         // Limit trade size: beck buying with tradeSize gets at most 3*poolSolid*tradeSize/(poolHub+tradeSize)
         // For beckU <= alexU (poolSolid), need tradeSize <= poolHub/2
@@ -149,20 +149,20 @@ contract LiquidTest is BaseTest {
         uint256 beckU = beck.buy(U, tradeSize);
 
         // Pool is now unbalanced
-        (uint256 Pmid, uint256 Emid) = U.pool();
-        assertLt(Pmid, P0, "Beck's buy should decrease pool U");
-        assertGt(Emid, E0, "Beck's buy should increase pool W");
+        (uint256 pMid, uint256 eMid) = U.pool();
+        assertLt(pMid, p0, "Beck's buy should decrease pool U");
+        assertGt(eMid, e0, "Beck's buy should increase pool W");
 
         // Alex sells exactly what beck bought to restore pool balance
         uint256 alexW = alex.sell(U, beckU);
 
         // Pool should be restored to original state (within 1% rounding tolerance)
-        (uint256 P1, uint256 E1) = U.pool();
-        assertEq(P1, P0, "Pool U should be restored");
-        assertApproxEqRel(E1, E0, 0.01e18, "Pool W should be approximately restored");
+        (uint256 p1, uint256 e1) = U.pool();
+        assertEq(p1, p0, "Pool U should be restored");
+        assertApproxEqRel(e1, e0, 0.01e18, "Pool W should be approximately restored");
 
-        // Calculate fair value of beckU at the balanced pool price (E0/P0)
-        uint256 fairValue = beckU * E0 / P0;
+        // Calculate fair value of beckU at the balanced pool price (e0/p0)
+        uint256 fairValue = beckU * e0 / p0;
 
         // Beck lost money: paid tradeSize W for beckU U worth only fairValue W
         assertLt(fairValue, tradeSize, "Beck overpaid due to slippage");
@@ -204,7 +204,7 @@ contract LiquidTest is BaseTest {
         alex.heat(U, poolSolid);
 
         // Record pool state after setup
-        (uint256 P0, uint256 E0) = U.pool();
+        (uint256 p0, uint256 e0) = U.pool();
 
         // Limit trade size: for beckU <= alexU, need tradeSize <= poolHub/2
         // Minimum trade of poolHub/10 to ensure observable effects
@@ -235,9 +235,9 @@ contract LiquidTest is BaseTest {
         alex.buy(U, beckW);
 
         // Verify pool restored to original state (within 2% rounding tolerance for 4 trades)
-        (uint256 P1, uint256 E1) = U.pool();
-        assertApproxEqRel(P1, P0, 0.02e18, "Pool U should be approximately restored");
-        assertApproxEqRel(E1, E0, 0.02e18, "Pool W should be approximately restored");
+        (uint256 p1, uint256 e1) = U.pool();
+        assertApproxEqRel(p1, p0, 0.02e18, "Pool U should be approximately restored");
+        assertApproxEqRel(e1, e0, 0.02e18, "Pool W should be approximately restored");
 
         // Verify both have approximately same U as they started (within rounding)
         uint256 alexUEnd = alex.balance(U);
@@ -318,42 +318,42 @@ contract LiquidTest is BaseTest {
         owen.heat(U, poolSolid, poolHub);
 
         // Verify initial state: P = T/2 (pool holds half the supply)
-        (uint256 P0,) = U.pool();
-        uint256 T0 = U.totalSupply();
-        assertEq(P0 * 2, T0, "Initial pool should hold half the supply (P = T/2)");
+        (uint256 p0,) = U.pool();
+        uint256 t0 = U.totalSupply();
+        assertEq(p0 * 2, t0, "Initial pool should hold half the supply (P = T/2)");
 
         // At P = T/2, heats(s) should return u = s
         uint256 testSolid = poolSolid / 10;
-        (uint256 u_heat, uint256 p_heat) = U.heats(testSolid);
-        assertEq(u_heat, testSolid, "At equilibrium, heats(s) should return u = s");
-        assertEq(p_heat, testSolid, "At equilibrium, heats(s) should return p = s");
+        (uint256 uHeat, uint256 pHeat) = U.heats(testSolid);
+        assertEq(uHeat, testSolid, "At equilibrium, heats(s) should return u = s");
+        assertEq(pHeat, testSolid, "At equilibrium, heats(s) should return p = s");
 
         // At P = T/2, cools(u) should return s = u
         uint256 testLiquid = poolSolid / 10;
-        (uint256 s_cool, uint256 p_cool) = U.cools(testLiquid);
-        assertEq(s_cool, testLiquid, "At equilibrium, cools(u) should return s = u");
-        assertEq(p_cool, testLiquid, "At equilibrium, cools(u) should return p = u");
+        (uint256 sCool, uint256 pCool) = U.cools(testLiquid);
+        assertEq(sCool, testLiquid, "At equilibrium, cools(u) should return s = u");
+        assertEq(pCool, testLiquid, "At equilibrium, cools(u) should return p = u");
 
         // Now verify that heat preserves P/T ratio
         give(alex, testSolid, U.solid());
         alex.heat(U, testSolid);
 
-        (uint256 P1,) = U.pool();
-        uint256 T1 = U.totalSupply();
+        (uint256 p1,) = U.pool();
+        uint256 t1 = U.totalSupply();
         // P/T should still equal 1/2
-        assertEq(P1 * 2, T1, "Heat should preserve P = T/2 ratio");
+        assertEq(p1 * 2, t1, "Heat should preserve P = T/2 ratio");
 
         // Verify u = s still holds after the heat
-        (uint256 u_after,) = U.heats(testSolid);
-        assertEq(u_after, testSolid, "After heat, u should still equal s");
+        (uint256 uAfter,) = U.heats(testSolid);
+        assertEq(uAfter, testSolid, "After heat, u should still equal s");
 
         // Cool and verify ratio is preserved
         uint256 alexLiquid = U.balanceOf(address(alex));
         if (alexLiquid > 0) {
             alex.cool(U, alexLiquid / 2);
-            (uint256 P2,) = U.pool();
-            uint256 T2 = U.totalSupply();
-            assertEq(P2 * 2, T2, "Cool should preserve P = T/2 ratio");
+            (uint256 p2,) = U.pool();
+            uint256 t2 = U.totalSupply();
+            assertEq(p2 * 2, t2, "Cool should preserve P = T/2 ratio");
         }
     }
 
@@ -370,15 +370,15 @@ contract LiquidTest is BaseTest {
         owen.heat(U, poolSize, poolSize);
 
         // Verify starting equilibrium
-        (uint256 P0,) = U.pool();
-        uint256 T0 = U.totalSupply();
-        assertEq(P0 * 2, T0, "Should start at equilibrium");
+        (uint256 p0,) = U.pool();
+        uint256 t0 = U.totalSupply();
+        assertEq(p0 * 2, t0, "Should start at equilibrium");
 
         // At equilibrium, u = s
-        (uint256 u_eq,) = U.heats(1000);
-        (uint256 s_eq,) = U.cools(1000);
-        assertEq(u_eq, 1000, "At equilibrium: heat gives u = s");
-        assertEq(s_eq, 1000, "At equilibrium: cool gives s = u");
+        (uint256 uEq,) = U.heats(1000);
+        (uint256 sEq,) = U.cools(1000);
+        assertEq(uEq, 1000, "At equilibrium: heat gives u = s");
+        assertEq(sEq, 1000, "At equilibrium: cool gives s = u");
 
         // The ratio P/T is preserved by heat/cool, so the system stays at equilibrium
         // This is by design - the initial heat(s,e) sets P = T/2, and all subsequent
@@ -388,30 +388,30 @@ contract LiquidTest is BaseTest {
         give(alex, 5000, U.solid());
         alex.heat(U, 5000);
 
-        (uint256 P1,) = U.pool();
-        uint256 T1 = U.totalSupply();
-        assertEq(P1 * 2, T1, "Ratio preserved after alex heat");
+        (uint256 p1,) = U.pool();
+        uint256 t1 = U.totalSupply();
+        assertEq(p1 * 2, t1, "Ratio preserved after alex heat");
 
         give(beck, 3000, U.solid());
         beck.heat(U, 3000);
 
-        (uint256 P2,) = U.pool();
-        uint256 T2 = U.totalSupply();
-        assertEq(P2 * 2, T2, "Ratio preserved after beck heat");
+        (uint256 p2,) = U.pool();
+        uint256 t2 = U.totalSupply();
+        assertEq(p2 * 2, t2, "Ratio preserved after beck heat");
 
         // Alex cools some
         uint256 alexBalance = U.balanceOf(address(alex));
         alex.cool(U, alexBalance / 2);
 
-        (uint256 P3,) = U.pool();
-        uint256 T3 = U.totalSupply();
-        assertEq(P3 * 2, T3, "Ratio preserved after alex cool");
+        (uint256 p3,) = U.pool();
+        uint256 t3 = U.totalSupply();
+        assertEq(p3 * 2, t3, "Ratio preserved after alex cool");
 
         // u = s should still hold
-        (uint256 u_final,) = U.heats(1000);
-        (uint256 s_final,) = U.cools(1000);
-        assertEq(u_final, 1000, "After all operations: heat still gives u = s");
-        assertEq(s_final, 1000, "After all operations: cool still gives s = u");
+        (uint256 uFinal,) = U.heats(1000);
+        (uint256 sFinal,) = U.cools(1000);
+        assertEq(uFinal, 1000, "After all operations: heat still gives u = s");
+        assertEq(sFinal, 1000, "After all operations: cool still gives s = u");
     }
 
     /**
@@ -437,14 +437,14 @@ contract LiquidTest is BaseTest {
         owen.heat(U, poolSolid, poolHub);
 
         // Verify starting equilibrium: P = T/2, so u = s
-        (uint256 P0, uint256 E0) = U.pool();
-        uint256 T0 = U.totalSupply();
-        assertEq(P0 * 2, T0, "Should start at equilibrium P = T/2");
+        (uint256 p0, uint256 e0) = U.pool();
+        uint256 t0 = U.totalSupply();
+        assertEq(p0 * 2, t0, "Should start at equilibrium P = T/2");
 
-        (uint256 u_before,) = U.heats(1000);
-        (uint256 s_before,) = U.cools(1000);
-        assertEq(u_before, 1000, "Before trade: u = s for heat");
-        assertEq(s_before, 1000, "Before trade: s = u for cool");
+        (uint256 uBefore,) = U.heats(1000);
+        (uint256 sBefore,) = U.cools(1000);
+        assertEq(uBefore, 1000, "Before trade: u = s for heat");
+        assertEq(sBefore, 1000, "Before trade: s = u for cool");
 
         // Limit trade size to avoid exhausting pool
         tradeSize = tradeSize % (poolHub / 4) + minSize;
@@ -454,33 +454,33 @@ contract LiquidTest is BaseTest {
         uint256 liquidBought = alex.buy(U, tradeSize);
 
         // Verify P decreased but T unchanged
-        (uint256 P1, uint256 E1) = U.pool();
-        uint256 T1 = U.totalSupply();
-        assertLt(P1, P0, "Buy should decrease pool liquid (P)");
-        assertGt(E1, E0, "Buy should increase pool hub (E)");
-        assertEq(T1, T0, "Buy should not change total supply");
+        (uint256 p1, uint256 e1) = U.pool();
+        uint256 t1 = U.totalSupply();
+        assertLt(p1, p0, "Buy should decrease pool liquid (P)");
+        assertGt(e1, e0, "Buy should increase pool hub (E)");
+        assertEq(t1, t0, "Buy should not change total supply");
 
         // Now P/T < 1/2, so heating should be favorable (u > s)
-        (uint256 u_after_buy,) = U.heats(1000);
-        (uint256 s_after_buy,) = U.cools(1000);
-        assertGt(u_after_buy, 1000, "After buy: heating favorable, u > s");
-        assertLt(s_after_buy, 1000, "After buy: cooling unfavorable, s < u");
+        (uint256 uAfterBuy,) = U.heats(1000);
+        (uint256 sAfterBuy,) = U.cools(1000);
+        assertGt(uAfterBuy, 1000, "After buy: heating favorable, u > s");
+        assertLt(sAfterBuy, 1000, "After buy: cooling unfavorable, s < u");
 
         // Alex sells liquid back (P increases, T unchanged → P/T moves toward 1/2)
         alex.sell(U, liquidBought);
 
         // Verify P increased back
-        (uint256 P2,) = U.pool();
-        uint256 T2 = U.totalSupply();
-        assertGt(P2, P1, "Sell should increase pool liquid (P)");
-        assertEq(T2, T0, "Sell should not change total supply");
+        (uint256 p2,) = U.pool();
+        uint256 t2 = U.totalSupply();
+        assertGt(p2, p1, "Sell should increase pool liquid (P)");
+        assertEq(t2, t0, "Sell should not change total supply");
 
         // P should be approximately restored (may have small rounding)
-        assertApproxEqRel(P2, P0, 0.01e18, "P should be approximately restored after round-trip");
+        assertApproxEqRel(p2, p0, 0.01e18, "P should be approximately restored after round-trip");
 
         // u = s should be approximately restored
-        (uint256 u_after_sell,) = U.heats(1000);
-        assertApproxEqAbs(u_after_sell, 1000, 10, "After sell: u approx s restored");
+        (uint256 uAfterSell,) = U.heats(1000);
+        assertApproxEqAbs(uAfterSell, 1000, 10, "After sell: u approx s restored");
     }
 
     /**
@@ -507,9 +507,9 @@ contract LiquidTest is BaseTest {
         owen.heat(U, poolSolid, poolHub);
 
         // Verify starting equilibrium
-        uint256 T0 = U.totalSupply();
-        (uint256 P0,) = U.pool();
-        assertEq(P0 * 2, T0, "Should start at equilibrium");
+        uint256 t0 = U.totalSupply();
+        (uint256 p0,) = U.pool();
+        assertEq(p0 * 2, t0, "Should start at equilibrium");
 
         // Limit trade size
         tradeSize = tradeSize % (poolHub / 4) + minSize;
@@ -519,13 +519,13 @@ contract LiquidTest is BaseTest {
         beck.buy(U, tradeSize);
 
         // Verify imbalance: P/T < 1/2
-        (uint256 P1,) = U.pool();
-        uint256 T1 = U.totalSupply();
-        assertLt(P1 * 2, T1, "After buy: P/T < 1/2");
+        (uint256 p1,) = U.pool();
+        uint256 t1 = U.totalSupply();
+        assertLt(p1 * 2, t1, "After buy: P/T < 1/2");
 
         // Check heating is now favorable (u > s)
-        (uint256 u_imbalanced,) = U.heats(1000);
-        assertGt(u_imbalanced, 1000, "Imbalanced pool: heating gives u > s");
+        (uint256 uImbalanced,) = U.heats(1000);
+        assertGt(uImbalanced, 1000, "Imbalanced pool: heating gives u > s");
 
         // Alex heats to capture arbitrage (gets more liquid than solid deposited)
         uint256 alexSolid = poolSolid / 10;
@@ -536,11 +536,11 @@ contract LiquidTest is BaseTest {
         assertGt(alexLiquid, alexSolid, "Alex arbitrage: received more liquid than solid deposited");
 
         // IMPORTANT: P/T ratio is PRESERVED by heat, not restored to 1/2
-        (uint256 P2,) = U.pool();
-        uint256 T2 = U.totalSupply();
-        uint256 ratio_before = P1 * 1e18 / T1;
-        uint256 ratio_after = P2 * 1e18 / T2;
-        assertApproxEqRel(ratio_after, ratio_before, 0.001e18, "Heat preserves P/T ratio");
+        (uint256 p2,) = U.pool();
+        uint256 t2 = U.totalSupply();
+        uint256 ratioBefore = p1 * 1e18 / t1;
+        uint256 ratioAfter = p2 * 1e18 / t2;
+        assertApproxEqRel(ratioAfter, ratioBefore, 0.001e18, "Heat preserves P/T ratio");
     }
 
     /**
@@ -572,9 +572,9 @@ contract LiquidTest is BaseTest {
         (uint256 beckLiquid,) = beck.heat(U, beckSolid);
 
         // Verify still at equilibrium after beck's heat
-        uint256 T0 = U.totalSupply();
-        (uint256 P0,) = U.pool();
-        assertEq(P0 * 2, T0, "Should still be at equilibrium after beck heat");
+        uint256 t0 = U.totalSupply();
+        (uint256 p0,) = U.pool();
+        assertEq(p0 * 2, t0, "Should still be at equilibrium after beck heat");
 
         // Trade size must be significant to create observable imbalance
         // Minimum 10% of beck's liquid to ensure s > u is detectable
@@ -586,13 +586,13 @@ contract LiquidTest is BaseTest {
         beck.sell(U, tradeSize);
 
         // Verify imbalance: P/T > 1/2
-        (uint256 P1,) = U.pool();
-        uint256 T1 = U.totalSupply();
-        assertGt(P1 * 2, T1, "After sell: P/T > 1/2");
+        (uint256 p1,) = U.pool();
+        uint256 t1 = U.totalSupply();
+        assertGt(p1 * 2, t1, "After sell: P/T > 1/2");
 
         // Check cooling is now favorable (s > u)
-        (uint256 s_imbalanced,) = U.cools(1000);
-        assertGt(s_imbalanced, 1000, "Imbalanced pool: cooling gives s > u");
+        (uint256 sImbalanced,) = U.cools(1000);
+        assertGt(sImbalanced, 1000, "Imbalanced pool: cooling gives s > u");
 
         // Alex needs liquid to cool - get some from owen who has liquid from initial heat
         // Note: owen has liquid from heat(poolSolid, poolHub)
@@ -607,10 +607,10 @@ contract LiquidTest is BaseTest {
         assertGt(alexSolidGained, alexLiquid, "Alex arbitrage: received more solid than liquid burned");
 
         // IMPORTANT: P/T ratio is PRESERVED by cool, not restored to 1/2
-        (uint256 P2,) = U.pool();
-        uint256 T2 = U.totalSupply();
-        uint256 ratio_before = P1 * 1e18 / T1;
-        uint256 ratio_after = P2 * 1e18 / T2;
-        assertApproxEqRel(ratio_after, ratio_before, 0.001e18, "Cool preserves P/T ratio");
+        (uint256 p2,) = U.pool();
+        uint256 t2 = U.totalSupply();
+        uint256 ratioBefore = p1 * 1e18 / t1;
+        uint256 ratioAfter = p2 * 1e18 / t2;
+        assertApproxEqRel(ratioAfter, ratioBefore, 0.001e18, "Cool preserves P/T ratio");
     }
 }
