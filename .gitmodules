@@ -22,3 +22,6 @@
 [submodule "lib/panic"]
 	path = lib/panic
 	url = https://github.com/uniteum/panic.git
+[submodule "lib/iliquid"]
+	path = lib/iliquid
+	url = https://github.com/uniteum/iliquid.git
