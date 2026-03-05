@@ -92,6 +92,20 @@ forge script script/Liquid.s.sol -f $chain --private-key $tx_key --broadcast --v
 - [CLAUDE.md](CLAUDE.md) - Comprehensive protocol documentation
 - [Foundry Book](https://book.getfoundry.sh/) - Foundry development framework
 
+## Parameter Naming Convention
+
+Single-letter parameter names are used consistently across all functions:
+
+| Letter | Meaning | Token type |
+|--------|---------|------------|
+| `m` | **mass** | Backing (solid) tokens — input to `heat`, output of `cool` |
+| `u` | **unpooled** | Liquid tokens held by users — input to `cool`, output of `heat` |
+| `p` | **pooled** | Liquid tokens held by the pool — output of `heat`/`cool` |
+| `s` | **spokes** | Spoke (liquid) tokens in AMM trades — input/output of `sell`/`buy` |
+| `e` | **lake** | Hub tokens in AMM trades or liquidity — input/output of `sell`/`buy`/`heat`/`cool` |
+
+Parameters with the same letter always represent the same type of value across all functions.
+
 ## Security
 
 This codebase uses:
