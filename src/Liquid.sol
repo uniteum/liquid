@@ -218,10 +218,11 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         }
     }
 
-    function zzz_(IERC20Metadata backing) external onlyLiquid {
-        if (address(solid) == address(0)) {
-            solid = backing;
+    function zzz_(IERC20Metadata backing) external {
+        if (address(solid) != address(0)) {
+            revert Unauthorized();
         }
+        solid = backing;
     }
 
     modifier notHub() {
