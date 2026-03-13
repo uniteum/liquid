@@ -197,12 +197,6 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         solid = backing;
     }
 
-    function _notHub() private view {
-        if (address(this) == address(HUB)) {
-            revert HubNotPool();
-        }
-    }
-
     modifier onlyLiquid() {
         _onlyLiquid();
         _;

@@ -49,7 +49,7 @@ contract LiquidBugsTest is BaseTest {
     /**
      * @notice heats(s, e) called on the hub ignores e and returns u = m.
      */
-    function test_Hub_HeatsIgnoresE() public {
+    function test_Hub_HeatsIgnoresE() public view {
         (uint256 u, uint256 p) = W.heats(100, 100);
         assertEq(u, 100, "Hub heats should return u = m");
         assertEq(p, 0, "Hub heats should return p = 0");
@@ -58,7 +58,7 @@ contract LiquidBugsTest is BaseTest {
     /**
      * @notice cools(u, e) called on the hub ignores e and returns m = u.
      */
-    function test_Hub_CoolsIgnoresE() public {
+    function test_Hub_CoolsIgnoresE() public view {
         (uint256 m, uint256 p) = W.cools(100, 100);
         assertEq(m, 100, "Hub cools should return m = u");
         assertEq(p, 0, "Hub cools should return p = 0");
