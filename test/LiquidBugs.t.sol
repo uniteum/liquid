@@ -47,19 +47,21 @@ contract LiquidBugsTest is BaseTest {
     // ---------------------------------------------------------------
 
     /**
-     * @notice heats(s, e) called on the hub should revert with HubNotPool.
+     * @notice heats(s, e) called on the hub ignores e and returns u = m.
      */
-    function test_NotHub_RevertsOnHub() public {
-        vm.expectRevert(ILiquid.HubNotPool.selector);
-        W.heats(100, 100);
+    function test_Hub_HeatsIgnoresE() public {
+        (uint256 u, uint256 p) = W.heats(100, 100);
+        assertEq(u, 100, "Hub heats should return u = m");
+        assertEq(p, 0, "Hub heats should return p = 0");
     }
 
     /**
-     * @notice cools(u, e) called on the hub should revert with HubNotPool.
+     * @notice cools(u, e) called on the hub ignores e and returns m = u.
      */
-    function test_NotHub_CoolsRevertsOnHub() public {
-        vm.expectRevert(ILiquid.HubNotPool.selector);
-        W.cools(100, 100);
+    function test_Hub_CoolsIgnoresE() public {
+        (uint256 m, uint256 p) = W.cools(100, 100);
+        assertEq(m, 100, "Hub cools should return m = u");
+        assertEq(p, 0, "Hub cools should return p = 0");
     }
 
     // ---------------------------------------------------------------
