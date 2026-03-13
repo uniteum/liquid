@@ -29,7 +29,7 @@ contract LiquidBugsTest is BaseTest {
         alex = newUser("alex");
         beck = newUser("beck");
         W = new Liquid(owen.newToken("W", SUPPLY));
-        owen.heat(W, SUPPLY);
+        owen.heat(W, SUPPLY, 0);
         U = W.make(owen.newToken("U", SUPPLY));
         V = W.make(owen.newToken("V", SUPPLY));
     }
@@ -81,7 +81,7 @@ contract LiquidBugsTest is BaseTest {
         vm.expectEmit(true, false, false, false, address(U));
         emit ILiquid.Heat(U, 0, 0, 0);
 
-        U.heat(100);
+        U.heat(100, 0);
         vm.stopPrank();
     }
 
@@ -95,7 +95,7 @@ contract LiquidBugsTest is BaseTest {
         give(alex, 100, U.solid());
         vm.startPrank(address(alex));
         U.solid().approve(address(U), 100);
-        U.heat(100);
+        U.heat(100, 0);
         vm.stopPrank();
 
         uint256 alexLiquid = U.balanceOf(address(alex));
@@ -104,7 +104,7 @@ contract LiquidBugsTest is BaseTest {
         emit ILiquid.Cool(U, 0, 0, 0);
 
         vm.prank(address(alex));
-        U.cool(alexLiquid);
+        U.cool(alexLiquid, 0);
     }
 
     // ---------------------------------------------------------------
@@ -141,7 +141,7 @@ contract LiquidBugsTest is BaseTest {
         owen.heat(U, GIFT, GIFT);
 
         give(alex, 1000, U.solid());
-        alex.heat(U, 1000);
+        alex.heat(U, 1000, 0);
 
         uint256 alexLiquid = U.balanceOf(address(alex));
         uint256 hubAmount = 100;
@@ -163,15 +163,15 @@ contract LiquidBugsTest is BaseTest {
         owen.heat(U, GIFT, GIFT);
 
         give(alex, 1000, U.solid());
-        alex.heat(U, 1000);
+        alex.heat(U, 1000, 0);
 
         uint256 alexLiquid = U.balanceOf(address(alex));
         uint256 poolBefore = U.balanceOf(address(U));
 
-        (, uint256 quotedPoolBurn) = U.cools(alexLiquid);
+        (, uint256 quotedPoolBurn) = U.cools(alexLiquid, 0);
 
         vm.prank(address(alex));
-        U.cool(alexLiquid);
+        U.cool(alexLiquid, 0);
 
         uint256 poolAfter = U.balanceOf(address(U));
         uint256 actualPoolBurn = poolBefore - poolAfter;
@@ -192,7 +192,7 @@ contract LiquidBugsTest is BaseTest {
         owen.heat(V, GIFT, GIFT);
 
         give(alex, 1000, U.solid());
-        alex.heat(U, 1000);
+        alex.heat(U, 1000, 0);
 
         uint256 alexU = U.balanceOf(address(alex));
         uint256 alexVBefore = V.balanceOf(address(alex));
@@ -215,7 +215,7 @@ contract LiquidBugsTest is BaseTest {
         owen.heat(V, GIFT, GIFT);
 
         give(alex, 1000, U.solid());
-        alex.heat(U, 1000);
+        alex.heat(U, 1000, 0);
 
         uint256 uHoldsVBefore = V.balanceOf(address(U));
         uint256 alexU = U.balanceOf(address(alex));
@@ -266,14 +266,14 @@ contract ReentrantHeater {
 
     function attack(uint256 amount) external {
         solid.doAfterUpdate(this.onTransfer);
-        target.heat(amount);
+        target.heat(amount, 0);
     }
 
     function onTransfer(IERC20Metadata, address, address, uint256) external {
         if (!attacked) {
             attacked = true;
             solid.clearAfterUpdate();
-            target.heat(50);
+            target.heat(50, 0);
         }
     }
 }
