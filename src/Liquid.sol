@@ -119,12 +119,10 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
 
     function sellFor(ILiquid that, uint256 s) external returns (uint256 e, uint256 thats) {
         (e, thats) = sellsFor(that, s);
-        // Transfer spokes from user to this pool
         emit Sell(this, s, e);
-        _update(msg.sender, address(this), s);
-        // Route hubs from this pool to target pool, spokes from target pool to user
-        HUB.update(address(this), address(that), e);
         emit Buy(that, thats, e);
+        _update(msg.sender, address(this), s);
+        HUB.update(address(this), address(that), e);
         Liquid(address(that)).update(address(that), msg.sender, thats);
     }
 
@@ -143,14 +141,14 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
     }
 
     function _buy(uint256 s, uint256 e) private {
-        HUB.update(msg.sender, address(this), e);
         emit Buy(this, s, e);
+        HUB.update(msg.sender, address(this), e);
         _update(address(this), msg.sender, s);
     }
 
     function _sell(uint256 s, uint256 e) private {
-        HUB.update(address(this), msg.sender, e);
         emit Sell(this, s, e);
+        HUB.update(address(this), msg.sender, e);
         _update(msg.sender, address(this), s);
     }
 
