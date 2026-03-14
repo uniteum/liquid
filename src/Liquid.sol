@@ -107,7 +107,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         e = E - (E * S + E - 1) / (S + s);
     }
 
-    function sell(uint256 s) external nonReentrant returns (uint256 e) {
+    function sell(uint256 s) external returns (uint256 e) {
         e = sells(s);
         _sell(s, e);
     }
@@ -117,7 +117,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         thats = that.buys(e);
     }
 
-    function sellFor(ILiquid that, uint256 s) external nonReentrant returns (uint256 e, uint256 thats) {
+    function sellFor(ILiquid that, uint256 s) external returns (uint256 e, uint256 thats) {
         (e, thats) = sellsFor(that, s);
         // Transfer spokes from user to this pool
         emit Sell(this, s, e);
@@ -133,7 +133,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         s = S - (S * E) / (E + e);
     }
 
-    function buy(uint256 e) external nonReentrant returns (uint256 s) {
+    function buy(uint256 e) external returns (uint256 s) {
         s = buys(e);
         _buy(s, e);
     }
