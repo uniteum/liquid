@@ -81,7 +81,7 @@ contract LiquidBugsTest is BaseTest {
         U.solid().approve(address(U), 100);
 
         vm.expectEmit(true, false, false, false, address(U));
-        emit ILiquid.Heat(U, 0, 0, 0);
+        emit ILiquid.Heat(U, 0, 0, 0, 0);
 
         U.heat(100, 0);
         vm.stopPrank();
@@ -103,7 +103,7 @@ contract LiquidBugsTest is BaseTest {
         uint256 alexLiquid = U.balanceOf(address(alex));
 
         vm.expectEmit(true, false, false, false, address(U));
-        emit ILiquid.Cool(U, 0, 0, 0);
+        emit ILiquid.Cool(U, 0, 0, 0, 0);
 
         vm.prank(address(alex));
         U.cool(alexLiquid, 0);

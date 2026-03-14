@@ -63,7 +63,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
 
     function heat(uint256 m, uint256 e) external nonReentrant returns (uint256 u, uint256 p) {
         (u, p) = heats(m, e);
-        emit Heat(this, m, e, u);
+        emit Heat(this, m, e, u, p);
         if (this == HUB) {
             _mint(msg.sender, u);
         } else {
@@ -97,7 +97,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
 
     function cool(uint256 u, uint256 e) external nonReentrant returns (uint256 m, uint256 p) {
         (m, p) = cools(u, e);
-        emit Cool(this, u, e, m);
+        emit Cool(this, u, e, m, p);
         if (this == HUB) {
             _burn(msg.sender, u);
             solid.safeTransfer(msg.sender, m);
