@@ -65,6 +65,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         (u, p) = heats(m, e);
         emit Heat(this, m, e, u, p);
         if (this == HUB) {
+            if (m > 0) solid.safeTransferFrom(msg.sender, address(this), m);
             _mint(msg.sender, u);
         } else {
             if (m > 0) solid.safeTransferFrom(msg.sender, address(this), m);

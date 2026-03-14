@@ -43,7 +43,9 @@ contract LiquidUser is User {
         (u, p) = U.heats(s, e);
         console.log("u:", u);
         console.log("p:", p);
+        uint256 massBefore = U.mass();
         (u, p) = U.heat(s, e);
+        assert(U.mass() == massBefore + s);
     }
 
     function cool(ILiquid U, uint256 u, uint256 e) public waterlog("cool", U, u, e) returns (uint256 s, uint256 p) {
