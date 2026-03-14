@@ -613,4 +613,55 @@ contract LiquidTest is BaseTest {
         uint256 ratioAfter = p2 * 1e18 / t2;
         assertApproxEqRel(ratioAfter, ratioBefore, 0.001e18, "Cool preserves P/T ratio");
     }
+
+    /**
+     * @notice Test heat(s, e) with e != 0 on an already-unbalanced pool.
+     *
+     * All existing tests only call heat(s, e) with e != 0 on a fresh pool.
+     * This test creates a pool, unbalances it via buy, then heats with hub
+     * to verify behavior when P/T != 1/2.
+     */
+    function test_HeatWithHubOnUnbalancedPool(uint256 poolSolid, uint256 poolHub, uint256 tradeSize, uint256 heatSolid)
+        public
+    {
+        uint256 minSize = 1000;
+        uint256 maxPoolSolid = owen.balance(S) / 4;
+        uint256 maxPoolHub = owen.balance(W) / 4;
+        poolSolid = poolSolid % (maxPoolSolid - minSize) + minSize;
+        poolHub = poolHub % (maxPoolHub - minSize) + minSize;
+
+        // Owen creates initial balanced pool
+        owen.heat(U, poolSolid, poolHub);
+
+        // Verify starting equilibrium
+        (uint256 p0,) = U.pool();
+        uint256 t0 = U.totalSupply();
+        assertEq(p0 * 2, t0, "Should start at equilibrium");
+
+        // Beck buys liquid to unbalance the pool (P/T < 1/2)
+        tradeSize = tradeSize % (poolHub / 4) + minSize;
+        give(beck, tradeSize, W);
+        beck.buy(U, tradeSize);
+
+        // Verify imbalance
+        (uint256 p1,) = U.pool();
+        uint256 t1 = U.totalSupply();
+        assertLt(p1 * 2, t1, "After buy: P/T < 1/2");
+
+        // Now heat with e != 0 on this unbalanced pool
+        heatSolid = heatSolid % (poolSolid / 4) + minSize;
+        uint256 heatHub = heatSolid / 2;
+        give(alex, heatSolid, U.solid());
+        give(alex, heatHub, W);
+
+        // This calls heat(s, e) with e != 0 on an unbalanced pool
+        // The mass invariant assertion in LiquidUser.heat will verify
+        // that solid backing is correctly transferred
+        alex.heat(U, heatSolid, heatHub);
+
+        // Pool should have grown
+        (uint256 p2, uint256 e2) = U.pool();
+        assertGt(p2, p1, "Pool spokes should increase after heat with hub");
+        assertGt(e2, 0, "Pool should have hub tokens");
+    }
 }
