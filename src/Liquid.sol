@@ -140,10 +140,6 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         _buy(s, e);
     }
 
-    function zzBuy(uint256 s, uint256 e) external onlyLiquid {
-        _buy(s, e);
-    }
-
     function _buy(uint256 s, uint256 e) private {
         emit Buy(this, s, e);
         HUB.update(msg.sender, address(this), e);
