@@ -10,9 +10,9 @@ import {ReentrancyGuardTransient} from "reentrancy/ReentrancyGuardTransient.sol"
 contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
     using SafeERC20 for IERC20Metadata;
 
-    string public constant namePrefix = "Liquid ";
+    string public constant NAME_PREFIX = "Liquid ";
 
-    string public constant symbolSuffix = "_L";
+    string public constant SYMBOL_SUFFIX = "_L";
 
     Liquid public immutable HUB = this;
 
@@ -23,11 +23,11 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
     }
 
     function name() public view virtual override(IERC20Metadata, ERC20) returns (string memory) {
-        return string.concat(namePrefix, solid.name());
+        return string.concat(NAME_PREFIX, solid.name());
     }
 
     function symbol() public view virtual override(IERC20Metadata, ERC20) returns (string memory) {
-        return string.concat(solid.symbol(), symbolSuffix);
+        return string.concat(solid.symbol(), SYMBOL_SUFFIX);
     }
 
     function decimals() public view virtual override(IERC20Metadata, ERC20) returns (uint8) {
