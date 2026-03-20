@@ -71,7 +71,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         emit Heat(this, m, e, u, p);
         if (u > 0) _mint(msg.sender, u);
         if (p > 0) _mint(address(this), p);
-        if (e > 0) HUB.update(msg.sender, address(this), e);
+        if (e > 0) HUB.zzUpdate(msg.sender, address(this), e);
         if (m > 0) solid.safeTransferFrom(msg.sender, address(this), m);
     }
 
@@ -102,7 +102,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         emit Cool(this, u, e, m, p);
         if (u > 0) _burn(msg.sender, u);
         if (p > 0) _burn(address(this), p);
-        if (e > 0) HUB.update(address(this), msg.sender, e);
+        if (e > 0) HUB.zzUpdate(address(this), msg.sender, e);
         if (m > 0) solid.safeTransfer(msg.sender, m);
     }
 
@@ -126,8 +126,8 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         emit Sell(this, s, e);
         emit Buy(that, thats, e);
         _update(msg.sender, address(this), s);
-        HUB.update(address(this), address(that), e);
-        Liquid(address(that)).update(address(that), msg.sender, thats);
+        HUB.zzUpdate(address(this), address(that), e);
+        Liquid(address(that)).zzUpdate(address(that), msg.sender, thats);
     }
 
     function buys(uint256 e) public view returns (uint256 s) {
@@ -142,17 +142,17 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
 
     function _buy(uint256 s, uint256 e) private {
         emit Buy(this, s, e);
-        HUB.update(msg.sender, address(this), e);
+        HUB.zzUpdate(msg.sender, address(this), e);
         _update(address(this), msg.sender, s);
     }
 
     function _sell(uint256 s, uint256 e) private {
         emit Sell(this, s, e);
-        HUB.update(address(this), msg.sender, e);
+        HUB.zzUpdate(address(this), msg.sender, e);
         _update(msg.sender, address(this), s);
     }
 
-    function update(address from, address to, uint256 amount) external onlyLiquid {
+    function zzUpdate(address from, address to, uint256 amount) external onlyLiquid {
         _update(from, to, amount);
     }
 
