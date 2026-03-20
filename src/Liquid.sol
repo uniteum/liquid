@@ -22,15 +22,15 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         solid = hub;
     }
 
-    function name() public view virtual override(ERC20, IERC20Metadata) returns (string memory) {
+    function name() public view virtual override(IERC20Metadata, ERC20) returns (string memory) {
         return string.concat(namePrefix, solid.name());
     }
 
-    function symbol() public view virtual override(ERC20, IERC20Metadata) returns (string memory) {
+    function symbol() public view virtual override(IERC20Metadata, ERC20) returns (string memory) {
         return string.concat(solid.symbol(), symbolSuffix);
     }
 
-    function decimals() public view virtual override(ERC20, IERC20Metadata) returns (uint8) {
+    function decimals() public view virtual override(IERC20Metadata, ERC20) returns (uint8) {
         return solid.decimals();
     }
 
