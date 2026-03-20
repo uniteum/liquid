@@ -615,6 +615,17 @@ contract LiquidTest is BaseTest {
     }
 
     /**
+     * @notice zzUpdate must revert when called by a non-liquid address.
+     */
+    function test_zzUpdateRevertsForNonLiquid() public {
+        giveAlex();
+        owen.heat(U, GIFT, GIFT);
+
+        vm.expectRevert();
+        Liquid(address(U)).zzUpdate(address(owen), address(alex), 100);
+    }
+
+    /**
      * @notice Test heat(s, e) with e != 0 on an already-unbalanced pool.
      *
      * All existing tests only call heat(s, e) with e != 0 on a fresh pool.
