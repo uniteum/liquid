@@ -10,6 +10,10 @@ import {ReentrancyGuardTransient} from "reentrancy/ReentrancyGuardTransient.sol"
 contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
     using SafeERC20 for IERC20Metadata;
 
+    string public constant namePrefix = "Liquid ";
+
+    string public constant symbolSuffix = "_L";
+
     Liquid public immutable HUB = this;
 
     IERC20Metadata public solid;
@@ -19,11 +23,11 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
     }
 
     function name() public view virtual override(ERC20, IERC20Metadata) returns (string memory) {
-        return solid.name();
+        return string.concat(namePrefix, solid.name());
     }
 
     function symbol() public view virtual override(ERC20, IERC20Metadata) returns (string memory) {
-        return solid.symbol();
+        return string.concat(solid.symbol(), symbolSuffix);
     }
 
     function decimals() public view virtual override(ERC20, IERC20Metadata) returns (uint8) {
@@ -136,7 +140,7 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
         _buy(s, e);
     }
 
-    function __buy(uint256 s, uint256 e) external onlyLiquid {
+    function zzBuy(uint256 s, uint256 e) external onlyLiquid {
         _buy(s, e);
     }
 
@@ -174,15 +178,13 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
             if (!cloned) {
                 emit Make(liquid, backing);
                 home = Clones.cloneDeterministic(address(HUB), salt, 0);
-                Liquid(home).zzz_(backing);
+                Liquid(home).zzInit(backing);
             }
         }
     }
 
-    function zzz_(IERC20Metadata backing) external {
-        if (address(solid) != address(0)) {
-            revert Unauthorized();
-        }
+    function zzInit(IERC20Metadata backing) external {
+        if (msg.sender != address(HUB)) revert Unauthorized();
         solid = backing;
     }
 

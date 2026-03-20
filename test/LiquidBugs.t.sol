@@ -229,13 +229,13 @@ contract LiquidBugsTest is BaseTest {
     }
 
     // ---------------------------------------------------------------
-    // Bug 6: zzz_ had no access control
+    // Bug 6: zzInit had no access control
     // ---------------------------------------------------------------
 
     /**
-     * @notice zzz_ must revert when called by a non-liquid address.
+     * @notice zzInit must revert when called by a non-liquid address.
      */
-    function test_zzz_RevertsForNonLiquid() public {
+    function test_zzInitRevertsForNonLiquid() public {
         TestToken realBacking = owen.newToken("REAL", SUPPLY);
         W.make(IERC20Metadata(address(realBacking)));
         (, address predictedAddr,) = W.made(IERC20Metadata(address(realBacking)));
@@ -245,7 +245,7 @@ contract LiquidBugsTest is BaseTest {
 
         // Non-liquid caller should be rejected
         vm.expectRevert();
-        spoke.zzz_(IERC20Metadata(address(fakeBacking)));
+        spoke.zzInit(IERC20Metadata(address(fakeBacking)));
     }
 }
 
