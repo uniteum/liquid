@@ -88,19 +88,20 @@ Note that token amounts are specified by lowercasing and pluralizing the corresp
 ### 1. Heat (Solid → Liquid)
 
 ```solidity
-function heat(uint256 s) external returns (uint256 u, uint256 p)
+function heat(uint256 m, uint256 e) external returns (uint256 u, uint256 p)
 ```
 
 **What it does:**
-- User deposits `s` solid token
-- Contract mints `2 s` liquid tokens split between the pool and user to preserve imbalance between pool and unpooled liquids
-- Result: User gains s ± ds liquid tokens, pool gains s ∓ ds liquid tokens
+- User deposits `m` solid tokens and optionally `e` hub tokens
+- Contract mints liquid tokens split between the pool and user to preserve the P/T ratio
+- When `e = 0`: mints `2m` liquid, split by current P/T ratio (u + p = 2m)
+- When `e > 0`: hub tokens augment the effective mass; the P/T ratio is still preserved
 
 **Example:**
 ```solidity
 // User has 1000 USDC
 usdc.approve(address(liquidUSDC), 1000);
-liquidUSDC.heat(1000);
+liquidUSDC.heat(1000, 0);
 // User now has: 1000 liquid (liquid-USDC)
 // Pool now has: 1000 liquid (liquid-USDC)
 ```
@@ -108,11 +109,12 @@ liquidUSDC.heat(1000);
 ### 2. Cool (Liquid → Solid)
 
 ```solidity
-function cool(uint256 u) external returns (uint256 s, uint256 p)
+function cool(uint256 u, uint256 e) external returns (uint256 m, uint256 p)
 ```
 
 **What it does:**
-- Burns liquid proportionally from both user and pool
+- Burns liquid proportionally from both user and pool, preserving P/T ratio
+- Optionally withdraws `e` hub tokens from the pool's lake
 - Returns backing tokens based on formula below
 - Burns total of `u + p` from user and pool (maintaining symmetry with heat)
 
@@ -240,7 +242,18 @@ Total minted in heat = 2 * solid (split between user and pool)
 Total burned in cool = u + p (from user and pool)
 ```
 
-### 3. Backing Token Conservation
+### 3. P/T Ratio Preservation
+
+```
+P/T before heat/cool = P/T after heat/cool
+```
+
+Heat and cool preserve the pool-to-total-supply ratio. They do NOT restore it to 1/2.
+Only buy/sell change the P/T ratio. This creates arbitrage opportunities:
+- After buy (P/T < 1/2): heating is favorable (u > s)
+- After sell (P/T > 1/2): cooling is favorable (s > u)
+
+### 4. Backing Token Conservation
 
 ```
 solid.balanceOf(address(liquid)) = sum of all heated solid - sum of all cooled solid
@@ -257,9 +270,9 @@ modifier nonReentrant() {
 }
 ```
 
-- All state-changing functions use `nonReentrant`
+- Applied to `heat` and `cool` (the only functions that call external ERC-20 tokens via `solid.safeTransfer*`)
+- `sell`, `buy`, `sellFor` do NOT need `nonReentrant` — they only interact with trusted Liquid instances via `zzUpdate`/`_update`
 - Transient storage clears after transaction
-- Protects against malicious ERC-20 callbacks
 
 ### Access Control
 
