@@ -1,0 +1,1 @@
+../../solidity/.claude/rules/solidity.md
