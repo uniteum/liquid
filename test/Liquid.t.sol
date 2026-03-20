@@ -654,10 +654,11 @@ contract LiquidTest is BaseTest {
         give(beck, tradeSize, W);
         beck.buy(U, tradeSize);
 
-        // Verify imbalance
+        // Verify imbalance and record P/T ratio
         (uint256 p1,) = U.pool();
         uint256 t1 = U.totalSupply();
         assertLt(p1 * 2, t1, "After buy: P/T < 1/2");
+        uint256 ratioBefore = p1 * 1e18 / t1;
 
         // Now heat with e != 0 on this unbalanced pool
         heatSolid = heatSolid % (poolSolid / 4) + minSize;
@@ -665,14 +666,12 @@ contract LiquidTest is BaseTest {
         give(alex, heatSolid, U.solid());
         give(alex, heatHub, W);
 
-        // This calls heat(s, e) with e != 0 on an unbalanced pool
-        // The mass invariant assertion in LiquidUser.heat will verify
-        // that solid backing is correctly transferred
         alex.heat(U, heatSolid, heatHub);
 
-        // Pool should have grown
-        (uint256 p2, uint256 e2) = U.pool();
-        assertGt(p2, p1, "Pool spokes should increase after heat with hub");
-        assertGt(e2, 0, "Pool should have hub tokens");
+        // P/T ratio must be preserved after heat with hub on unbalanced pool
+        (uint256 p2,) = U.pool();
+        uint256 t2 = U.totalSupply();
+        uint256 ratioAfter = p2 * 1e18 / t2;
+        assertApproxEqRel(ratioAfter, ratioBefore, 0.001e18, "Heat with hub should preserve P/T ratio");
     }
 }

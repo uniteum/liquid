@@ -60,7 +60,6 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
                 p = (2 * m * P) / T;
             }
             u = 2 * m - p;
-            p = u;
         }
     }
 
