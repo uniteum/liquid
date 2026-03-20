@@ -81,7 +81,7 @@ Note that token amounts are specified by lowercasing and pluralizing the corresp
 
 ### Key File
 
-**[src/Liquid.sol](src/Liquid.sol)** (241 lines) - Single contract implementing entire protocol
+**[src/Liquid.sol](src/Liquid.sol)** (~197 lines) - Single contract implementing entire protocol
 
 ## Core Operations
 
@@ -130,44 +130,44 @@ p = 2 * s - u                 // pool burn amount
 ### 3. Sell (Liquid → Hub)
 
 ```solidity
-function sell(uint256 spokes) external returns (uint256 hubs)
+function sell(uint256 s) external returns (uint256 e)
 ```
 
 **Constant Product Formula:**
 ```solidity
 (S, E) = pool()              // S = spoke balance, E = hub balance
-hubs = E - (E * S + E - 1) / (S + spokes)
+e = E - (E * S + E - 1) / (S + s)
 ```
 
 **What it does:**
-- Calculates hub received for selling `spokes` to pool
+- Calculates hub received for selling `s` spokes to pool
 - Transfers spokes from user to pool
 - Transfers hub from pool to user
 
 ### 4. Buy (Hub → Liquid)
 
 ```solidity
-function buy(uint256 hubs) external returns (uint256 spokes)
+function buy(uint256 e) external returns (uint256 s)
 ```
 
 **Formula:**
 ```solidity
 (S, E) = pool()              // S = spoke balance, E = hub balance
-spokes = S - (S * E) / (E + hubs)
+s = S - (S * E) / (E + e)
 ```
 
 **What it does:**
-- Buys spokes by spending exactly `hubs` amount
+- Buys spokes by spending exactly `e` hub tokens
 - Transfers hub from user to pool
 - Transfers spokes from pool to user
 
 ### 5. Cross-Liquid Swaps
 
 ```solidity
-function sellFor(ILiquid that, uint256 spokes) external
-    returns (uint256 hubs, uint256 thats)
-function sellsFor(ILiquid that, uint256 spokes) public view
-    returns (uint256 hubs, uint256 thats)
+function sellFor(ILiquid that, uint256 s) external
+    returns (uint256 e, uint256 thats)
+function sellsFor(ILiquid that, uint256 s) public view
+    returns (uint256 e, uint256 thats)
 ```
 
 **What it does:**
@@ -220,12 +220,12 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
 **Balance Queries:**
 - `pool()` - Returns `(uint256 P, uint256 E)` where P is spoke balance and E is hub balance
 - `mass()` - Returns backing tokens held by contract
-- `update()` - Internal token transfer (callable only by other Liquids)
+- `zzUpdate()` - Internal token transfer (callable only by other Liquids)
 
 **Access Control:**
 - `onlyLiquid` modifier - Ensures caller is registered Liquid instance
-- `notHub` modifier - Ensures operation is not on the hub itself
-- Protects `__buy()`, `update()` from external manipulation
+- Hub operations guarded by `if (this == HUB)` checks within functions
+- Protects `_buy()`, `zzUpdate()` from external manipulation
 
 ## Mathematical Invariants
 
@@ -288,7 +288,7 @@ modifier onlyLiquid() {
 
 - Only registered Liquid instances can call cross-pool functions
 - Validates caller by checking predicted CREATE2 address
-- Applied to: `__buy()`, `update()`
+- Applied to: `zzUpdate()`
 
 ### Safe Token Handling
 
@@ -428,7 +428,7 @@ contract LiquidTest is BaseTest {
         super.setUp();
         owen = newUser("owen");
         W = new Liquid(owen.newToken("W", SUPPLY));
-        owen.heat(W, SUPPLY);
+        owen.heat(W, SUPPLY, 0);
         U = W.make(owen.newToken("U", SUPPLY));
         V = W.make(owen.newToken("V", SUPPLY));
     }
@@ -439,9 +439,8 @@ contract LiquidTest is BaseTest {
 
 ```solidity
 contract LiquidUser is User {
-    function heat(ILiquid U, uint256 s) public returns (uint256 u, uint256 p) { }
     function heat(ILiquid U, uint256 s, uint256 e) public returns (uint256 u, uint256 p) { }
-    function cool(ILiquid U, uint256 u) public returns (uint256 s, uint256 p) { }
+    function cool(ILiquid U, uint256 u, uint256 e) public returns (uint256 s, uint256 p) { }
     function sell(ILiquid U, uint256 liquid) public returns (uint256 water) { }
     function buy(ILiquid U, uint256 water) public returns (uint256 liquid) { }
     function liquidate(ILiquid U) public returns (uint256 liquid, uint256 solid) { }
@@ -460,7 +459,7 @@ function test_FixedHeatCool(uint256 s) public returns (uint256 u, uint256 p) {
     assertEq(P, 2 * GIFT, "Pool had unexpected U");
     assertEq(E, GIFT, "Pool had unexpected E");
 
-    (u, p) = alex.heat(U, DOLLIP);
+    (u, p) = alex.heat(U, DOLLIP, 0);
     assertEq(u, DOLLIP, "alex liquid != solid");
 
     // Full liquidation
@@ -528,7 +527,7 @@ ILiquid liquidDAI = hub.make(dai);
 ```solidity
 // User deposits backing token (solid)
 dai.approve(address(liquidDAI), 1000 ether);
-(uint256 u, uint256 p) = liquidDAI.heat(1000 ether);
+(uint256 u, uint256 p) = liquidDAI.heat(1000 ether, 0);
 // User receives u liquid tokens, pool grows by p tokens
 ```
 
@@ -536,7 +535,7 @@ dai.approve(address(liquidDAI), 1000 ether);
 
 ```solidity
 // User withdraws backing token (solid)
-(uint256 solid, uint256 poolBurn) = liquidDAI.cool(500 ether);
+(uint256 solid, uint256 poolBurn) = liquidDAI.cool(500 ether, 0);
 // User receives DAI, burns liquid from self (500) and pool (poolBurn)
 ```
 
@@ -578,17 +577,16 @@ uint256 hubs = liquidDAI.sell(50 ether);   // Sell 50 spokes, receive hub
 ## Events
 
 ```solidity
-event Heat(ILiquid indexed liquid, uint256 solids, uint256 pools, uint256 senders);
-event Cool(ILiquid indexed liquid, uint256 liquids, uint256 hubs, uint256 solids);
-event Buy(ILiquid indexed liquid, uint256 liquids, uint256 hubs);
-event Sell(ILiquid indexed liquid, uint256 liquids, uint256 hubs);
+event Heat(ILiquid indexed liquid, uint256 m, uint256 e, uint256 u, uint256 p);
+event Cool(ILiquid indexed liquid, uint256 u, uint256 e, uint256 m, uint256 p);
+event Buy(ILiquid indexed liquid, uint256 s, uint256 e);
+event Sell(ILiquid indexed liquid, uint256 s, uint256 e);
 event Make(ILiquid indexed liquid, IERC20Metadata indexed solid);
 ```
 
 ## Errors
 
 ```solidity
-error HubNotPool();     // Operation not allowed on hub
 error Nothing();        // Zero address token
 error Unauthorized();   // Non-liquid caller
 ```
@@ -614,7 +612,7 @@ uint256 spokes = liquid.buys(100 ether);                       // Spokes from bu
 
 ```solidity
 string memory name = liquid.name();              // From backing token
-string memory symbol = liquid.symbol();          // "l" + backing symbol
+string memory symbol = liquid.symbol();          // backing symbol + "_L"
 uint8 decimals = liquid.decimals();              // From backing token
 IERC20Metadata backing = liquid.solid();         // Get backing token
 ```
