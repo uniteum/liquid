@@ -11,7 +11,6 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
     using SafeERC20 for IERC20Metadata;
 
     string public constant NAME_PREFIX = "Liquid ";
-
     string public constant SYMBOL_SUFFIX = "_L";
 
     Liquid public immutable HUB = this;
