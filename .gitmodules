@@ -25,6 +25,6 @@
 [submodule "lib/iliquid"]
 	path = lib/iliquid
 	url = https://github.com/uniteum/iliquid.git
-[submodule "solidity"]
-	path = solidity
-	url = git@github.com:uniteum/solidity.git
+[submodule "crucible"]
+	path = crucible
+	url = git@github.com:uniteum/crucible.git
