@@ -365,56 +365,7 @@ FOUNDRY_PROFILE=deep forge test --match-contract SolidInvariant
 
 ### Code Style
 
-**NatSpec:**
-- Use `/** */` multi-line block notation (never `///`)
-- Always multi-line format even for single-line comments
-- Include `@notice` for public descriptions
-- Add `@param` and `@return` as needed
-
-**Formatting:**
-- Run `forge fmt` before committing
-- Follows Foundry's default style guide
-
-### Code Quality & Linting
-
-**CRITICAL: All generated code MUST be lint-free.**
-
-**Pre-commit checklist:**
-1. Run `forge fmt` on all modified `.sol` files
-2. Verify compilation: `forge build`
-3. Run affected tests: `forge test`
-4. Check for warnings in compiler output
-
-**Solidity Style Rules:**
-- **Function visibility order**: external → public → internal → private
-- **Function declaration formatting**: When parameters don't fit on one line:
-  ```solidity
-  // CORRECT: Multi-line with proper indentation
-  function longFunctionName(uint256 param1, uint256 param2)
-      public
-      returns (uint256 result1, uint256 result2)
-  {
-      // body
-  }
-
-  // WRONG: Single line when too long
-  function longFunctionName(uint256 param1, uint256 param2) public returns (uint256 result1, uint256 result2) {
-  ```
-- **Imports**: One per line, sorted alphabetically
-- **Line length**: Max 120 characters (forge fmt default)
-- **Indentation**: 4 spaces (configured in foundry.toml)
-
-**Common Linting Fixes:**
-- Add blank line before function if missing
-- Remove trailing whitespace
-- Ensure consistent spacing around operators
-- Format multi-line function signatures consistently
-
-**When writing code:**
-1. Write the code
-2. Mentally verify it follows forge fmt rules
-3. If unsure, assume forge fmt will reformat and write cleanly
-4. After file operations, expect forge fmt may auto-format
+See `lib/crucible/.claude/rules/solidity.md` for general Solidity style rules, linting, and pre-commit checklist.
 
 ## Test Patterns
 
