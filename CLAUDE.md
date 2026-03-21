@@ -358,6 +358,11 @@ FOUNDRY_PROFILE=deep forge test --match-contract SolidInvariant
 - `ci` - In CI/CD pipelines
 - `deep` - Before production deploys or major releases
 
+### Bash Tool Usage
+
+- **Avoid compound statements** (`; && |`). Use separate, parallel Bash tool calls instead so each command can be individually matched by permission rules.
+- Only use compound statements when there's a genuine dependency that can't be expressed otherwise.
+
 ### Code Style
 
 **NatSpec:**
