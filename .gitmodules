@@ -26,5 +26,5 @@
 	path = lib/iliquid
 	url = https://github.com/uniteum/iliquid.git
 [submodule "crucible"]
-	path = crucible
+	path = lib/crucible
 	url = git@github.com:uniteum/crucible.git
