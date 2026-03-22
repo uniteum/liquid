@@ -282,15 +282,42 @@ contract LiquidTest is BaseTest {
         assertGt(P, 0, "Pool should have U");
         assertGt(E, 0, "Pool should have W");
 
-        // Test cools(u, e) - the two-parameter version
+        // e must be small enough that m*E >= e*(P-p), i.e. e <= poolHub/19
         uint256 testU = poolSolid / 10;
-        uint256 testE = poolHub / 10;
+        uint256 testE = poolHub / 20;
 
         // Call cools(u, e) and check it returns non-zero values
         (uint256 s,) = U.cools(testU, testE);
 
         // These assertions will FAIL if cools is broken (returns 0)
         assertGt(s, 0, "cools(u,e) should return non-zero solid");
+    }
+
+    /**
+     * @notice heats and cools are inverses: heat(m, e) -> (u, p), then cool(u, e) -> (m, p).
+     */
+    function test_HeatCoolRoundTrip(uint256 poolSolid, uint256 poolHub, uint256 heatSolid, uint256 heatHub) public {
+        uint256 minSize = 1000;
+        uint256 maxPoolSolid = owen.balance(S) / 2;
+        uint256 maxPoolHub = owen.balance(W) / 2;
+        poolSolid = poolSolid % (maxPoolSolid - minSize) + minSize;
+        poolHub = poolHub % (maxPoolHub - minSize) + minSize;
+
+        // Owen creates pool
+        owen.heat(U, poolSolid, poolHub);
+
+        // Alex heats with (m, e) and then cools with (u, e)
+        heatSolid = heatSolid % (GIFT - 1) + 1;
+        heatHub = heatHub % (GIFT - 1) + 1;
+        giveAlex();
+        (uint256 u, uint256 p) = alex.heat(U, heatSolid, heatHub);
+
+        // Quote the inverse
+        (uint256 m, uint256 pCool) = U.cools(u, heatHub);
+
+        // cools should return the original solid amount and pool burn (within rounding)
+        assertApproxEqAbs(m, heatSolid, 1, "round-trip solid mismatch");
+        assertApproxEqAbs(pCool, p, 1, "round-trip pool mismatch");
     }
 
     /**

@@ -77,8 +77,8 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
             uint256 U = T - P;
             m = (u * T) / U / 2;
             p = 2 * m - u;
-            if (E > 0) {
-                m = m + (e * mass()) / E;
+            if (e > 0) {
+                m = (m * E - e * (P - p)) / (E + e);
             }
         }
     }
