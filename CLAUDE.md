@@ -39,20 +39,6 @@ Approval is ONLY required for `heat` (solid → liquid). All other operations (`
 
 **This is NOT the algebraic Unit protocol described in previous documentation.** No algebraic composition, rational exponents, symbolic algebra, reciprocal relationships, or forge operations. This is a simple constant-product AMM with single token wrapping and cross-pool swaps via hub intermediary.
 
-## Development Workflow
-
-```bash
-forge build          # Compile
-forge test           # Run tests
-forge test -vvv      # Verbose
-forge fmt            # Format
-```
-
-### Bash Tool Usage
-
-- **Avoid compound statements** (`; && |`). Use separate, parallel Bash tool calls instead so each command can be individually matched by permission rules.
-- Only use compound statements when there's a genuine dependency that can't be expressed otherwise.
-
 ## Test Patterns
 
 ### Base Test Setup
