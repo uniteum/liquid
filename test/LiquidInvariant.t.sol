@@ -3,7 +3,7 @@
 pragma solidity ^0.8.30;
 
 import {Liquid, ILiquid} from "../src/Liquid.sol";
-import {BaseTest, console} from "crucible/test/Base.t.sol";
+import {BaseTest} from "crucible/test/Base.t.sol";
 import {LiquidUser, IERC20Metadata} from "./LiquidUser.sol";
 
 /**
@@ -126,11 +126,7 @@ contract LiquidInvariantTest is BaseTest {
     // ---------------------------------------------------------------
 
     function invariant_MassEqualsSolidBalance() public view {
-        assertEq(
-            U.mass(),
-            U.solid().balanceOf(address(U)),
-            "mass() must equal solid.balanceOf(contract)"
-        );
+        assertEq(U.mass(), U.solid().balanceOf(address(U)), "mass() must equal solid.balanceOf(contract)");
     }
 
     // ---------------------------------------------------------------
@@ -156,10 +152,7 @@ contract LiquidInvariantTest is BaseTest {
         // Circulating tokens are held by owen and alice
         uint256 owenBal = U.balanceOf(address(owen));
         uint256 aliceBal = U.balanceOf(address(alice));
-        assertEq(
-            owenBal + aliceBal, circulating,
-            "Circulating tokens must equal sum of user balances"
-        );
+        assertEq(owenBal + aliceBal, circulating, "Circulating tokens must equal sum of user balances");
     }
 
     // ---------------------------------------------------------------
@@ -220,9 +213,9 @@ contract LiquidInvariantTest is BaseTest {
     function invariant_CoolsNonNegative() public view {
         (uint256 P,) = U.pool();
         uint256 T = U.totalSupply();
-        uint256 U_circ = T - P;
-        if (U_circ > 100) {
-            uint256 testAmount = U_circ / 10;
+        uint256 uCirc = T - P;
+        if (uCirc > 100) {
+            uint256 testAmount = uCirc / 10;
             (uint256 m,) = U.cools(testAmount, 0);
             assertGt(m, 0, "cools must return positive solid");
             // p can be 0 if P/T = 1/2, but should not be negative (underflow)
