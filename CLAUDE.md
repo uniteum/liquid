@@ -53,10 +53,6 @@ forge fmt            # Format
 - **Avoid compound statements** (`; && |`). Use separate, parallel Bash tool calls instead so each command can be individually matched by permission rules.
 - Only use compound statements when there's a genuine dependency that can't be expressed otherwise.
 
-### Code Style
-
-See `lib/crucible/.claude/rules/solidity.md` for general Solidity style rules, linting, and pre-commit checklist.
-
 ## Test Patterns
 
 ### Base Test Setup
