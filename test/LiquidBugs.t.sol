@@ -77,14 +77,10 @@ contract LiquidBugsTest is BaseTest {
 
         give(alex, 100, U.solid());
 
-        vm.startPrank(address(alex));
-        U.solid().approve(address(U), 100);
-
         vm.expectEmit(true, false, false, false, address(U));
         emit ILiquid.Heat(U, 0, 0, 0, 0);
 
-        U.heat(100, 0);
-        vm.stopPrank();
+        alex.heat(U, 100, 0);
     }
 
     /**
@@ -95,18 +91,14 @@ contract LiquidBugsTest is BaseTest {
         owen.heat(U, GIFT, GIFT);
 
         give(alex, 100, U.solid());
-        vm.startPrank(address(alex));
-        U.solid().approve(address(U), 100);
-        U.heat(100, 0);
-        vm.stopPrank();
+        alex.heat(U, 100, 0);
 
         uint256 alexLiquid = U.balanceOf(address(alex));
 
         vm.expectEmit(true, false, false, false, address(U));
         emit ILiquid.Cool(U, 0, 0, 0, 0);
 
-        vm.prank(address(alex));
-        U.cool(alexLiquid, 0);
+        alex.cool(U, alexLiquid, 0);
     }
 
     // ---------------------------------------------------------------
@@ -150,8 +142,7 @@ contract LiquidBugsTest is BaseTest {
 
         uint256 alexHubBefore = W.balanceOf(address(alex));
 
-        vm.prank(address(alex));
-        U.cool(alexLiquid, hubAmount);
+        alex.cool(U, alexLiquid, hubAmount);
 
         uint256 alexHubAfter = W.balanceOf(address(alex));
         assertGt(alexHubAfter, alexHubBefore, "Alex should receive hub tokens from cool(u, e)");
@@ -172,8 +163,7 @@ contract LiquidBugsTest is BaseTest {
 
         (, uint256 quotedPoolBurn) = U.cools(alexLiquid, 0);
 
-        vm.prank(address(alex));
-        U.cool(alexLiquid, 0);
+        alex.cool(U, alexLiquid, 0);
 
         uint256 poolAfter = U.balanceOf(address(U));
         uint256 actualPoolBurn = poolBefore - poolAfter;
