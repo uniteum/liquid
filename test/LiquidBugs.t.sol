@@ -3,9 +3,9 @@
 pragma solidity ^0.8.30;
 
 import {Liquid, ILiquid} from "../src/Liquid.sol";
-import {BaseTest} from "./Base.t.sol";
+import {BaseTest} from "crucible/test/Base.t.sol";
 import {LiquidUser, IERC20Metadata} from "./LiquidUser.sol";
-import {TestToken} from "./TestToken.sol";
+import {TestToken} from "crucible/test/TestToken.sol";
 import {ReentrancyGuardTransient} from "reentrancy/ReentrancyGuardTransient.sol";
 
 /**

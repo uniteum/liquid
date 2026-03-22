@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.30;
 
-import {User, TestToken, IERC20Metadata, console} from "./User.sol";
+import {User, TestToken, IERC20Metadata, console} from "crucible/test/User.sol";
 import {ILiquid} from "iliquid/ILiquid.sol";
 import {SafeERC20} from "erc20/SafeERC20.sol";
 import {Strings} from "strings/Strings.sol";
