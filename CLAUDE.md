@@ -48,15 +48,6 @@ forge test -vvv      # Verbose
 forge fmt            # Format
 ```
 
-### Invariant Test Profiles
-
-```bash
-FOUNDRY_PROFILE=quick forge test --match-contract SolidInvariant  # ~4s, dev feedback
-forge test --match-contract SolidInvariant                        # ~170s, before commits
-FOUNDRY_PROFILE=ci forge test --match-contract SolidInvariant     # CI/CD
-FOUNDRY_PROFILE=deep forge test --match-contract SolidInvariant   # Pre-deploy
-```
-
 ### Bash Tool Usage
 
 - **Avoid compound statements** (`; && |`). Use separate, parallel Bash tool calls instead so each command can be individually matched by permission rules.
