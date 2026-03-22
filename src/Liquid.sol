@@ -45,11 +45,6 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
     function heats(uint256 m, uint256 e) public view returns (uint256 u, uint256 p) {
         if (this == HUB) {
             u = m;
-        } else if (e == 0) {
-            uint256 T = totalSupply();
-            uint256 P = balanceOf(address(this));
-            p = (2 * m * P) / T;
-            u = 2 * m - p;
         } else {
             (uint256 P, uint256 E) = pool();
             m = m + (e * (P + m)) / (E + e);
@@ -76,12 +71,6 @@ contract Liquid is ILiquid, ERC20, ReentrancyGuardTransient {
     function cools(uint256 u, uint256 e) public view returns (uint256 m, uint256 p) {
         if (this == HUB) {
             m = u;
-        } else if (e == 0) {
-            uint256 T = totalSupply();
-            uint256 P = balanceOf(address(this));
-            uint256 U = T - P;
-            m = (u * T) / U / 2;
-            p = 2 * m - u;
         } else {
             (uint256 P, uint256 E) = pool();
             uint256 T = totalSupply();
