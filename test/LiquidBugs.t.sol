@@ -219,6 +219,53 @@ contract LiquidBugsTest is BaseTest {
     }
 
     // ---------------------------------------------------------------
+    // Heat/cool roundtrip: cool(heat(m,0)) should restore state
+    // ---------------------------------------------------------------
+
+    /**
+     * @notice heat(m,0) then cool(u,0) with the returned u should
+     *         return exactly m solids and restore pool/supply.
+     */
+    function test_HeatCoolRoundtrip_RestoresState() public {
+        // Bootstrap pool with non-zero P and E
+        give(owen, GIFT, IERC20Metadata(address(W)));
+        owen.heat(U, GIFT, GIFT);
+
+        give(alex, 1000, U.solid());
+
+        // Snapshot state before heat
+        (uint256 P0, uint256 E0) = U.pool();
+        uint256 T0 = U.totalSupply();
+        uint256 M0 = U.mass();
+        uint256 alexSolid0 = U.solid().balanceOf(address(alex));
+
+        // Heat
+        uint256 m = 500;
+        (uint256 u,) = alex.heat(U, m, 0);
+        assertGt(u, 0, "heat should mint user tokens");
+
+        // Cool with the exact u returned by heat
+        (uint256 mOut,) = alex.cool(U, u, 0);
+
+        // Check solid roundtrip
+        uint256 alexSolid1 = U.solid().balanceOf(address(alex));
+        assertEq(mOut, m, "cool should return the same solids deposited");
+        assertEq(alexSolid1, alexSolid0, "alex solid balance should be restored");
+
+        // Check pool state restored
+        (uint256 P1, uint256 E1) = U.pool();
+        uint256 T1 = U.totalSupply();
+        uint256 M1 = U.mass();
+        assertEq(P1, P0, "pool spokes should be restored");
+        assertEq(E1, E0, "pool hubs should be restored");
+        assertEq(T1, T0, "total supply should be restored");
+        assertEq(M1, M0, "mass should be restored");
+
+        // Alex should hold no U tokens
+        assertEq(U.balanceOf(address(alex)), 0, "alex should hold no liquid tokens");
+    }
+
+    // ---------------------------------------------------------------
     // Bug 6: zzInit had no access control
     // ---------------------------------------------------------------
 
